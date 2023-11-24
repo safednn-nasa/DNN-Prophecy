@@ -1,7 +1,9 @@
 import argparse
 
-from prophecy.utils import SPLITS
-from prophecy.utils.misc import get_model, get_dataset
+from prophecy.data.dataset import Dataset
+from prophecy.utils.misc import get_model
+from prophecy.core.extract import extract_rules
+from prophecy.core.evaluate import get_eval_labels
 
 
 if __name__ == '__main__':
@@ -15,8 +17,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     model = get_model(args.model, args.version)
-    split = SPLITS[args.split]
-    dataset = get_dataset(args.dataset, split)
+    dataset = Dataset(args.dataset)
 
-    print(f"Dataset size: {len(dataset)}")
-    print(f"Model size (layers): {len(model.layers)}")
+    get_eval_labels(model, dataset, args.split)
+
+    #extract_rules(model, dataset)

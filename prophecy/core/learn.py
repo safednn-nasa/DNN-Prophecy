@@ -42,8 +42,8 @@ def learn_act_rules(dec_labels: list, fingerprints: dict) -> Dict[str, tree.Deci
         for output, values in fingerprint.items():
             print(values.shape, dec_labels.shape)
             print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
-            dec_basic_estimator = tree.DecisionTreeClassifier()
-            dec_basic_estimator.fit(values, dec_labels)
-            classifiers[f"{layer}_{output}"] = dec_basic_estimator
+            basic_estimator = tree.DecisionTreeClassifier()
+            basic_estimator.fit(values, dec_labels)
+            classifiers[f"{layer}_{output}"] = basic_estimator
 
     return classifiers

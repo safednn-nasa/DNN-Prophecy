@@ -2,7 +2,7 @@ import argparse
 
 from prophecy.data.dataset import Dataset
 from prophecy.utils.misc import get_model
-from prophecy.core.extract import extract_rules
+from prophecy.core.extract import get_model_fingerprints
 
 
 if __name__ == '__main__':
@@ -18,4 +18,4 @@ if __name__ == '__main__':
     model = get_model(args.model, args.version)
     dataset = Dataset(args.dataset)
 
-    extract_rules(model, dataset, args.split)
+    get_model_fingerprints(model, dataset, args.split)

@@ -6,28 +6,25 @@ from typing import Dict
 from prophecy.data.dataset import Dataset
 
 
-def get_val_rules(dec_labels: list, dataset: Dataset) -> tree.DecisionTreeClassifier:
+def learn_val_rules(labels: np.array, dataset: Dataset) -> tree.DecisionTreeClassifier:
     """
         Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron values
 
-    :param dec_labels: list of labels
+    :param labels: np.array of decision/accuracy labels
     :param dataset: Dataset
     :return:
     """
 
-    print("DECISION RULES:")
-    dec_labels = np.array(dec_labels)
-    print("Invoking Dec-tree classifier based on INPUT FEATURES.")
     print("Inputs: (neuron signature (Values) dataset)(labels dataset)")
     fingerprint_inp = dataset.splits['train'].features.to_numpy()
-    print(fingerprint_inp.shape, dec_labels.shape)
-    dec_basic_estimator = tree.DecisionTreeClassifier()
-    dec_basic_estimator.fit(fingerprint_inp, dec_labels)
+    print(fingerprint_inp.shape, labels.shape)
+    basic_estimator = tree.DecisionTreeClassifier()
+    basic_estimator.fit(fingerprint_inp, labels)
 
-    return dec_basic_estimator
+    return basic_estimator
 
 
-def get_act_rules(dec_labels: list, fingerprints: dict) -> Dict[str, tree.DecisionTreeClassifier]:
+def learn_act_rules(dec_labels: list, fingerprints: dict) -> Dict[str, tree.DecisionTreeClassifier]:
     """
         Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron activations
 
@@ -36,16 +33,15 @@ def get_act_rules(dec_labels: list, fingerprints: dict) -> Dict[str, tree.Decisi
     :return:
     """
 
-    print("DECISION RULES:")
     dec_labels = np.array(dec_labels)
     classifiers = {}
 
     for layer, fingerprint in fingerprints.items():
-        print(f"Invoking Dec-tree classifier based on neuron activations for layer {layer}")
         print("Inputs: (neuron signature (On/Off activations) dataset)(labels dataset)")
 
         for output, values in fingerprint.items():
             print(values.shape, dec_labels.shape)
+            print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
             dec_basic_estimator = tree.DecisionTreeClassifier()
             dec_basic_estimator.fit(values, dec_labels)
             classifiers[f"{layer}_{output}"] = dec_basic_estimator

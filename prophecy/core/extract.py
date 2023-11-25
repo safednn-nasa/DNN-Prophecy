@@ -1,5 +1,6 @@
 import keras
 import pandas as pd
+import numpy as np
 
 from typing import Tuple
 from keras import backend
@@ -9,7 +10,7 @@ from prophecy.data.dataset import Dataset
 from prophecy.core.evaluate import get_eval_labels
 
 
-def extract_rules(model: keras.Model, dataset: Dataset, split: str) -> Tuple[list, list]:
+def extract_rules(model: keras.Model, dataset: Dataset, split: str) -> Tuple[np.array, np.array]:
     """
         Rule Extraction from every layer (input through output).
         Each rule is of the form pre(x) = > P(F(x)), pre: neuron constraints at the chosen layer.
@@ -25,8 +26,8 @@ def extract_rules(model: keras.Model, dataset: Dataset, split: str) -> Tuple[lis
     eval_labels = get_eval_labels(model, dataset, split)
     # TODO: for test in the previous code the eval_labels are computed with (model.predict(x_val)).argmax(axis=1)
     # that yields different results than the get_eval_labels function
-    acc_labels = []
-    dec_labels = []
+    accuracy_labels = []
+    decision_labels = []
     print(f"{split.upper()} LABELS:", eval_labels.shape)
     match_count = 0
     mismatch_count = 0
@@ -35,16 +36,16 @@ def extract_rules(model: keras.Model, dataset: Dataset, split: str) -> Tuple[lis
         # if eval_labels[idx] == int(dataset.splits[split].labels.iloc[idx]['label']):
         if eval_labels[idx] == dataset.splits[split].labels[idx]:
             match_count = match_count + 1
-            dec_labels.append(eval_labels[idx])
-            acc_labels.append(0)
+            decision_labels.append(eval_labels[idx])
+            accuracy_labels.append(0)
         else:
             mismatch_count = mismatch_count + 1
-            dec_labels.append(1000)
-            acc_labels.append(1000)  # Misclassified
+            decision_labels.append(1000)
+            accuracy_labels.append(1000)  # Misclassified
 
     print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
 
-    return acc_labels, dec_labels
+    return np.array(accuracy_labels), np.array(decision_labels)
 
 
 def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, features: pd.DataFrame):

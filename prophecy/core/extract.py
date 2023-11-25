@@ -1,14 +1,15 @@
 import keras
 import pandas as pd
 
-from tensorflow.keras import backend
+from typing import Tuple
+from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
 
 from prophecy.data.dataset import Dataset
 from prophecy.core.evaluate import get_eval_labels
 
 
-def extract_rules(model: keras.Model, dataset: Dataset, split: str):
+def extract_rules(model: keras.Model, dataset: Dataset, split: str) -> Tuple[list, list]:
     """
         Rule Extraction from every layer (input through output).
         Each rule is of the form pre(x) = > P(F(x)), pre: neuron constraints at the chosen layer.
@@ -42,6 +43,8 @@ def extract_rules(model: keras.Model, dataset: Dataset, split: str):
             acc_labels.append(1000)  # Misclassified
 
     print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
+
+    return acc_labels, dec_labels
 
 
 def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, features: pd.DataFrame):

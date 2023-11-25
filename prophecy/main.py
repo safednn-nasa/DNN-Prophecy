@@ -2,7 +2,8 @@ import argparse
 
 from prophecy.data.dataset import Dataset
 from prophecy.utils.misc import get_model
-from prophecy.core.extract import get_model_fingerprints
+from prophecy.core.extract import get_model_fingerprints, extract_rules
+from prophecy.core.learn import get_val_rules, get_act_rules
 
 
 if __name__ == '__main__':
@@ -18,4 +19,8 @@ if __name__ == '__main__':
     model = get_model(args.model, args.version)
     dataset = Dataset(args.dataset)
 
-    get_model_fingerprints(model, dataset, args.split)
+    dec_labels, acc_labels = extract_rules(model, dataset, 'train')
+    fingerprints = get_model_fingerprints(model, dataset, 'train')
+
+    get_val_rules(dec_labels, dataset)
+    get_act_rules(dec_labels, fingerprints)

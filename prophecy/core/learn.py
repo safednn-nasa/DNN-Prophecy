@@ -3,47 +3,34 @@ import numpy as np
 from sklearn import tree
 from typing import Dict
 
-from prophecy.data.dataset import Dataset
 
-
-def learn_val_rules(labels: np.array, dataset: Dataset) -> tree.DecisionTreeClassifier:
+def learn_rules(labels: np.array, fingerprints: dict, activations: bool) -> Dict[str, tree.DecisionTreeClassifier]:
     """
-        Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron values
+        Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron features of
+        activations
 
-    :param labels: np.array of decision/accuracy labels
-    :param dataset: Dataset
-    :return:
-    """
-
-    print("Inputs: (neuron signature (Values) dataset)(labels dataset)")
-    fingerprint_inp = dataset.splits['train'].features.to_numpy()
-    print(fingerprint_inp.shape, labels.shape)
-    basic_estimator = tree.DecisionTreeClassifier()
-    basic_estimator.fit(fingerprint_inp, labels)
-
-    return basic_estimator
-
-
-def learn_act_rules(dec_labels: list, fingerprints: dict) -> Dict[str, tree.DecisionTreeClassifier]:
-    """
-        Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron activations
-
-    :param dec_labels: list of labels
+    :param labels: list of labels
     :param fingerprints: dict of fingerprints
+    :param activations: boolean indicating whether to use activations or features
     :return:
     """
 
-    dec_labels = np.array(dec_labels)
     classifiers = {}
+
+    if activations:
+        # skip input layer
+        # TODO: why input rules are learned only for features?
+        fingerprints = {layer: fingerprint for layer, fingerprint in fingerprints.items() if layer != 'input'}
 
     for layer, fingerprint in fingerprints.items():
         print("Inputs: (neuron signature (On/Off activations) dataset)(labels dataset)")
 
-        for output, values in fingerprint.items():
-            print(values.shape, dec_labels.shape)
-            print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
-            basic_estimator = tree.DecisionTreeClassifier()
-            basic_estimator.fit(values, dec_labels)
-            classifiers[f"{layer}_{output}"] = basic_estimator
+        #for output, values in fingerprint.items():
+        print(fingerprint.shape, labels.shape)
+        #print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
+        basic_estimator = tree.DecisionTreeClassifier()
+        basic_estimator.fit(fingerprint, labels)
+        #classifiers[f"{layer}_{output}"] = basic_estimator
+        classifiers[layer] = basic_estimator
 
     return classifiers

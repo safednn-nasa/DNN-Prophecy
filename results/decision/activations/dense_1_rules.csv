@@ -1,0 +1,2 @@
+,Rule Type,Rule,Train Coverage (%),Train Precision (%),Train Recall (%),Test Coverage (%),Test Precision (%),Test Recall (%)
+0,Rule for correct classification to 0,"LAYER:2, NEURONS:[4, 6], SIGNATURE:[0, 1], SUPPORT:6",0.9771986970684038,100,1.8404907975460123,0.6493506493506493,100.0,1.0526315789473684

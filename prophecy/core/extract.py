@@ -2,50 +2,16 @@ import keras
 import pandas as pd
 import numpy as np
 
-from typing import Tuple
 from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
 
+from prophecy.core.learn import learn_rules
+from prophecy.utils.paths import results_path
 from prophecy.data.dataset import Dataset
+from prophecy.data.objects import Settings
 from prophecy.core.evaluate import get_eval_labels
-
-
-def extract_rules(model: keras.Model, dataset: Dataset, split: str) -> Tuple[np.array, np.array]:
-    """
-        Rule Extraction from every layer (input through output).
-        Each rule is of the form pre(x) = > P(F(x)), pre: neuron constraints at the chosen layer.
-        P is a property of the output of model.
-
-        Three types of Rules:
-            1. Decision Rules: P(F(x)) is true iff F(x) = L
-            2. Rules for correct behavior: P(F(x)) is true iff F(x) = L and L = L_ideal.
-            3. Rules for incorrect behavior: P(F(x)) is true iff F(x) != L_ideal.
-    :return:
-    """
-
-    eval_labels = get_eval_labels(model, dataset, split)
-    # TODO: for test in the previous code the eval_labels are computed with (model.predict(x_val)).argmax(axis=1)
-    # that yields different results than the get_eval_labels function
-    accuracy_labels = []
-    decision_labels = []
-    print(f"{split.upper()} LABELS:", eval_labels.shape)
-    match_count = 0
-    mismatch_count = 0
-
-    for idx in range(0, len(eval_labels)):
-        # if eval_labels[idx] == int(dataset.splits[split].labels.iloc[idx]['label']):
-        if eval_labels[idx] == dataset.splits[split].labels[idx]:
-            match_count = match_count + 1
-            decision_labels.append(eval_labels[idx])
-            accuracy_labels.append(0)
-        else:
-            mismatch_count = mismatch_count + 1
-            decision_labels.append(1000)
-            accuracy_labels.append(1000)  # Misclassified
-
-    print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
-
-    return np.array(accuracy_labels), np.array(decision_labels)
+from prophecy.core.helpers import (get_all_invariants_val, get_all_invariants, impure_rules,
+                                   describe_invariants_all_labels)
 
 
 def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, features: pd.DataFrame):
@@ -64,21 +30,137 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, f
     return (outputs[0] > 0.0).astype('int'), outputs[0]
 
 
-def get_model_fingerprints(model: keras.Model, dataset: Dataset, split: str):
-    """
-        Collect the neuron values and activations of Train Data and Test Data after each layer
-    :return:
-    """
+class RuleExtractor:
+    def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings):
+        self.model = model
+        self.dataset = dataset
+        self.settings = settings
+        self.labels = {'train': {}, 'val': {}}
+        self.fingerprints = {'train': {}, 'val': {}}
+        self.output_path = results_path / self.settings.rules / self.settings.fingerprint
+        self.output_path.mkdir(parents=True, exist_ok=True)
 
-    # check split is valid
-    if split not in ['train', 'val']:
-        raise ValueError(f"Invalid split {split}")
+    @property
+    def train_labels(self):
+        if len(self.labels['train']) == 0:
+            self.get_labels('train')
 
-    fingerprints = {}
+        return self.labels['train']
 
-    for layer in model.layers:
-        act, val = get_layer_fingerprint(model.input, layer, dataset.splits[split].features)
-        fingerprints[layer.name] = {'act': act, 'val': val}
-        print(f"Fingerprint after {layer.name}. ({act.shape} inputs, {val.shape} neurons)")
+    @property
+    def val_labels(self):
+        if len(self.labels['val']) == 0:
+            self.get_labels('val')
 
-    return fingerprints
+        return self.labels['val']
+
+    @property
+    def train_fingerprints(self):
+        if len(self.fingerprints['train']) == 0:
+            self.get_model_fingerprints('train')
+
+        return self.fingerprints['train']
+
+    @property
+    def val_fingerprints(self):
+        if len(self.fingerprints['val']) == 0:
+            self.get_model_fingerprints('val')
+
+        return self.fingerprints['val']
+
+    def __call__(self, *args, **kwargs):
+        """
+            Rule Extraction from every layer (input through output).
+            Each rule is of the form pre(x) = > P(F(x)), pre: neuron constraints at the chosen layer.
+            P is a property of the output of model.
+
+            Three types of Rules:
+                1. Decision Rules: P(F(x)) is true iff F(x) = L
+                2. Rules for correct behavior: P(F(x)) is true iff F(x) = L and L = L_ideal.
+                3. Rules for incorrect behavior: P(F(x)) is true iff F(x) != L_ideal.
+        :return:
+        """
+        print(f"{self.settings.rules.upper()} RULES:")
+        print(f"Invoking Dec-tree classifier based on {self.settings.fingerprint.upper()}.")
+
+        # TODO: fix this
+        if self.settings.fingerprint == 'features':
+            fingerprints_tr = {_l: _f[self.settings.fingerprint] for _l, _f in self.train_fingerprints.items()}
+            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items()]
+        else:
+            fingerprints_tr = {_l: _f[self.settings.fingerprint] for _l, _f in self.train_fingerprints.items() if _l != 'input'}
+            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items() if _l != 'input']
+
+        learners = learn_rules(labels=self.train_labels[self.settings.rules], fingerprints=fingerprints_tr,
+                               activations=self.settings.fingerprint == 'activations')
+
+        for i, (layer, learner) in enumerate(learners.items(), 1):
+            print(f"\nRULES FROM LAYER {layer.upper()} IN TERMS OF {self.settings.fingerprint.upper()}\n")
+            invariants = get_all_invariants_val(learner) if self.settings.fingerprint == 'features' else \
+                get_all_invariants(learner)
+            print(f"InV {i-1}")
+            impure_rules(invariants)
+
+            results = describe_invariants_all_labels(invariants, i, list(fingerprints_tr.values()), fingerprints_tst,
+                                                     self.train_labels[self.settings.rules],
+                                                     self.val_labels[self.settings.rules], ALL=True,
+                                                     MIS=True if self.settings.rules == 'accuracy' else False)
+            (cls_list, rules_list, tr_recall_list, tst_prec_list, tst_recall_list, df) = results
+
+            if df is not None:
+                df.to_csv(str(self.output_path / f'{layer}_rules.csv'))
+            else:
+                print(cls_list, rules_list, tr_recall_list, tst_prec_list, tst_recall_list)
+
+    def get_labels(self, split: str):
+        """
+            Collect the labels for the rules
+        :param split: train/val
+        :return:
+        """
+
+        if split == 'train':
+            eval_labels = get_eval_labels(self.model, self.dataset, split)
+        else:
+            # TODO: for test in the previous code the eval_labels are computed with (model.predict(x_val)).argmax(axis=1)
+            # that yields different results than the get_eval_labels function
+            eval_labels = self.model.predict(self.dataset.splits[split].features).argmax(axis=1)
+
+        print(f"{split.upper()} LABELS:", eval_labels.shape)
+
+        self.labels[split]['accuracy'] = np.array([]).astype(int)
+        self.labels[split]['decision'] = np.array([]).astype(int)
+
+        match_count = 0
+        mismatch_count = 0
+
+        for idx in range(0, len(eval_labels)):
+            # if eval_labels[idx] == int(dataset.splits[split].labels.iloc[idx]['label']):
+            if eval_labels[idx] == self.dataset.splits[split].labels[idx]:
+                match_count = match_count + 1
+                self.labels[split]['decision'] = np.append(self.labels[split]['decision'], eval_labels[idx])
+                self.labels[split]['accuracy'] = np.append(self.labels[split]['accuracy'], 0)
+            else:
+                mismatch_count = mismatch_count + 1
+                self.labels[split]['decision'] = np.append(self.labels[split]['decision'], 1000)
+                self.labels[split]['accuracy'] = np.append(self.labels[split]['accuracy'], 1000)  # Misclassified
+
+        print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
+
+    def get_model_fingerprints(self, split: str):
+        """
+            Collect the neuron values and activations of Train Data and Test Data after each layer
+        :return:
+        """
+
+        # check split is valid
+        if split not in self.fingerprints:
+            raise ValueError(f"Invalid split {split}")
+
+        self.fingerprints[split]['input'] = {'activations': None,
+                                             'features': self.dataset.splits[split].features.to_numpy()}
+
+        for layer in self.model.layers:
+            activations, features = get_layer_fingerprint(self.model.input, layer, self.dataset.splits[split].features)
+            self.fingerprints[split][layer.name] = {'activations': activations, 'features': features}
+            print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

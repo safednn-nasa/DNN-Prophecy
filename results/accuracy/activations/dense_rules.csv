@@ -1,5 +1,0 @@
-,Rule Type,Rule,Train Coverage (%),Train Precision (%),Train Recall (%),Test Coverage (%),Test Precision (%),Test Recall (%)
-0,Rule for incorrect classification,"LAYER:1, NEURONS:[3, 2, 11], SIGNATURE:[0, 0, 1], SUPPORT:1",0.16286644951140067,100,0.6993006993006993,0.0,0.0,0.0
-0,Rule for correct classification to 0,"LAYER:1, NEURONS:[3, 8], SIGNATURE:[1, 0], SUPPORT:3",0.4885993485342019,100,0.6369426751592357,0.6493506493506493,0.0,0.0
-0,Rule for correct classification to 0,"LAYER:1, NEURONS:[3, 2, 11, 5, 4], SIGNATURE:[0, 1, 1, 1, 0], SUPPORT:2",0.32573289902280134,100,0.42462845010615713,0.0,0.0,0.0
-0,Rule for correct classification to 0,"LAYER:1, NEURONS:[3, 2, 11, 6], SIGNATURE:[0, 1, 0, 0], SUPPORT:1",0.16286644951140067,100,0.21231422505307856,0.0,0.0,0.0

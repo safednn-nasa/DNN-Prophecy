@@ -6,7 +6,6 @@ from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
 
 from prophecy.core.learn import learn_rules
-from prophecy.utils.paths import results_path
 from prophecy.data.dataset import Dataset
 from prophecy.data.objects import Settings
 from prophecy.core.evaluate import get_eval_labels
@@ -37,8 +36,6 @@ class RuleExtractor:
         self.settings = settings
         self.labels = {'train': {}, 'val': {}}
         self.fingerprints = {'train': {}, 'val': {}}
-        self.output_path = results_path / self.settings.rules / self.settings.fingerprint
-        self.output_path.mkdir(parents=True, exist_ok=True)
 
     @property
     def train_labels(self):
@@ -94,6 +91,9 @@ class RuleExtractor:
         learners = learn_rules(labels=self.train_labels[self.settings.rules], fingerprints=fingerprints_tr,
                                activations=self.settings.fingerprint == 'activations')
 
+        results = {}
+        is_mis = True if self.settings.rules == 'accuracy' else False
+
         for i, (layer, learner) in enumerate(learners.items(), 1):
             print(f"\nRULES FROM LAYER {layer.upper()} IN TERMS OF {self.settings.fingerprint.upper()}\n")
             invariants = get_all_invariants_val(learner) if self.settings.fingerprint == 'features' else \
@@ -101,16 +101,12 @@ class RuleExtractor:
             print(f"InV {i-1}")
             impure_rules(invariants)
 
-            results = describe_invariants_all_labels(invariants, i, list(fingerprints_tr.values()), fingerprints_tst,
-                                                     self.train_labels[self.settings.rules],
-                                                     self.val_labels[self.settings.rules], ALL=True,
-                                                     MIS=True if self.settings.rules == 'accuracy' else False)
-            (cls_list, rules_list, tr_recall_list, tst_prec_list, tst_recall_list, df) = results
+            desc = describe_invariants_all_labels(invariants, i, list(fingerprints_tr.values()), fingerprints_tst,
+                                                  self.train_labels[self.settings.rules],
+                                                  self.val_labels[self.settings.rules], ALL=True, MIS=is_mis)
+            results[layer] = desc
 
-            if df is not None:
-                df.to_csv(str(self.output_path / f'{layer}_rules.csv'))
-            else:
-                print(cls_list, rules_list, tr_recall_list, tst_prec_list, tst_recall_list)
+        return results
 
     def get_labels(self, split: str):
         """

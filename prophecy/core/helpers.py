@@ -3,6 +3,7 @@ import numpy as np
 import operator
 
 from tqdm import tqdm
+from prophecy.data.objects import Rule, Performance
 
 
 def get_all_invariants(estimator):
@@ -130,9 +131,9 @@ def check_pattern(layer_vals, neuron_ids, neuron_sig):
     # layer_vals = (layer_vals).flatten()
 
     for ind in range(0, len(neuron_sig)):
-        if (ind % 2 == 0):
+        if ind % 2 == 0:
             op = neuron_sig[ind]
-            if (op == '<='):
+            if op == '<=':
                 oper = 0
             else:
                 oper = 1
@@ -141,13 +142,13 @@ def check_pattern(layer_vals, neuron_ids, neuron_sig):
             vsig = float(neuron_sig[ind])
             val = float(layer_vals[v])
             # print(v,vsig,val,oper)
-            if (oper == 0):
-                if (val > vsig):
+            if oper == 0:
+                if val > vsig:
                     # print(v,val,vsig,oper)
                     found = False
                     break
             else:
-                if (val <= vsig):
+                if val <= vsig:
                     # print(v,val,vsig,oper)
                     found = False
                     break
@@ -173,9 +174,9 @@ def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False):
     return matched_ids
 
 
-def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1):
-    if (cl not in set(labels)):
-        return (-1, -1, -1)
+def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1) -> Performance:
+    if cl not in set(labels):
+        return Performance(-1, -1, -1)
 
     TOT_LABELS = len(set(labels))
     total_labels = np.zeros(TOT_LABELS - 1)
@@ -188,30 +189,33 @@ def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1):
     recall = 0
     prec = 0
 
-    if (supp != -1):
+    if supp != -1:
         prec = 100
-        if (cl != 1000):
+        if cl != 1000:
             recall = (supp / (total_labels[cl])) * 100.0
         else:
             recall = (supp / (total_fail)) * 100.0
         coverage = (supp / len(suffixes)) * 100.0
-        return (coverage, prec, recall)
+
+        return Performance(coverage, prec, recall)
 
     cls = get_suffix_cluster(neurons, signature, suffixes, VAL)
     cls_labels = []
+
     for indx1 in range(0, len(cls)):
         cls_labels.append(labels[cls[indx1]])
+
     coverage = (len(cls) / len(suffixes)) * 100.0
 
-    if (cl != 1000):
+    if cl != 1000:
         true_pos = len(np.where(cls_labels == cl)[0])
         false_pos = len(cls) - true_pos
         false_neg = (total_labels[cl]) - true_pos
-        if ((true_pos + false_neg) == 0):
+        if (true_pos + false_neg) == 0:
             recall = 0
         else:
             recall = (true_pos / (true_pos + false_neg)) * 100.0
-        if ((true_pos + false_pos) == 0):
+        if (true_pos + false_pos) == 0:
             prec = 0
         else:
             prec = (true_pos / (true_pos + false_pos)) * 100.0
@@ -221,62 +225,54 @@ def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1):
         false_pos = len(cls) - true_pos
         false_neg = (total_fail) - true_pos
         # print(len(cls), total_fail,true_pos, false_pos, false_neg)
-        if ((true_pos + false_neg) == 0):
+        if (true_pos + false_neg) == 0:
             recall = 0
         else:
             recall = (true_pos / (true_pos + false_neg)) * 100.0
-        if ((true_pos + false_pos) == 0):
+        if (true_pos + false_pos) == 0:
             prec = 0
         else:
             prec = (true_pos / (true_pos + false_pos)) * 100.0
 
-    return (coverage, prec, recall)
+    return Performance(coverage, prec, recall)
 
 
 def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, fingerprints_tst, labels, labels_test,
-                                   ALL=False, Threshold=60, MIS=True, Top=False):
-    if (Top == True):
+                                   ALL: bool = False, Threshold: int = 60, MIS: bool = True, Top: bool = False) -> list:
+    if Top is True:
         print("PRINTING RULES WITH HIGHEST RECALL FOR CORRECT CLASSIFICATION TO EVERY LABEL.")
-    elif (ALL == True):
+    elif ALL is True:
         print("PRINTING ALL RULES FOR CORRECT CLASSIFICATION FOR EVERY LABEL.")
     else:
         print("PRINTING RULES FOR CORRECT CLASSIFICATION WITH TRAIN RECALL >= ", Threshold, "%.")
 
-    if (MIS == True):
-        if (Top == True):
+    if MIS is True:
+        if Top is True:
             print("PRINTING RULES WITH HIGHEST RECALL FOR INCORRECT CLASSIFICATION.")
         else:
             print("PRINTING ALL RULES FOR INCORRECT CLASSIFICATION.")
 
-    cls_list = []
-    rules_list = []
-    tr_recall_list = []
-    tst_prec_list = []
-    tst_recall_list = []
-    final_df = []
+    ruleset = []
 
-    for cl, invs in all_invariants.items():
-        if (cl == -1):
+    for cl, invars in all_invariants.items():
+        if cl == -1:
             print("impure:")
-            print(invs[0])
+            print(invars[0])
             continue
 
-        if (MIS == False and (cl == 1000)):
+        if MIS == False and (cl == 1000):
             continue
 
-        for indx in range(0, len(invs)):
-            if (Top and indx > 0):
+        for idx in range(0, len(invars)):
+            if Top and idx > 0:
                 continue
 
-            inv = invs[indx]
-
+            inv = invars[idx]
             neurons = inv[0]
             signature = inv[1]
+            support = inv[2]
 
-            if len(neurons) == len(signature):
-                VAL = False
-            else:
-                VAL = True
+            is_val = len(neurons) != len(signature)
 
             tr_suffixes = []
             tst_suffixes = []
@@ -287,78 +283,37 @@ def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, finge
                 tst_suffixes = fingerprints_tst[layer - 1]
 
             tr_recall = 0
+            # TODO: default values? should we keep them?
             tr_prec = 100
-            tst_recll = 0
+            tst_recall = 0
             tst_prec = 0
+            rule = {"layer": layer, "neurons": neurons, "signature": signature, "support": support, "label": cl}
 
-            if (len(tr_suffixes) > 0):
-                (tr_cov, tr_prec, tr_recall) = calc_prec_recall(tr_suffixes, labels, neurons, signature, cl, VAL,
-                                                                supp=inv[2])
+            if len(tr_suffixes) > 0:
+                train_performance = calc_prec_recall(tr_suffixes, labels, neurons, signature, cl, is_val, supp=support)
+                rule.update(train_performance.to_dict("train"))
 
-            if (len(tst_suffixes) > 0):
-                (tst_cov, tst_prec, tst_recall) = calc_prec_recall(tst_suffixes, labels_test, neurons, signature,
-                                                                   cl, VAL)
+            if len(tst_suffixes) > 0:
+                test_performance = calc_prec_recall(tst_suffixes, labels_test, neurons, signature, cl, is_val)
+                rule.update(test_performance.to_dict("test"))
 
-            text = ""
-            rule_sig = ""
-            if (cl != 1000):
-                text = "Rule for correct classification to " + str(cl)
-                if (ALL == False) and (Top == False) and (tr_recall < Threshold):
+            if cl != 1000:
+                kind = "correct"
+                if (ALL is False) and (Top is False) and (tr_recall < Threshold):
+                    # TODO: is this for filtering certain rules based on recall?
                     continue
-                rule_sig = "LAYER:" + str(layer) + ", NEURONS:" + str(inv[0]) + ", " + "SIGNATURE:" + str(
-                    inv[1]) + ", " + "SUPPORT:" + str(inv[2])
-            # print("Rule:(neurons:",inv[0],",signature:",inv[1],"), Support:",inv[2])
-
             else:
-                text = "Rule for incorrect classification"
-                rule_sig = "LAYER:" + str(layer) + ", NEURONS:" + str(inv[0]) + ", " + "SIGNATURE:" + str(
-                    inv[1]) + ", " + "SUPPORT:" + str(inv[2])
-            # print("Rule:(neurons:",inv[0],",signature:",inv[1],"), Support:",inv[2])
+                kind = "incorrect"
 
-            if (len(tst_suffixes) > 0):
-                data = {"Rule Type": [text],
-                        "Rule": [rule_sig],
-                        "Train Coverage (%)": [tr_cov],
-                        "Train Precision (%)": [tr_prec],
-                        "Train Recall (%)": [tr_recall],
-                        "Test Coverage (%)": [tst_cov],
-                        "Test Precision (%)": [tst_prec],
-                        "Test Recall (%)": [tst_recall]}
+            rule.update({"kind": kind})
+            ruleset.append(rule)
 
-                cls_list.append(cl)
-                rules_list.append(inv)
-                tr_recall_list.append(tr_recall)
-                tst_prec_list.append(tst_prec)
-                tst_recall_list.append(tst_recall)
-
-            else:
-                data = {"Rule Type": [text],
-                        "Rule": [rule_sig],
-                        "Train Coverage (%)": [tr_cov],
-                        "Train Precision (%)": [tr_prec],
-                        "Train Recall (%)": [tr_recall]}
-                cls_list.append(cl)
-                rules_list.append(inv)
-                tr_recall_list.append(tr_recall)
-
-            pd.set_option('display.max_colwidth', None)
-            df = pd.DataFrame(data)
-            final_df.append(df)
-            #styled_df = df.style.hide(axis="index")
-            #styled_df1 = styled_df.set_properties(**{
-            #    'font-size': '8pt',
-            #})
-
-            #display(styled_df1)
-            #print(styled_df1)
-
-    df = pd.concat(final_df) if len(final_df) > 0 else None
-    return cls_list, rules_list, tr_recall_list, tst_prec_list, tst_recall_list, df
+    return ruleset
 
 
 def impure_rules(all_invariants):
-    for cl, invs in all_invariants.items():
+    for cl, invars in all_invariants.items():
         if cl == -1:
             print("impure:")
-            print(invs[0])
+            print(invars[0])
             continue

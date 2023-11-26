@@ -174,9 +174,9 @@ def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False):
     return matched_ids
 
 
-def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1) -> Performance:
+def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) -> Performance:
     if cl not in set(labels):
-        return Performance(-1, -1, -1)
+        return Performance(-1, -1, -1, -1)
 
     TOT_LABELS = len(set(labels))
     total_labels = np.zeros(TOT_LABELS - 1)
@@ -186,18 +186,18 @@ def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1) -> 
 
     total_fail = len(np.where(labels == 1000)[0])
 
-    recall = 0
-    prec = 0
-
     if supp != -1:
+        # TODO: why precision is always 100?
         prec = 100
         if cl != 1000:
             recall = (supp / (total_labels[cl])) * 100.0
         else:
             recall = (supp / (total_fail)) * 100.0
-        coverage = (supp / len(suffixes)) * 100.0
 
-        return Performance(coverage, prec, recall)
+        coverage = (supp / len(suffixes)) * 100.0
+        f1 = 2 * ((recall * prec) / (recall + prec))
+
+        return Performance(coverage, prec, recall, f1)
 
     cls = get_suffix_cluster(neurons, signature, suffixes, VAL)
     cls_labels = []
@@ -234,7 +234,12 @@ def calc_prec_recall(suffixes, labels, neurons, signature, cl, VAL, supp=-1) -> 
         else:
             prec = (true_pos / (true_pos + false_pos)) * 100.0
 
-    return Performance(coverage, prec, recall)
+    if (recall + prec) > 0:
+        f1 = 2 * ((recall * prec) / (recall + prec))
+    else:
+        f1 = 0.0
+
+    return Performance(coverage, prec, recall, f1)
 
 
 def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, fingerprints_tst, labels, labels_test,
@@ -290,11 +295,11 @@ def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, finge
             rule = {"layer": layer, "neurons": neurons, "signature": signature, "support": support, "label": cl}
 
             if len(tr_suffixes) > 0:
-                train_performance = calc_prec_recall(tr_suffixes, labels, neurons, signature, cl, is_val, supp=support)
+                train_performance = calc_prec_recall_f1(tr_suffixes, labels, neurons, signature, cl, is_val, supp=support)
                 rule.update(train_performance.to_dict("train"))
 
             if len(tst_suffixes) > 0:
-                test_performance = calc_prec_recall(tst_suffixes, labels_test, neurons, signature, cl, is_val)
+                test_performance = calc_prec_recall_f1(tst_suffixes, labels_test, neurons, signature, cl, is_val)
                 rule.update(test_performance.to_dict("test"))
 
             if cl != 1000:
@@ -304,6 +309,12 @@ def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, finge
                     continue
             else:
                 kind = "incorrect"
+
+            if 'train_f1' in rule:
+                if 'test_f1' in rule:
+                    rule.update({"f1": (rule['train_f1'] + rule['test_f1'])/2.0})
+                else:
+                    rule.update({"f1": rule['train_f1']})
 
             rule.update({"kind": kind})
             ruleset.append(rule)

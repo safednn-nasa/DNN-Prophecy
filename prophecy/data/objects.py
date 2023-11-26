@@ -26,6 +26,7 @@ class Performance:
     coverage: float
     precision: float
     recall: float
+    f1: float
 
     def to_dict(self, prefix: str = '') -> dict:
         if prefix:
@@ -33,4 +34,5 @@ class Performance:
 
         return {f"{prefix}coverage": self.coverage,
                 f"{prefix}precision": self.precision,
-                f"{prefix}recall": self.recall}
+                f"{prefix}recall": self.recall,
+                f"{prefix}f1": self.f1}

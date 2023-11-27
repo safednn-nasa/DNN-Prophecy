@@ -125,7 +125,14 @@ def get_all_invariants_val(estimator):
 
 # print("MIS-CLASSIFIED:", total_fail)
 
-def check_pattern(layer_vals, neuron_ids, neuron_sig):
+def check_pattern(layer_vals: list, neuron_ids: list, neuron_sig: list) -> bool:
+    """
+        Check if the provided layer values satisfy the provided neuron signature.
+    :param layer_vals:
+    :param neuron_ids:
+    :param neuron_sig:
+    :return:
+    """
     found = True
     oper = -1
     # layer_vals = (layer_vals).flatten()

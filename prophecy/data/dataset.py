@@ -63,8 +63,8 @@ class Val(Split):
 @dataclass
 class Unseen(Split):
     name: str = 'unseen'
-    _features_file: str = 'data.csv'
-    _labels_file: str = 'data.csv'
+    _features_file: str = 'x.csv'
+    _labels_file: str = 'y.csv'
     headers: bool = True
 
 

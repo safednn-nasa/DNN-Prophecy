@@ -20,5 +20,17 @@ $ pip install -r requirements.txt
 
 ## Usage
 ```
-usage: prophecy.py [-h] [--model MODEL] [--version VERSION] [--dataset DATASET] [--split SPLIT]`
+usage: prophecy.py [-h] [--model MODEL] [--version VERSION] [--dataset DATASET] [--settings SETTINGS] command
+```
+
+## Examples
+
+- Extract rules from a model
+
+```shell
+$ python -m prophecy.main --model PD --version 1 --dataset PD --settings feat_acc extract
+```
+- Detect violations of a model on unseen data
+```shell
+$ python -m prophecy.main --model PD --version 1 --dataset PD --settings feat_acc detect
 ```

@@ -76,18 +76,18 @@ class Detector:
             "unseen_correct": tot_corr_unseen,
             "unseen_incorrect": tot_inc_unseen,
             "covered": covered,
-            "coverage": (covered / len(self.dataset.splits['unseen'].features))*100.0,
+            "coverage": round((covered / len(self.dataset.splits['unseen'].features))*100.0, 2),
             "uncertain": uncertain,
             "tot_pred_correct": tot_corr,
             "tot_pred_incorrect": tot_inc,
             "true_pos_cor": true_pos_cor,
             "false_pos_cor": false_pos_cor,
-            "precision_cor": float(true_pos_cor / (true_pos_cor + false_pos_cor)) * 100.0,
-            "recall_cor": float(true_pos_cor / tot_corr_unseen) * 100.0,
+            "precision_cor": round(float(true_pos_cor / (true_pos_cor + false_pos_cor)) * 100.0, 2),
+            "recall_cor": round(float(true_pos_cor / tot_corr_unseen) * 100.0, 2),
             "true_pos_inc": true_pos_inc,
             "false_pos_inc": false_pos_inc,
-            "precision_inc": float(true_pos_inc / (true_pos_inc + false_pos_inc)) * 100.0,
-            "recall_inc": float(true_pos_inc / tot_inc_unseen) * 100.0,
+            "precision_inc": round(float(true_pos_inc / (true_pos_inc + false_pos_inc)) * 100.0, 2),
+            "recall_inc": round(float(true_pos_inc / tot_inc_unseen) * 100.0, 2),
         }
 
     def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[int, bool, bool]:

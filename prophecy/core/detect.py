@@ -43,8 +43,8 @@ class Detector:
 
         for inp_idx, sample in self.dataset.splits['unseen'].features.iterrows():
             print(sample.to_list())
-            corr_cnt, cover, found = self.eval_rules(inp_idx, correct_rules)
-            inc_cnt, cover, found = self.eval_rules(inp_idx, incorrect_rules)
+            corr_cnt, corr_cover, found = self.eval_rules(inp_idx, correct_rules)
+            inc_cnt, inc_cover, found = self.eval_rules(inp_idx, incorrect_rules)
 
             # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
             if corr_cnt == inc_cnt:
@@ -69,7 +69,7 @@ class Detector:
                 else:
                     false_pos_inc += 1
 
-            if cover is True:
+            if corr_cover or inc_cover:
                 covered += 1
 
         return {

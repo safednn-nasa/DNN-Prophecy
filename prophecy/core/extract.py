@@ -115,12 +115,7 @@ class RuleExtractor:
         :return:
         """
 
-        if split == 'train':
-            eval_labels = get_eval_labels(self.model, self.dataset, split)
-        else:
-            # TODO: for test in the previous code the eval_labels are computed with (model.predict(x_val)).argmax(axis=1)
-            # that yields different results than the get_eval_labels function
-            eval_labels = self.model.predict(self.dataset.splits[split].features).argmax(axis=1)
+        eval_labels = get_eval_labels(self.model, self.dataset, split)
 
         print(f"{split.upper()} LABELS:", eval_labels.shape)
 

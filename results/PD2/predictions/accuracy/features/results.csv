@@ -1,2 +1,2 @@
 unseen_correct,unseen_incorrect,covered,coverage,uncertain,tot_pred_correct,tot_pred_incorrect,true_pos_cor,false_pos_cor,precision_cor,recall_cor,true_pos_inc,false_pos_inc,precision_inc,recall_inc
-99,54,153,100.0,0,99,54,93,6,93.94,93.94,48,6,88.89,88.89
+99,54,153,100.0,0,104,49,97,7,93.27,97.98,47,2,95.92,87.04

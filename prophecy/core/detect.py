@@ -35,15 +35,11 @@ class Detector:
         tot_corr = 0
         tot_inc = 0
         uncertain = 0
-        true_pos_cor = 0
-        false_pos_cor = 0
-        true_neg_cor = 0
-        false_neg_cor = 0
 
-        true_pos_inc = 0
-        false_pos_inc = 0
-        true_neg_inc = 0
-        false_neg_inc = 0
+        true_pos = 0
+        false_pos = 0
+        true_neg = 0
+        false_neg = 0
 
         covered = 0
 
@@ -56,48 +52,38 @@ class Detector:
             if corr_cnt == inc_cnt:
                 print("UNCERTAIN:")
                 uncertain += 1
-                if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
-                    false_neg_cor = false_neg_cor + 1
-                    true_neg_inc = true_neg_inc + 1
-                else:
-                    false_neg_inc = false_neg_inc + 1
-                    true_neg_cor = true_neg_cor + 1
+                #if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
+                #    false_neg_cor = false_neg_cor + 1
+                #    true_neg_inc = true_neg_inc + 1
+                #else:
+                #    false_neg_inc = false_neg_inc + 1
+                #    true_neg_cor = true_neg_cor + 1
 
             if corr_cnt > inc_cnt:
                 print("CORRECT")
                 tot_corr += 1
 
                 if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
-                    true_pos_cor += 1
-                    true_neg_inc += 1
+                    true_pos += 1
                 else:
-                    false_pos_cor += 1
-                    false_neg_inc += 1
+                    false_pos += 1
 
             if inc_cnt > corr_cnt:
                 print("INCORRECT")
                 tot_inc += 1
 
                 if self.dataset.splits['unseen'].labels[inp_idx] != labels[inp_idx]:
-                    true_pos_inc += 1
-                    true_neg_cor += 1
+                    true_neg += 1
                 else:
-                    false_pos_inc += 1
-                    false_neg_cor += 1
+                    false_neg += 1
 
             if corr_cover or inc_cover:
                 covered += 1
 
-        total_tps = true_pos_cor + true_pos_inc
-        total_fps = false_pos_cor + false_pos_inc
-        total_tns = true_neg_cor + true_neg_inc
-        total_fns = false_neg_cor + false_neg_inc
-        retrieved_instances_cor = true_pos_cor + false_pos_cor
-        retrieved_instances_inc = true_pos_inc + false_pos_inc
-        retrieved_instances = total_tps + total_fps
-        relevant_instances = total_tps + total_fns
-        total_precision = (total_tps / retrieved_instances) if retrieved_instances > 0 else 0
-        total_recall = (total_tps / relevant_instances) if relevant_instances > 0 else 0
+        retrieved_instances = true_pos + false_pos
+        relevant_instances = true_pos + false_neg
+        total_precision = (true_pos / retrieved_instances) if retrieved_instances > 0 else 0
+        total_recall = (true_pos / relevant_instances) if relevant_instances > 0 else 0
 
         return {
             "unseen_correct": tot_corr_unseen,
@@ -107,18 +93,10 @@ class Detector:
             "uncertain": uncertain,
             "tot_pred_correct": tot_corr,
             "tot_pred_incorrect": tot_inc,
-            "true_pos_cor": true_pos_cor,
-            "false_pos_cor": false_pos_cor,
-            "precision_cor": round(float(true_pos_cor / retrieved_instances_cor) * 100.0, 2) if retrieved_instances_cor > 0 else 0,
-            "recall_cor": round(float(true_pos_cor / tot_corr_unseen) * 100.0, 2),
-            "true_pos_inc": true_pos_inc,
-            "false_pos_inc": false_pos_inc,
-            "precision_inc": round(float(true_pos_inc / retrieved_instances_inc) * 100.0, 2) if retrieved_instances_inc > 0 else 0,
-            "recall_inc": round(float(true_pos_inc / tot_inc_unseen) * 100.0, 2),
-            "total_tps": total_tps,
-            "total_fps": total_fps,
-            "total_tns": total_tns,
-            "total_fns": total_fns,
+            "tps": true_pos,
+            "fps": false_pos,
+            "tns": true_neg,
+            "fns": false_neg,
             "total_precision": round(total_precision * 100.0, 2),
             "total_recall": round(total_recall * 100.0, 2),
         }

@@ -21,6 +21,8 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(dest='subparser')
     detect_parser = subparsers.add_parser('detect')
     detect_parser.add_argument('-t', '--threshold', type=float, help='rule F1-threshold', default=0.0)
+    detect_parser.add_argument('-l2', '--last_2_layers', action='store_true',
+                               help='consider only the rules from the last two layers')
 
     extract_parser = subparsers.add_parser('extract')
 
@@ -60,6 +62,10 @@ if __name__ == '__main__':
 
         ruleset = pd.concat(dfs)
         ruleset = ruleset[ruleset['f1'] >= args.threshold]
+
+        if args.last_2_layers:
+            ruleset = ruleset[ruleset['layer'] >= len(model.layers) - 2]
+
         results = detector(ruleset)
         pd.DataFrame([results]).to_csv(predictions_path / 'results.csv', index=False)
     else:

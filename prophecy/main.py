@@ -65,7 +65,8 @@ if __name__ == '__main__':
         ruleset = ruleset[ruleset['f1'] >= args.threshold]
 
         if args.last_2_layers:
-            ruleset = ruleset[ruleset['layer_count'] >= len(model.layers) - 2]
+            total_layers = len(model.layers) + 1
+            ruleset = ruleset[ruleset['layer_count'] >= total_layers - 2]
 
         results = detector(ruleset)
         pd.DataFrame([results]).to_csv(predictions_path / 'results.csv', index=False)

@@ -36,9 +36,15 @@ class Detector:
         tot_inc = 0
         uncertain = 0
         true_pos_cor = 0
-        true_pos_inc = 0
         false_pos_cor = 0
+        true_neg_cor = 0
+        false_neg_cor = 0
+
+        true_pos_inc = 0
         false_pos_inc = 0
+        true_neg_inc = 0
+        false_neg_inc = 0
+
         covered = 0
 
         for inp_idx, sample in self.dataset.splits['unseen'].features.iterrows():
@@ -50,6 +56,12 @@ class Detector:
             if corr_cnt == inc_cnt:
                 print("UNCERTAIN:")
                 uncertain += 1
+                if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
+                    false_neg_cor = false_neg_cor + 1
+                    true_neg_inc = true_neg_inc + 1
+                else:
+                    false_neg_inc = false_neg_inc + 1
+                    true_neg_cor = true_neg_cor + 1
 
             if corr_cnt > inc_cnt:
                 print("CORRECT")
@@ -57,8 +69,10 @@ class Detector:
 
                 if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
                     true_pos_cor += 1
+                    true_neg_inc += 1
                 else:
                     false_pos_cor += 1
+                    false_neg_inc += 1
 
             if inc_cnt > corr_cnt:
                 print("INCORRECT")
@@ -66,11 +80,20 @@ class Detector:
 
                 if self.dataset.splits['unseen'].labels[inp_idx] != labels[inp_idx]:
                     true_pos_inc += 1
+                    true_neg_cor += 1
                 else:
                     false_pos_inc += 1
+                    false_neg_cor += 1
 
             if corr_cover or inc_cover:
                 covered += 1
+
+        total_tps = true_pos_cor + true_pos_inc
+        total_fps = false_pos_cor + false_pos_inc
+        total_tns = true_neg_cor + true_neg_inc
+        total_fns = false_neg_cor + false_neg_inc
+        total_precision = total_tps / (total_tps + total_fps)
+        total_recall = total_tps / (total_tps + total_fns)
 
         return {
             "unseen_correct": tot_corr_unseen,
@@ -88,6 +111,12 @@ class Detector:
             "false_pos_inc": false_pos_inc,
             "precision_inc": round(float(true_pos_inc / (true_pos_inc + false_pos_inc)) * 100.0, 2),
             "recall_inc": round(float(true_pos_inc / tot_inc_unseen) * 100.0, 2),
+            "total_tps": total_tps,
+            "total_fps": total_fps,
+            "total_tns": total_tns,
+            "total_fns": total_fns,
+            "total_precision": round(total_precision * 100.0, 2),
+            "total_recall": round(total_recall * 100.0, 2),
         }
 
     def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[int, bool, bool]:

@@ -92,6 +92,8 @@ class Detector:
         total_fps = false_pos_cor + false_pos_inc
         total_tns = true_neg_cor + true_neg_inc
         total_fns = false_neg_cor + false_neg_inc
+        retrieved_instances_cor = true_pos_cor + false_pos_cor
+        retrieved_instances_inc = true_pos_inc + false_pos_inc
         retrieved_instances = total_tps + total_fps
         relevant_instances = total_tps + total_fns
         total_precision = (total_tps / retrieved_instances) if retrieved_instances > 0 else 0
@@ -107,11 +109,11 @@ class Detector:
             "tot_pred_incorrect": tot_inc,
             "true_pos_cor": true_pos_cor,
             "false_pos_cor": false_pos_cor,
-            "precision_cor": round(float(true_pos_cor / (true_pos_cor + false_pos_cor)) * 100.0, 2),
+            "precision_cor": round(float(true_pos_cor / retrieved_instances_cor) * 100.0, 2) if retrieved_instances_cor > 0 else 0,
             "recall_cor": round(float(true_pos_cor / tot_corr_unseen) * 100.0, 2),
             "true_pos_inc": true_pos_inc,
             "false_pos_inc": false_pos_inc,
-            "precision_inc": round(float(true_pos_inc / (true_pos_inc + false_pos_inc)) * 100.0, 2),
+            "precision_inc": round(float(true_pos_inc / retrieved_instances_inc) * 100.0, 2) if retrieved_instances_inc > 0 else 0,
             "recall_inc": round(float(true_pos_inc / tot_inc_unseen) * 100.0, 2),
             "total_tps": total_tps,
             "total_fps": total_fps,

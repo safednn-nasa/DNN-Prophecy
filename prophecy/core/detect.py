@@ -92,8 +92,10 @@ class Detector:
         total_fps = false_pos_cor + false_pos_inc
         total_tns = true_neg_cor + true_neg_inc
         total_fns = false_neg_cor + false_neg_inc
-        total_precision = total_tps / (total_tps + total_fps)
-        total_recall = total_tps / (total_tps + total_fns)
+        retrieved_instances = total_tps + total_fps
+        relevant_instances = total_tps + total_fns
+        total_precision = (total_tps / retrieved_instances) if retrieved_instances > 0 else 0
+        total_recall = (total_tps / relevant_instances) if relevant_instances > 0 else 0
 
         return {
             "unseen_correct": tot_corr_unseen,

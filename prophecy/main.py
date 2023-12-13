@@ -21,6 +21,7 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(dest='subparser')
     detect_parser = subparsers.add_parser('detect')
     detect_parser.add_argument('-t', '--threshold', type=float, help='rule F1-threshold', default=0.0)
+    detect_parser.add_argument('--layer', type=int, help='consider the layer', required=False, default=None)
     detect_parser.add_argument('-l2', '--last_2_layers', action='store_true',
                                help='consider only the rules from the last two layers')
 
@@ -67,6 +68,12 @@ if __name__ == '__main__':
         if args.last_2_layers:
             total_layers = len(model.layers) + 1
             ruleset = ruleset[ruleset['layer_count'] >= total_layers - 2]
+        elif args.layer:
+            # check if layer in ruleset['layer_count'].unique()
+            if args.layer not in ruleset['layer_count'].unique():
+                print(f"Layer {args.layer} not found in ruleset.")
+                exit()
+            ruleset = ruleset[ruleset['layer_count'] == args.layer]
 
         results = detector(ruleset)
         pd.DataFrame([results]).to_csv(predictions_path / 'results.csv', index=False)

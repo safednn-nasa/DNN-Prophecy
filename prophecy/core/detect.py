@@ -88,8 +88,8 @@ class Detector:
         return {
             "unseen_correct": tot_corr_unseen,
             "unseen_incorrect": tot_inc_unseen,
-            "covered": covered,
-            "coverage": round((covered / len(self.dataset.splits['unseen'].features))*100.0, 2),
+            "covered": covered - uncertain,
+            "coverage": round(((covered - uncertain) / len(self.dataset.splits['unseen'].features))*100.0, 2),
             "uncertain": uncertain,
             "tot_pred_correct": tot_corr,
             "tot_pred_incorrect": tot_inc,

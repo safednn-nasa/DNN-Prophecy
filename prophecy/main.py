@@ -57,6 +57,7 @@ if __name__ == '__main__':
             if f.is_file() and f.suffix == '.csv':
                 layer = f.stem
                 rules = pd.read_csv(f)
+                rules['layer_count'] = rules['layer']
                 rules['layer'] = layer
                 dfs.append(rules)
 
@@ -64,7 +65,7 @@ if __name__ == '__main__':
         ruleset = ruleset[ruleset['f1'] >= args.threshold]
 
         if args.last_2_layers:
-            ruleset = ruleset[ruleset['layer'] >= len(model.layers) - 2]
+            ruleset = ruleset[ruleset['layer_count'] >= len(model.layers) - 2]
 
         results = detector(ruleset)
         pd.DataFrame([results]).to_csv(predictions_path / 'results.csv', index=False)

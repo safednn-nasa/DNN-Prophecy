@@ -44,13 +44,13 @@ class Detector:
         covered = 0
 
         for inp_idx, sample in self.dataset.splits['unseen'].features.iterrows():
-            print(sample.to_list())
+            #print(sample.to_list())
             corr_cnt, corr_cover, found = self.eval_rules(inp_idx, correct_rules)
             inc_cnt, inc_cover, found = self.eval_rules(inp_idx, incorrect_rules)
 
             # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
             if corr_cnt == inc_cnt:
-                print("UNCERTAIN:")
+                #print("UNCERTAIN:")
                 uncertain += 1
                 #if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
                 #    false_neg_cor = false_neg_cor + 1
@@ -60,7 +60,7 @@ class Detector:
                 #    true_neg_cor = true_neg_cor + 1
 
             if corr_cnt > inc_cnt:
-                print("CORRECT")
+                #print("CORRECT")
                 tot_corr += 1
 
                 if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
@@ -69,7 +69,7 @@ class Detector:
                     false_pos += 1
 
             if inc_cnt > corr_cnt:
-                print("INCORRECT")
+                #print("INCORRECT")
                 tot_inc += 1
 
                 if self.dataset.splits['unseen'].labels[inp_idx] != labels[inp_idx]:
@@ -82,8 +82,9 @@ class Detector:
 
         retrieved_instances = true_pos + false_pos
         relevant_instances = true_pos + false_neg
-        total_precision = (true_pos / retrieved_instances) if retrieved_instances > 0 else 0
-        total_recall = (true_pos / relevant_instances) if relevant_instances > 0 else 0
+        precision = (true_pos / retrieved_instances) if retrieved_instances > 0 else 0
+        recall = (true_pos / relevant_instances) if relevant_instances > 0 else 0
+        f1_score = (2 * precision * recall) / (precision + recall) if precision + recall > 0 else 0
 
         return {
             "unseen_correct": tot_corr_unseen,
@@ -97,8 +98,9 @@ class Detector:
             "fps": false_pos,
             "tns": true_neg,
             "fns": false_neg,
-            "total_precision": round(total_precision * 100.0, 2),
-            "total_recall": round(total_recall * 100.0, 2),
+            "precision": round(precision * 100.0, 2),
+            "recall": round(recall * 100.0, 2),
+            "f1": round(f1_score * 100.0, 2)
         }
 
     def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[int, bool, bool]:

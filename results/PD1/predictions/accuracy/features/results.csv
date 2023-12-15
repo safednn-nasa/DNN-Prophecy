@@ -1,2 +1,2 @@
-unseen_correct,unseen_incorrect,covered,coverage,uncertain,tot_pred_correct,tot_pred_incorrect,true_pos_cor,false_pos_cor,precision_cor,recall_cor,true_pos_inc,false_pos_inc,precision_inc,recall_inc
-119,34,153,100.0,1,122,30,117,5,95.9,98.32,28,2,93.33,82.35
+unseen_correct,unseen_incorrect,covered,coverage,uncertain,tot_pred_correct,tot_pred_incorrect,tps,fps,tns,fns,total_precision,total_recall
+119,34,152,99.35,1,122,30,117,5,28,2,95.9,98.32

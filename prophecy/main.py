@@ -21,9 +21,8 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(dest='subparser')
     detect_parser = subparsers.add_parser('detect')
     detect_parser.add_argument('-t', '--threshold', type=float, help='rule F1-threshold', default=0.0)
-    detect_parser.add_argument('--layer', type=int, help='consider the layer', required=False, default=None)
-    detect_parser.add_argument('-l2', '--last_2_layers', action='store_true',
-                               help='consider only the rules from the last two layers')
+    detect_parser.add_argument('-bf', '--brute-force', action='store_true', default=False,
+                               help='try all possible combinations of layers')
 
     extract_parser = subparsers.add_parser('extract')
 
@@ -51,6 +50,8 @@ if __name__ == '__main__':
             df.to_csv(rules_path / f'{layer}.csv', index=False)
 
     elif args.subparser == 'detect':
+        results = []
+        output_path = predictions_path / ('results_bf.csv' if args.brute_force else f'results.csv')
         detector = Detector(model=model, dataset=dataset)
 
         dfs = []
@@ -65,18 +66,20 @@ if __name__ == '__main__':
         ruleset = pd.concat(dfs)
         ruleset = ruleset[ruleset['f1'] >= args.threshold]
 
-        if args.last_2_layers:
-            total_layers = len(model.layers) + 1
-            ruleset = ruleset[ruleset['layer_count'] >= total_layers - 2]
-        elif args.layer:
-            # check if layer in ruleset['layer_count'].unique()
-            if args.layer not in ruleset['layer_count'].unique():
-                print(f"Layer {args.layer} not found in ruleset.")
-                exit()
-            ruleset = ruleset[ruleset['layer_count'] == args.layer]
+        if args.brute_force:
+            layers = sorted(ruleset['layer_count'].unique())
+            # get all combination of layers
+            from itertools import combinations
+            for i in range(1, len(layers)+1):
+                for comb in combinations(layers, i):
+                    print(f"Running detector for layers combination: {comb}")
+                    outcome = detector(ruleset=ruleset[ruleset['layer_count'].isin(comb)])
+                    outcome['layers'] = '_'.join(str(c) for c in comb)
+                    results.append(outcome)
+        else:
+            results.append(detector(ruleset=ruleset))
 
-        results = detector(ruleset)
-        pd.DataFrame([results]).to_csv(predictions_path / 'results.csv', index=False)
+        pd.DataFrame(results).to_csv(output_path, index=False)
     else:
         print("Please specify a command ['extract', 'detect'].")
         exit()

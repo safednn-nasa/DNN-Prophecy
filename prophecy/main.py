@@ -2,20 +2,24 @@ import argparse
 import pandas as pd
 
 from prophecy.data.dataset import Dataset
-from prophecy.utils.misc import get_model, lookup_settings, load_settings
+from prophecy.utils.misc import lookup_models, get_model, lookup_settings, load_settings, lookup_datasets
 from prophecy.core.extract import RuleExtractor
 from prophecy.core.detect import Detector
 from prophecy.utils.paths import results_path
 
 SETTINGS = lookup_settings()
+MODELS = lookup_models()
+model_choices = sorted(list(MODELS.keys()))
+DATASETS = lookup_datasets()
+dataset_choices = sorted(list(DATASETS.keys()))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Infer Data Precondition')
     parser.add_argument('--model', type=str, help='Model to infer the precondition', required=True,
-                        choices=['PD'])
-    parser.add_argument('--version', type=int, help='Version of the model', required=True)
-    parser.add_argument('--dataset', type=str, help='target dataset', required=True, choices=['PD'])
+                        choices=model_choices)
+    parser.add_argument('--dataset', type=str, help='target dataset', required=True,
+                        choices=dataset_choices)
     parser.add_argument('--settings', type=str, help='settings', required=True, choices=SETTINGS.keys())
 
     subparsers = parser.add_subparsers(dest='subparser')
@@ -27,11 +31,17 @@ if __name__ == '__main__':
     extract_parser = subparsers.add_parser('extract')
 
     args = parser.parse_args()
-    model = get_model(args.model, args.version)
+
+    # check if model name is equal to the dataset name
+    if args.model[:-1] != args.dataset:
+        print(f"Model ({args.model}) must match dataset ({args.dataset}).")
+        exit()
+
+    model = get_model(MODELS[args.model])
     dataset = Dataset(args.dataset)
     settings = load_settings(SETTINGS[args.settings])
 
-    base_path = results_path / f"{args.model}{args.version}"
+    base_path = results_path / args.model
     rules_path = base_path / "rules" / settings.rules / settings.fingerprint
     rules_path.mkdir(parents=True, exist_ok=True)
     predictions_path = base_path / "predictions" / settings.rules / settings.fingerprint

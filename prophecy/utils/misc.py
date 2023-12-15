@@ -2,7 +2,7 @@ import json
 
 from tensorflow import keras
 from pathlib import Path
-from prophecy.utils.paths import models_path, settings_path
+from prophecy.utils.paths import models_path, settings_path, datasets_path
 from prophecy.data.objects import Settings
 
 
@@ -10,13 +10,29 @@ RULES = ['decision', 'accuracy']
 FINGERPRINTS = ['features', 'activations']
 
 
-def get_model(model: str, version: str) -> keras.Model:
-    model_path = models_path / f"{model}{version}.h5"
-
+def get_model(model_path: Path) -> keras.Model:
     if not model_path.exists():
         raise ValueError(f"{model_path} does not exist")
 
     return keras.models.load_model(str(model_path))
+
+
+def lookup_datasets():
+    datasets = {file.stem: file for file in datasets_path.iterdir() if file.is_dir()}
+
+    if len(datasets) == 0:
+        raise ValueError(f"No datasets found in {datasets_path} directory")
+
+    return datasets
+
+
+def lookup_models():
+    models = {file.stem: file for file in models_path.iterdir() if file.suffix == '.h5'}
+
+    if len(models) == 0:
+        raise ValueError(f"No models found in {models_path} directory")
+
+    return models
 
 
 def lookup_settings():

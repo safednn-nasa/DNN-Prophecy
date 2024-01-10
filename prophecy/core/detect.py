@@ -183,13 +183,20 @@ class ClassifierDetector(BaseDetector):
             else:
                 _, _, op = self.model_rep[layer]
                 pred_label = classifier.predict([op[0][inp_idx]])
+                #print(classifier.decision_path([op[0][inp_idx]]))
+                #print(classifier.apply([op[0][inp_idx]]))
 
-            label_type = type(self.dataset.splits['unseen'].labels[inp_idx])
+            #label_type = type(self.dataset.splits['unseen'].labels[inp_idx])
 
-            if type(pred_label[0]) is not label_type:
-                raise TypeError(f"Predicted label {pred_label[0]} is not of type {label_type}")
+            #if type(pred_label[0]) is not label_type:
+            #    raise TypeError(f"Predicted label {pred_label[0]} is not of type {label_type}")
+            #print(pred_label[0], self.dataset.splits['unseen'].labels[inp_idx])
+            #if pred_label[0] == self.dataset.splits['unseen'].labels[inp_idx]:
+            #    corr_cnt += 1
+            #else:
+            #    inc_cnt += 1
 
-            if pred_label[0] == self.dataset.splits['unseen'].labels[inp_idx]:
+            if pred_label[0] == 0:
                 corr_cnt += 1
             else:
                 inc_cnt += 1

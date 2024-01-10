@@ -2,6 +2,7 @@ import keras
 import pandas as pd
 import numpy as np
 
+from pathlib import Path
 from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
 
@@ -65,7 +66,7 @@ class RuleExtractor:
 
         return self.fingerprints['val']
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, path: Path = None, *args, **kwargs):
         """
             Rule Extraction from every layer (input through output).
             Each rule is of the form pre(x) = > P(F(x)), pre: neuron constraints at the chosen layer.
@@ -89,12 +90,13 @@ class RuleExtractor:
             fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items() if _l != 'input']
 
         learners = learn_rules(labels=self.train_labels[self.settings.rules], fingerprints=fingerprints_tr,
-                               activations=self.settings.fingerprint == 'activations')
+                               activations=self.settings.fingerprint == 'activations', save_path=path)
 
         results = {}
         is_mis = True if self.settings.rules == 'accuracy' else False
 
         for i, (layer, learner) in enumerate(learners.items(), 1):
+            # TODO: get the tree and for every input just call predict and get the output
             print(f"\nRULES FROM LAYER {layer.upper()} IN TERMS OF {self.settings.fingerprint.upper()}\n")
             invariants = get_all_invariants_val(learner) if self.settings.fingerprint == 'features' else \
                 get_all_invariants(learner)

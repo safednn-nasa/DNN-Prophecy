@@ -4,6 +4,7 @@ import numpy as np
 from typing import Tuple
 
 from prophecy.data.dataset import Dataset, Split
+from prophecy.data.objects import Predictions
 
 
 def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
@@ -38,33 +39,32 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
     return np.array(labels)
 
 
-def get_unseen_labels(model: keras.Model, dataset_split: Split) -> Tuple[np.array, int, int]:
+def predict_unseen(model: keras.Model, dataset_split: Split) -> Predictions:
     unseen_ops = model.predict(dataset_split.features)
-    unseen_labels = []
+    predictions = Predictions()
 
     cnt_0 = 0
+    # TODO: why this count is set to one?
     cnt_1 = 1
-    tot_corr_unseen = 0
-    tot_inc_unseen = 0
 
     for i in range(0, len(unseen_ops)):
         if unseen_ops[i][0] > 0.5:
-            cnt_1 = cnt_1 + 1
-            unseen_labels.append(1)
+            cnt_1 += + 1
+            predictions.labels.append(1)
 
             if dataset_split.labels[i] == 1:
-                tot_corr_unseen = tot_corr_unseen + 1
+                predictions.correct += 1
             else:
-                tot_inc_unseen = tot_inc_unseen + 1
+                predictions.incorrect += 1
         else:
-            cnt_0 = cnt_0 + 1
-            unseen_labels.append(0)
+            cnt_0 += 1
+            predictions.labels.append(0)
             if dataset_split.labels[i] == 0:
-                tot_corr_unseen = tot_corr_unseen + 1
+                predictions.correct += 1
             else:
-                tot_inc_unseen = tot_inc_unseen + 1
+                predictions.incorrect += 1
 
     print("UNSEEN: Label 0:", cnt_0, "Label 1:", cnt_1)
-    print("UNSEEN: ACT CORR:", tot_corr_unseen, ", ACT INCORR:", tot_inc_unseen)
+    print("UNSEEN: ACT CORR:", predictions.correct, ", ACT INCORR:", predictions.incorrect)
 
-    return np.array(unseen_labels), tot_corr_unseen, tot_inc_unseen
+    return predictions

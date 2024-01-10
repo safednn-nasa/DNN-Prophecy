@@ -4,7 +4,7 @@ import pandas as pd
 from prophecy.data.dataset import Dataset
 from prophecy.utils.misc import lookup_models, get_model, lookup_settings, load_settings, lookup_datasets
 from prophecy.core.extract import RuleExtractor
-from prophecy.core.detect import Detector
+from prophecy.core.detect import RulesDetector, ClassifierDetector
 from prophecy.utils.paths import results_path
 
 SETTINGS = lookup_settings()
@@ -28,6 +28,7 @@ if __name__ == '__main__':
     detect_parser.add_argument('-bf', '--brute-force', action='store_true', default=False,
                                help='try all possible combinations of layers')
 
+    classify_parser = subparsers.add_parser('classify')
     extract_parser = subparsers.add_parser('extract')
 
     args = parser.parse_args()
@@ -44,13 +45,16 @@ if __name__ == '__main__':
     base_path = results_path / args.model
     rules_path = base_path / "rules" / settings.rules / settings.fingerprint
     rules_path.mkdir(parents=True, exist_ok=True)
+    classifiers_path = base_path / "classifiers" / settings.rules / settings.fingerprint
+    classifiers_path.mkdir(parents=True, exist_ok=True)
     predictions_path = base_path / "predictions" / settings.rules / settings.fingerprint
     predictions_path.mkdir(parents=True, exist_ok=True)
 
     if args.subparser == 'extract':
         rule_extractor = RuleExtractor(model=model, dataset=dataset, settings=settings)
-        ruleset = rule_extractor()
+        ruleset = rule_extractor(path=classifiers_path)
 
+        # TODO: maybe move this in the rule extractor class
         for layer, rules in ruleset.items():
             df = pd.DataFrame(rules)
 
@@ -62,7 +66,6 @@ if __name__ == '__main__':
     elif args.subparser == 'detect':
         results = []
         output_path = predictions_path / ('results_bf.csv' if args.brute_force else f'results.csv')
-        detector = Detector(model=model, dataset=dataset)
 
         dfs = []
         for f in rules_path.iterdir():
@@ -83,13 +86,23 @@ if __name__ == '__main__':
             for i in range(1, len(layers)+1):
                 for comb in combinations(layers, i):
                     print(f"Running detector for layers combination: {comb}")
-                    outcome = detector(ruleset=ruleset[ruleset['layer_count'].isin(comb)])
+                    # TODO: optimize this
+                    detector = RulesDetector(model=model, dataset=dataset,
+                                             ruleset=ruleset[ruleset['layer_count'].isin(comb)])
+                    outcome = detector()
                     outcome['layers'] = '_'.join(str(c) for c in comb)
                     results.append(outcome)
         else:
-            results.append(detector(ruleset=ruleset))
+            detector = RulesDetector(model=model, dataset=dataset, ruleset=ruleset)
+            results.append(detector())
 
         pd.DataFrame(results).to_csv(output_path, index=False)
+
+    elif args.subparser == 'classify':
+        output_path = predictions_path / 'results_clf.csv'
+        clf_detector = ClassifierDetector(model=model, dataset=dataset, learners_path=classifiers_path)
+        results = clf_detector()
+        pd.DataFrame(results, index=[0]).to_csv(output_path, index=False)
     else:
         print("Please specify a command ['extract', 'detect'].")
         exit()

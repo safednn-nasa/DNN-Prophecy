@@ -1,106 +1,122 @@
+from abc import abstractmethod
+
 import keras
 import pandas as pd
+import pickle
 
 from ast import literal_eval
 from typing import Tuple
+from tqdm import tqdm
+from pathlib import Path
 
 from prophecy.data.dataset import Dataset
-from prophecy.core.evaluate import get_unseen_labels
+from prophecy.data.objects import Predictions, Evaluation
+from prophecy.core.evaluate import predict_unseen
 from prophecy.core.helpers import check_pattern
 
 
-class Detector:
-    def __init__(self, model: keras.Model, dataset: Dataset):
+class BaseDetector:
+    def __init__(self, name: str, model: keras.Model, dataset: Dataset):
+        self.name = name
         self.model = model
         self.dataset = dataset
-        self._model_rep = {}
+        self._model_rep = None
+        self._predictions = None
+
+    def __call__(self, **kwargs) -> dict:
+        evaluation = Evaluation()
+
+        for inp_idx, sample in tqdm(self.dataset.splits['unseen'].features.iterrows()):
+            self.eval(evaluation, inp_idx, sample)
+
+        results = {
+            "unseen_correct": self.predictions.correct,
+            "unseen_incorrect": self.predictions.incorrect
+        }
+        results.update(evaluation.to_dict())
+        results.update(self.stats(evaluation))
+        results.update(evaluation.performance())
+
+        return results
+
+    @abstractmethod
+    def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
+        pass
+
+    @abstractmethod
+    def stats(self, evaluation: Evaluation) -> dict:
+        pass
+
+    @property
+    def predictions(self) -> Predictions:
+        if self._predictions is None:
+            self._predictions = predict_unseen(self.model, self.dataset.splits['unseen'])
+
+        return self._predictions
 
     @property
     def model_rep(self):
-        if len(self._model_rep) == 0:
-            self.get_model_rep()
+        if self._model_rep is None:
+            self._model_rep = {}
+            # Get the model fingerprints
+
+            for layer in self.model.layers:
+                func_dense = keras.backend.function(self.model.input, [layer.output])
+                inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
+                op = func_dense(inp_tensor)
+                self._model_rep[layer.name] = (func_dense, inp_tensor, op)
 
         return self._model_rep
 
-    def __call__(self, ruleset: pd.DataFrame) -> dict:
-        print("DETECT CORRECT, INCORRECT, UNCERTAIN on UNSEEN DATA")
 
+class RulesDetector(BaseDetector):
+    def __init__(self, ruleset: pd.DataFrame, **kw):
+        print("DETECT CORRECT, INCORRECT, UNCERTAIN on UNSEEN DATA")
+        super().__init__(name="rules", **kw)
         # parse the ruleset
         ruleset['neurons'] = ruleset['neurons'].apply(literal_eval)
         ruleset['signature'] = ruleset['signature'].apply(literal_eval)
-        correct_rules = ruleset[ruleset['kind'] == 'correct']
-        incorrect_rules = ruleset[ruleset['kind'] == 'incorrect']
-        labels, tot_corr_unseen, tot_inc_unseen = get_unseen_labels(self.model, self.dataset.splits['unseen'])
 
-        tot_corr = 0
-        tot_inc = 0
-        uncertain = 0
+        self.correct_rules = ruleset[ruleset['kind'] == 'correct']
+        self.incorrect_rules = ruleset[ruleset['kind'] == 'incorrect']
 
-        true_pos = 0
-        false_pos = 0
-        true_neg = 0
-        false_neg = 0
+    def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
+        # print(sample.to_list())
+        corr_cnt, corr_cover, found = self.eval_rules(index, self.correct_rules)
+        inc_cnt, inc_cover, found = self.eval_rules(index, self.incorrect_rules)
 
-        covered = 0
+        # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
+        if corr_cnt == inc_cnt:
+            # print("UNCERTAIN:")
+            evaluation.uncertain += 1
+            # if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
+            #    false_neg_cor = false_neg_cor + 1
+            #    true_neg_inc = true_neg_inc + 1
+            # else:
+            #    false_neg_inc = false_neg_inc + 1
+            #    true_neg_cor = true_neg_cor + 1
+        # TODO: the evaluation should be done with sklearn
+        if corr_cnt > inc_cnt:
+            # print("CORRECT")
+            evaluation.tot_corr += 1
+            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                       pred_label=self.predictions.labels[index], is_pos=True)
 
-        for inp_idx, sample in self.dataset.splits['unseen'].features.iterrows():
-            #print(sample.to_list())
-            corr_cnt, corr_cover, found = self.eval_rules(inp_idx, correct_rules)
-            inc_cnt, inc_cover, found = self.eval_rules(inp_idx, incorrect_rules)
+        if inc_cnt > corr_cnt:
+            # print("INCORRECT")
+            evaluation.tot_inc += 1
+            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                       pred_label=self.predictions.labels[index], is_pos=False)
 
-            # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
-            if corr_cnt == inc_cnt:
-                #print("UNCERTAIN:")
-                uncertain += 1
-                #if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
-                #    false_neg_cor = false_neg_cor + 1
-                #    true_neg_inc = true_neg_inc + 1
-                #else:
-                #    false_neg_inc = false_neg_inc + 1
-                #    true_neg_cor = true_neg_cor + 1
+        # save whether the sample was covered or not
+        evaluation.outputs.append(1) if corr_cover or inc_cover else evaluation.outputs.append(0)
 
-            if corr_cnt > inc_cnt:
-                #print("CORRECT")
-                tot_corr += 1
-
-                if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
-                    true_pos += 1
-                else:
-                    false_pos += 1
-
-            if inc_cnt > corr_cnt:
-                #print("INCORRECT")
-                tot_inc += 1
-
-                if self.dataset.splits['unseen'].labels[inp_idx] != labels[inp_idx]:
-                    true_neg += 1
-                else:
-                    false_neg += 1
-
-            if corr_cover or inc_cover:
-                covered += 1
-
-        retrieved_instances = true_pos + false_pos
-        relevant_instances = true_pos + false_neg
-        precision = (true_pos / retrieved_instances) if retrieved_instances > 0 else 0
-        recall = (true_pos / relevant_instances) if relevant_instances > 0 else 0
-        f1_score = (2 * precision * recall) / (precision + recall) if precision + recall > 0 else 0
+    def stats(self, evaluation: Evaluation) -> dict:
+        true_covered = sum(evaluation.outputs) - evaluation.uncertain
 
         return {
-            "unseen_correct": tot_corr_unseen,
-            "unseen_incorrect": tot_inc_unseen,
-            "covered": covered - uncertain,
-            "coverage": round(((covered - uncertain) / len(self.dataset.splits['unseen'].features))*100.0, 2),
-            "uncertain": uncertain,
-            "tot_pred_correct": tot_corr,
-            "tot_pred_incorrect": tot_inc,
-            "tps": true_pos,
-            "fps": false_pos,
-            "tns": true_neg,
-            "fns": false_neg,
-            "precision": round(precision * 100.0, 2),
-            "recall": round(recall * 100.0, 2),
-            "f1": round(f1_score * 100.0, 2)
+            "covered": true_covered,
+            "coverage": round((true_covered / len(self.dataset.splits['unseen'].features)) * 100.0, 2)
         }
 
     def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[int, bool, bool]:
@@ -122,14 +138,63 @@ class Detector:
 
         return counter, cover, found
 
-    def get_model_rep(self):
-        """
-            Get the model fingerprints
-        :return: None
-        """
 
-        for layer in self.model.layers:
-            func_dense = keras.backend.function(self.model.input, [layer.output])
-            inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
-            op = func_dense(inp_tensor)
-            self._model_rep[layer.name] = (func_dense, inp_tensor, op)
+class ClassifierDetector(BaseDetector):
+    def __init__(self, learners_path: Path, **kw):
+        super().__init__(name="classifier", **kw)
+        self.learners_path = learners_path
+        self._classifiers = {}
+
+    @property
+    def classifiers(self):
+        if self._classifiers == {}:
+            for classifier_path in self.learners_path.iterdir():
+                if classifier_path.is_file() and classifier_path.suffix == '.pkl':
+                    self._classifiers[classifier_path.stem] = pickle.load(open(classifier_path, 'rb'))
+
+        return self._classifiers
+
+    def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
+        corr_cnt, inc_cnt = self.eval_classifiers(index, row)
+
+        if corr_cnt == inc_cnt:
+            # print("UNCERTAIN:")
+            evaluation.uncertain += 1
+
+        if corr_cnt > inc_cnt:
+            # print("CORRECT")
+            evaluation.tot_corr += 1
+            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                       pred_label=self.predictions.labels[index], is_pos=True)
+
+        if inc_cnt > corr_cnt:
+            # print("INCORRECT")
+            evaluation.tot_inc += 1
+            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                       pred_label=self.predictions.labels[index], is_pos=False)
+
+    def eval_classifiers(self, inp_idx: int, row: pd.Series) -> Tuple[int, int]:
+        corr_cnt = 0
+        inc_cnt = 0
+
+        for layer, classifier in self.classifiers.items():
+            if layer == 'input':
+                pred_label = classifier.predict([row.to_numpy()])
+            else:
+                _, _, op = self.model_rep[layer]
+                pred_label = classifier.predict([op[0][inp_idx]])
+
+            label_type = type(self.dataset.splits['unseen'].labels[inp_idx])
+
+            if type(pred_label[0]) is not label_type:
+                raise TypeError(f"Predicted label {pred_label[0]} is not of type {label_type}")
+
+            if pred_label[0] == self.dataset.splits['unseen'].labels[inp_idx]:
+                corr_cnt += 1
+            else:
+                inc_cnt += 1
+
+        return corr_cnt, inc_cnt
+
+    def stats(self, evaluation: Evaluation) -> dict:
+        return {}

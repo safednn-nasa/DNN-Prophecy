@@ -1,10 +1,13 @@
 import numpy as np
+import pickle
 
 from sklearn import tree
 from typing import Dict
+from pathlib import Path
 
 
-def learn_rules(labels: np.array, fingerprints: dict, activations: bool) -> Dict[str, tree.DecisionTreeClassifier]:
+def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_path: Path = None) \
+        -> Dict[str, tree.DecisionTreeClassifier]:
     """
         Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron features of
         activations
@@ -12,6 +15,7 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool) -> Dict
     :param labels: list of labels
     :param fingerprints: dict of fingerprints
     :param activations: boolean indicating whether to use activations or features
+    :param save_path: save path for the resulting estimator
     :return:
     """
 
@@ -32,5 +36,11 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool) -> Dict
         basic_estimator.fit(fingerprint, labels)
         #classifiers[f"{layer}_{output}"] = basic_estimator
         classifiers[layer] = basic_estimator
+
+        if save_path and save_path.exists():
+            model_path = save_path / f"{layer}.pkl"
+
+            with model_path.open(mode='wb') as mf:
+                pickle.dump(basic_estimator, mf)
 
     return classifiers

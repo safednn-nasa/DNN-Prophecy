@@ -82,12 +82,15 @@ class RulesDetector(BaseDetector):
 
     def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
         # print(sample.to_list())
-        corr_cnt, corr_cover, found = self.eval_rules(index, self.correct_rules)
-        inc_cnt, inc_cover, found = self.eval_rules(index, self.incorrect_rules)
+        corr_layer, corr_cover, found = self.eval_rules(index, self.correct_rules)
+        inc_layer, inc_cover, found = self.eval_rules(index, self.incorrect_rules)
+        corr_cnt = len(corr_layer)
+        inc_cnt = len(inc_layer)
+        stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
         # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
         if corr_cnt == inc_cnt:
-            # print("UNCERTAIN:")
+            stats['eval'] = 'uncertain'
             evaluation.uncertain += 1
             # if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
             #    false_neg_cor = false_neg_cor + 1
@@ -97,17 +100,20 @@ class RulesDetector(BaseDetector):
             #    true_neg_cor = true_neg_cor + 1
         # TODO: the evaluation should be done with sklearn
         if corr_cnt > inc_cnt:
-            # print("CORRECT")
+            stats['eval'] = 'correct'
             evaluation.tot_corr += 1
-            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                       pred_label=self.predictions.labels[index], is_pos=True)
+            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                              pred_label=self.predictions.labels[index], is_pos=True)
+            stats['pred'] = pred
 
         if inc_cnt > corr_cnt:
-            # print("INCORRECT")
+            stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
-            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                       pred_label=self.predictions.labels[index], is_pos=False)
+            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                              pred_label=self.predictions.labels[index], is_pos=False)
+            stats['pred'] = pred
 
+        print(stats)
         # save whether the sample was covered or not
         evaluation.outputs.append(1) if corr_cover or inc_cover else evaluation.outputs.append(0)
 
@@ -119,8 +125,8 @@ class RulesDetector(BaseDetector):
             "coverage": round((true_covered / len(self.dataset.splits['unseen'].features)) * 100.0, 2)
         }
 
-    def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[int, bool, bool]:
-        counter = 0
+    def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[list, bool, bool]:
+        layers = []
         cover = False
         found = False
 
@@ -133,10 +139,10 @@ class RulesDetector(BaseDetector):
 
                 if found:
                     cover = True
-                    counter += 1
+                    layers.append(layer)
                     break
 
-        return counter, cover, found
+        return layers, cover, found
 
 
 class ClassifierDetector(BaseDetector):
@@ -155,27 +161,34 @@ class ClassifierDetector(BaseDetector):
         return self._classifiers
 
     def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
-        corr_cnt, inc_cnt = self.eval_classifiers(index, row)
+        corr_layer, inc_layer = self.eval_classifiers(index, row)
+        corr_cnt = len(corr_layer)
+        inc_cnt = len(inc_layer)
+        stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
         if corr_cnt == inc_cnt:
-            # print("UNCERTAIN:")
+            stats['eval'] = 'uncertain'
             evaluation.uncertain += 1
 
         if corr_cnt > inc_cnt:
-            # print("CORRECT")
+            stats['eval'] = 'correct'
             evaluation.tot_corr += 1
-            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                       pred_label=self.predictions.labels[index], is_pos=True)
+            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                              pred_label=self.predictions.labels[index], is_pos=True)
+            stats['pred'] = pred
 
         if inc_cnt > corr_cnt:
-            # print("INCORRECT")
+            stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
-            evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                       pred_label=self.predictions.labels[index], is_pos=False)
+            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+                              pred_label=self.predictions.labels[index], is_pos=False)
+            stats['pred'] = pred
 
-    def eval_classifiers(self, inp_idx: int, row: pd.Series) -> Tuple[int, int]:
-        corr_cnt = 0
-        inc_cnt = 0
+        print(stats)
+
+    def eval_classifiers(self, inp_idx: int, row: pd.Series) -> Tuple[list, list]:
+        corr_layer = []
+        inc_layer = []
 
         for layer, classifier in self.classifiers.items():
             if layer == 'input':
@@ -197,11 +210,11 @@ class ClassifierDetector(BaseDetector):
             #    inc_cnt += 1
 
             if pred_label[0] == 0:
-                corr_cnt += 1
+                corr_layer.append(layer)
             else:
-                inc_cnt += 1
+                inc_layer.append(layer)
 
-        return corr_cnt, inc_cnt
+        return corr_layer, inc_layer
 
     def stats(self, evaluation: Evaluation) -> dict:
         return {}

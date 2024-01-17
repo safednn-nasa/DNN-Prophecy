@@ -58,18 +58,22 @@ class Evaluation:
     false_neg: int = 0
     outputs: list = field(default_factory=lambda: [])
 
-    def __call__(self, true_label: Any, pred_label: Any, is_pos: bool):
+    def __call__(self, true_label: Any, pred_label: Any, is_pos: bool) -> str:
         if is_pos:
             if true_label == pred_label:
                 self.true_pos += 1
+                return 'tp'
             else:
                 self.false_pos += 1
+                return 'fp'
         else:
             # TODO: explain this condition
             if true_label != pred_label:
                 self.true_neg += 1
+                return 'tn'
             else:
                 self.false_neg += 1
+                return 'fn'
 
     @property
     def retrieved(self):

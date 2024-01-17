@@ -9,6 +9,7 @@ from keras.src.engine.keras_tensor import KerasTensor
 from prophecy.core.learn import learn_rules
 from prophecy.data.dataset import Dataset
 from prophecy.data.objects import Settings
+from prophecy.utils.misc import sanity_check
 from prophecy.core.evaluate import get_eval_labels
 from prophecy.core.helpers import (get_all_invariants_val, get_all_invariants, impure_rules,
                                    describe_invariants_all_labels)
@@ -107,6 +108,10 @@ class RuleExtractor:
                                                   self.train_labels[self.settings.rules],
                                                   self.val_labels[self.settings.rules], ALL=True, MIS=is_mis)
             results[layer] = desc
+
+            if not sanity_check(desc, learner):
+                raise ValueError(f"Sanity check failed for layer {layer}. "
+                                 f"#rules: {len(desc)} | #leaves: {learner.get_n_leaves()}")
 
         return results
 

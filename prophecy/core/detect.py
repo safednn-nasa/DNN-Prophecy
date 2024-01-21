@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 import keras
+import numpy as np
 import pandas as pd
 import pickle
 
@@ -8,6 +9,7 @@ from ast import literal_eval
 from typing import Tuple
 from tqdm import tqdm
 from pathlib import Path
+from sklearn.tree import DecisionTreeClassifier
 
 from prophecy.data.dataset import Dataset
 from prophecy.data.objects import Predictions, Evaluation
@@ -146,10 +148,11 @@ class RulesDetector(BaseDetector):
 
 
 class ClassifierDetector(BaseDetector):
-    def __init__(self, learners_path: Path, **kw):
+    def __init__(self, learners_path: Path, only_pure: bool = False, **kw):
         super().__init__(name="classifier", **kw)
         self.learners_path = learners_path
         self._classifiers = {}
+        self._only_pure = only_pure
 
     @property
     def classifiers(self):
@@ -191,28 +194,24 @@ class ClassifierDetector(BaseDetector):
         inc_layer = []
 
         for layer, classifier in self.classifiers.items():
+            predict_method = classifier.predict_proba if self._only_pure else classifier.predict
+
             if layer == 'input':
-                pred_label = classifier.predict([row.to_numpy()])
+                prediction = predict_method([row.to_numpy()])
             else:
                 _, _, op = self.model_rep[layer]
-                pred_label = classifier.predict([op[0][inp_idx]])
-                #print(classifier.decision_path([op[0][inp_idx]]))
-                #print(classifier.apply([op[0][inp_idx]]))
+                prediction = predict_method([op[0][inp_idx]])
 
-            #label_type = type(self.dataset.splits['unseen'].labels[inp_idx])
-
-            #if type(pred_label[0]) is not label_type:
-            #    raise TypeError(f"Predicted label {pred_label[0]} is not of type {label_type}")
-            #print(pred_label[0], self.dataset.splits['unseen'].labels[inp_idx])
-            #if pred_label[0] == self.dataset.splits['unseen'].labels[inp_idx]:
-            #    corr_cnt += 1
-            #else:
-            #    inc_cnt += 1
-
-            if pred_label[0] == 0:
-                corr_layer.append(layer)
+            if self._only_pure:
+                if prediction[0][0] not in [0.0, 1.0]:
+                    print(f"Uncertain prediction for layer {layer} with probabilities {prediction[0]}")
+                    continue
+                # get the class with the highest probability
+                label = classifier.classes_[np.argmax(prediction[0])]
             else:
-                inc_layer.append(layer)
+                label = prediction[0]
+
+            corr_layer.append(layer) if label == 0 else inc_layer.append(layer)
 
         return corr_layer, inc_layer
 

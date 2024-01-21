@@ -29,6 +29,9 @@ if __name__ == '__main__':
                                help='try all possible combinations of layers')
 
     classify_parser = subparsers.add_parser('classify')
+    classify_parser.add_argument('-op', '--only-pure', action='store_true', default=False,
+                                 help='Consider only classifications with 100 probability')
+
     extract_parser = subparsers.add_parser('extract')
 
     args = parser.parse_args()
@@ -100,7 +103,8 @@ if __name__ == '__main__':
 
     elif args.subparser == 'classify':
         output_path = predictions_path / 'results_clf.csv'
-        clf_detector = ClassifierDetector(model=model, dataset=dataset, learners_path=classifiers_path)
+        clf_detector = ClassifierDetector(model=model, dataset=dataset, learners_path=classifiers_path,
+                                          only_pure=args.only_pure)
         results = clf_detector()
         pd.DataFrame(results, index=[0]).to_csv(output_path, index=False)
     else:

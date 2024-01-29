@@ -1,0 +1,2 @@
+layer,neurons,signature,support,label,train_coverage,train_precision,train_recall,train_f1,test_coverage,test_precision,test_recall,test_f1,f1,kind
+4,[0],"['>', 0.005867481231689453]",1,0,0.08561643835616438,100,0.17271157167530224,0.3448275862068965,0.0,0,0.0,0.0,0.17241379310344826,correct

@@ -3,7 +3,7 @@ import numpy as np
 
 from typing import Tuple
 
-from prophecy.data.dataset import Dataset, Split
+from trustbench.core.dataset import Dataset, Split
 from prophecy.data.objects import Predictions
 
 

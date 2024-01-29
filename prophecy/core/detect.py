@@ -11,7 +11,7 @@ from tqdm import tqdm
 from pathlib import Path
 from sklearn.tree import DecisionTreeClassifier
 
-from prophecy.data.dataset import Dataset
+from trustbench.core.dataset import Dataset
 from prophecy.data.objects import Predictions, Evaluation
 from prophecy.core.evaluate import predict_unseen
 from prophecy.core.helpers import check_pattern

@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from tensorflow import keras
 from pathlib import Path
-from prophecy.utils.paths import models_path, settings_path, datasets_path
+from prophecy.utils.paths import models_path, settings_path
 from prophecy.data.objects import Settings
 
 
@@ -20,15 +20,6 @@ def get_model(model_path: Path) -> keras.Model:
         raise ValueError(f"{model_path} does not exist")
 
     return keras.models.load_model(str(model_path))
-
-
-def lookup_datasets():
-    datasets = {file.stem: file for file in datasets_path.iterdir() if file.is_dir()}
-
-    if len(datasets) == 0:
-        raise ValueError(f"No datasets found in {datasets_path} directory")
-
-    return datasets
 
 
 def lookup_models():

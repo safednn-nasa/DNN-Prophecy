@@ -7,7 +7,7 @@ from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
 
 from prophecy.core.learn import learn_rules
-from prophecy.data.dataset import Dataset
+from trustbench.core.dataset import Dataset
 from prophecy.data.objects import Settings
 from prophecy.utils.misc import sanity_check
 from prophecy.core.evaluate import get_eval_labels

@@ -1,8 +1,9 @@
 import argparse
 import pandas as pd
 
-from prophecy.data.dataset import Dataset
-from prophecy.utils.misc import lookup_models, get_model, lookup_settings, load_settings, lookup_datasets
+from trustbench.core.dataset import Dataset
+from trustbench.utils.misc import get_datasets_configs, list_datasets
+from prophecy.utils.misc import lookup_models, get_model, lookup_settings, load_settings
 from prophecy.core.extract import RuleExtractor
 from prophecy.core.detect import RulesDetector, ClassifierDetector
 from prophecy.utils.paths import results_path
@@ -10,8 +11,9 @@ from prophecy.utils.paths import results_path
 SETTINGS = lookup_settings()
 MODELS = lookup_models()
 model_choices = sorted(list(MODELS.keys()))
-DATASETS = lookup_datasets()
-dataset_choices = sorted(list(DATASETS.keys()))
+DATASETS_CONFIGS = get_datasets_configs()
+dataset_choices = sorted(list(DATASETS_CONFIGS.keys()))
+datasets = list_datasets()
 
 
 if __name__ == '__main__':
@@ -42,7 +44,10 @@ if __name__ == '__main__':
         exit()
 
     model = get_model(MODELS[args.model])
-    dataset = Dataset(args.dataset)
+
+    dataset = Dataset(args.dataset, path=datasets[args.dataset],
+                      config=DATASETS_CONFIGS[args.dataset].get('preprocess', {}))
+    dataset.splits['unseen'] = dataset.splits.pop('test')
     settings = load_settings(SETTINGS[args.settings])
 
     base_path = results_path / args.model
@@ -102,7 +107,8 @@ if __name__ == '__main__':
         pd.DataFrame(results).to_csv(output_path, index=False)
 
     elif args.subparser == 'classify':
-        output_path = predictions_path / 'results_clf.csv'
+        file_name = 'results_clf_pure.csv' if args.only_pure else 'results_clf.csv'
+        output_path = predictions_path / file_name
         clf_detector = ClassifierDetector(model=model, dataset=dataset, learners_path=classifiers_path,
                                           only_pure=args.only_pure)
         results = clf_detector()

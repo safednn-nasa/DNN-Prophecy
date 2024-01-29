@@ -31,6 +31,11 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_pa
 
         #for output, values in fingerprint.items():
         print(fingerprint.shape, labels.shape)
+
+        if len(fingerprint.shape) > 2:
+            print(f"Reshaping fingerprint for layer {layer}")
+            fingerprint = np.array([x.flatten() for x in fingerprint])
+
         #print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
         basic_estimator = tree.DecisionTreeClassifier()
         basic_estimator.fit(fingerprint, labels)

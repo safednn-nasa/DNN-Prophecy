@@ -52,7 +52,7 @@ class BaseDetector:
     @property
     def predictions(self) -> Predictions:
         if self._predictions is None:
-            self._predictions = predict_unseen(self.model, self.dataset.splits['unseen'])
+            self._predictions = predict_unseen(self.model, self.dataset, 'unseen')
 
         return self._predictions
 
@@ -62,9 +62,17 @@ class BaseDetector:
             self._model_rep = {}
             # Get the model fingerprints
 
+            reshape_shape = self.dataset.get_resize_shape()
+
             for layer in self.model.layers:
+
+                if reshape_shape:
+                    features = self.dataset.splits['unseen'].resize(reshape_shape)
+                else:
+                    features = self.dataset.splits['unseen'].features
+
                 func_dense = keras.backend.function(self.model.input, [layer.output])
-                inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
+                inp_tensor = keras.backend.constant(features)
                 op = func_dense(inp_tensor)
                 self._model_rep[layer.name] = (func_dense, inp_tensor, op)
 
@@ -200,7 +208,11 @@ class ClassifierDetector(BaseDetector):
                 prediction = predict_method([row.to_numpy()])
             else:
                 _, _, op = self.model_rep[layer]
-                prediction = predict_method([op[0][inp_idx]])
+
+                if len(op[0][inp_idx].shape) > 2:
+                    prediction = predict_method([op[0][inp_idx].flatten()])
+                else:
+                    prediction = predict_method([op[0][inp_idx]])
 
             if self._only_pure:
                 if prediction[0][0] not in [0.0, 1.0]:

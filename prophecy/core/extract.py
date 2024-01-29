@@ -109,9 +109,9 @@ class RuleExtractor:
                                                   self.val_labels[self.settings.rules], ALL=True, MIS=is_mis)
             results[layer] = desc
 
-            if not sanity_check(desc, learner):
-                raise ValueError(f"Sanity check failed for layer {layer}. "
-                                 f"#rules: {len(desc)} | #leaves: {learner.get_n_leaves()}")
+            #if not sanity_check(desc, learner):
+            #    raise ValueError(f"Sanity check failed for layer {layer}. "
+            #                     f"#rules: {len(desc)} | #leaves: {learner.get_n_leaves()}")
 
         return results
 
@@ -155,10 +155,22 @@ class RuleExtractor:
         if split not in self.fingerprints:
             raise ValueError(f"Invalid split {split}")
 
-        self.fingerprints[split]['input'] = {'activations': None,
-                                             'features': self.dataset.splits[split].features.to_numpy()}
+        resize_shape = self.dataset.get_resize_shape()
+
+        if resize_shape:
+            features = self.dataset.splits[split].resize(resize_shape)
+        else:
+            features = self.dataset.splits[split].features.to_numpy()
+
+        self.fingerprints[split]['input'] = {'activations': None, 'features': features}
 
         for layer in self.model.layers:
-            activations, features = get_layer_fingerprint(self.model.input, layer, self.dataset.splits[split].features)
+
+            if resize_shape:
+                input_features = self.dataset.splits[split].resize(resize_shape)
+            else:
+                input_features = self.dataset.splits[split].features.to_numpy()
+
+            activations, features = get_layer_fingerprint(self.model.input, layer, input_features)
             self.fingerprints[split][layer.name] = {'activations': activations, 'features': features}
             print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

@@ -39,7 +39,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # check if model name is equal to the dataset name
-    if args.model[:-1] != args.dataset:
+    if args.dataset not in args.model:
         print(f"Model ({args.model}) must match dataset ({args.dataset}).")
         exit()
 

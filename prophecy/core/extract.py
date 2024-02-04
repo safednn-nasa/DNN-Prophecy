@@ -32,12 +32,15 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, f
 
 
 class RuleExtractor:
-    def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings):
+    def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings, only_dense: bool = False,
+                 skip_rules: bool = False, **kwargs):
         self.model = model
         self.dataset = dataset
         self.settings = settings
         self.labels = {'train': {}, 'val': {}}
         self.fingerprints = {'train': {}, 'val': {}}
+        self._only_dense = only_dense
+        self._skip_rules = skip_rules
 
     @property
     def train_labels(self):
@@ -93,6 +96,12 @@ class RuleExtractor:
         learners = learn_rules(labels=self.train_labels[self.settings.rules], fingerprints=fingerprints_tr,
                                activations=self.settings.fingerprint == 'activations', save_path=path)
 
+        if self._skip_rules:
+            return {}
+
+        return self._extract(learners, list(fingerprints_tr.values()), fingerprints_tst)
+
+    def _extract(self, learners: dict, fingerprints_tr: list, fingerprints_tst: list):
         results = {}
         is_mis = True if self.settings.rules == 'accuracy' else False
 
@@ -104,7 +113,7 @@ class RuleExtractor:
             print(f"InV {i-1}")
             impure_rules(invariants)
 
-            desc = describe_invariants_all_labels(invariants, i, list(fingerprints_tr.values()), fingerprints_tst,
+            desc = describe_invariants_all_labels(invariants, i, fingerprints_tr, fingerprints_tst,
                                                   self.train_labels[self.settings.rules],
                                                   self.val_labels[self.settings.rules], ALL=True, MIS=is_mis)
             results[layer] = desc
@@ -165,6 +174,9 @@ class RuleExtractor:
         self.fingerprints[split]['input'] = {'activations': None, 'features': features}
 
         for layer in self.model.layers:
+            if self._only_dense and 'dense' not in layer.name:
+                # skip non-dense layers
+                continue
 
             if resize_shape:
                 input_features = self.dataset.splits[split].resize(resize_shape)

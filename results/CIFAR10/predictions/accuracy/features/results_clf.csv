@@ -1,2 +1,2 @@
 unseen_correct,unseen_incorrect,uncertain,tot_pred_correct,tot_pred_incorrect,tps,fps,tns,fns,precision,recall,f1
-85,5,0,90,0,85,5,0,0,94.44,100.0,97.14
+85,5,2,88,0,83,5,0,0,94.32,100.0,97.08

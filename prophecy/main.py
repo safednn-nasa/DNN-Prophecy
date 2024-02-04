@@ -35,6 +35,10 @@ if __name__ == '__main__':
                                  help='Consider only classifications with 100 probability')
 
     extract_parser = subparsers.add_parser('extract')
+    extract_parser.add_argument('-odl', '--only-dense-layers', action='store_true', default=False,
+                                help='Consider only dense layers')
+    extract_parser.add_argument('-sr', '--skip-rules', action='store_true', default=False,
+                                help='Skip rules extraction')
 
     args = parser.parse_args()
 
@@ -59,7 +63,8 @@ if __name__ == '__main__':
     predictions_path.mkdir(parents=True, exist_ok=True)
 
     if args.subparser == 'extract':
-        rule_extractor = RuleExtractor(model=model, dataset=dataset, settings=settings)
+        rule_extractor = RuleExtractor(model=model, dataset=dataset, settings=settings, skip_rules=args.skip_rules,
+                                       only_dense=args.only_dense_layers)
         ruleset = rule_extractor(path=classifiers_path)
 
         # TODO: maybe move this in the rule extractor class

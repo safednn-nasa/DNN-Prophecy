@@ -1,7 +1,10 @@
+from typing import Union
+
 import keras
 import pandas as pd
 import numpy as np
 
+from tqdm import tqdm
 from pathlib import Path
 from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
@@ -15,7 +18,8 @@ from prophecy.core.helpers import (get_all_invariants_val, get_all_invariants, i
                                    describe_invariants_all_labels)
 
 
-def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, features: pd.DataFrame):
+def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
+                          features: Union[pd.DataFrame, np.ndarray]):
     """
 
     :param model_input: model input
@@ -25,10 +29,31 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer, f
     """
     func = backend.function(model_input, [layer.output])
 
-    x_tensor = backend.constant(features)
-    outputs = func(x_tensor)
+    if features.shape[0] > 5000 and isinstance(features, np.ndarray):
+        batch_size = 256
+        num_samples = len(features)
+        num_batches = int(np.ceil(num_samples / batch_size))
 
-    return (outputs[0] > 0.0).astype('int'), outputs[0]
+        activations_list = []
+        values_list = []
+
+        for i in tqdm(range(num_batches)):
+            start_idx = i * batch_size
+            end_idx = (i + 1) * batch_size
+
+            batch_features = features[start_idx:end_idx, :]
+            x_tensor = backend.constant(batch_features)
+            outputs = func(x_tensor)
+
+            activations_list.append((outputs[0] > 0.0).astype('int'))
+            values_list.append(outputs[0])
+
+        return np.concatenate(activations_list, axis=0), np.concatenate(values_list, axis=0)
+    else:
+        x_tensor = backend.constant(features)
+        outputs = func(x_tensor)
+
+        return (outputs[0] > 0.0).astype('int'), outputs[0]
 
 
 class RuleExtractor:

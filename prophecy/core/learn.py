@@ -37,7 +37,7 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_pa
             fingerprint = np.array([x.flatten() for x in fingerprint])
 
         #print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
-        basic_estimator = tree.DecisionTreeClassifier()
+        basic_estimator = tree.DecisionTreeClassifier(n_jobs=-1)
         basic_estimator.fit(fingerprint, labels)
         #classifiers[f"{layer}_{output}"] = basic_estimator
         classifiers[layer] = basic_estimator

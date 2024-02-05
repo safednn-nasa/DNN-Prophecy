@@ -4,6 +4,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pickle
+import tensorflow as tf
 
 from ast import literal_eval
 from typing import Tuple, Union
@@ -24,6 +25,12 @@ class BaseDetector:
         self.dataset = dataset
         self._model_rep = None
         self._predictions = None
+        self._target_layers = []
+
+    @property
+    @abstractmethod
+    def target_layers(self):
+        pass
 
     def __call__(self, **kwargs) -> dict:
         evaluation = Evaluation()
@@ -66,13 +73,41 @@ class BaseDetector:
             self._model_rep = {}
             # Get the model fingerprints
 
-            for layer in self.model.layers:
-                func_dense = keras.backend.function(self.model.input, [layer.output])
-                inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
-                op = func_dense(inp_tensor)
-                self._model_rep[layer.name] = (func_dense, inp_tensor, op)
+            total_samples = self.dataset.splits['unseen'].features.shape[0]
+
+            if self.dataset.format == 'npy' and total_samples > 5000:
+                self.get_batched_model_rep(total_samples)
+            else:
+                for layer in self.model.layers:
+                    if layer.name not in self.target_layers:
+                        continue
+
+                    func_dense = keras.backend.function(self.model.input, [layer.output])
+                    inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
+                    op = func_dense(inp_tensor)
+                    self._model_rep[layer.name] = (func_dense, inp_tensor, op)
 
         return self._model_rep
+
+    def get_batched_model_rep(self, total_samples: int,  batch_size=256):
+        for layer in self.model.layers:
+            if layer.name not in self.target_layers:
+                continue
+
+            layer_inputs = []
+            layer_outputs = []
+            func_dense = keras.backend.function(self.model.input, [layer.output])
+
+            for start in tqdm(range(0, total_samples, batch_size)):
+                end = min(start + batch_size, total_samples)
+                batch_features = self.dataset.splits['unseen'].features[start:end]
+                inp_tensor = keras.backend.constant(batch_features)
+                layer_inputs.append(inp_tensor)
+                op = func_dense(inp_tensor)
+                layer_outputs.append(op)
+
+            self._model_rep[layer.name] = (func_dense, tf.concat(layer_inputs, axis=0),
+                                           np.concatenate(layer_outputs, axis=1))
 
 
 class RulesDetector(BaseDetector):
@@ -85,6 +120,11 @@ class RulesDetector(BaseDetector):
 
         self.correct_rules = ruleset[ruleset['kind'] == 'correct']
         self.incorrect_rules = ruleset[ruleset['kind'] == 'incorrect']
+
+    @property
+    def target_layers(self):
+        # TODO: to be implemented
+        raise NotImplementedError
 
     def eval(self, evaluation: Evaluation, index: int, row: Union[pd.Series, np.ndarray]):
         # print(sample.to_list())
@@ -157,6 +197,13 @@ class ClassifierDetector(BaseDetector):
         self.learners_path = learners_path
         self._classifiers = {}
         self._only_pure = only_pure
+
+    @property
+    def target_layers(self):
+        if len(self._target_layers) == 0:
+            self._target_layers = list(self.classifiers.keys())
+
+        return self._target_layers
 
     @property
     def classifiers(self):

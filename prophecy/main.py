@@ -2,7 +2,7 @@ import argparse
 import pandas as pd
 
 from trustbench.core.dataset import Dataset
-from trustbench.utils.misc import get_datasets_configs, list_datasets
+from trustbench.utils.misc import get_datasets_configs, list_datasets, load_dataset
 from prophecy.utils.misc import lookup_models, get_model, lookup_settings, load_settings
 from prophecy.core.extract import RuleExtractor
 from prophecy.core.detect import RulesDetector, ClassifierDetector
@@ -48,9 +48,7 @@ if __name__ == '__main__':
         exit()
 
     model = get_model(MODELS[args.model])
-
-    dataset = Dataset(args.dataset, path=datasets[args.dataset],
-                      config=DATASETS_CONFIGS[args.dataset].get('preprocess', {}))
+    dataset = load_dataset(name=args.dataset, path=datasets[args.dataset], config=DATASETS_CONFIGS[args.dataset])
     dataset.splits['unseen'] = dataset.splits.pop('test')
     settings = load_settings(SETTINGS[args.settings])
 

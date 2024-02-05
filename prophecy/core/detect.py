@@ -6,7 +6,7 @@ import pandas as pd
 import pickle
 
 from ast import literal_eval
-from typing import Tuple
+from typing import Tuple, Union
 from tqdm import tqdm
 from pathlib import Path
 from sklearn.tree import DecisionTreeClassifier
@@ -28,8 +28,12 @@ class BaseDetector:
     def __call__(self, **kwargs) -> dict:
         evaluation = Evaluation()
 
-        for inp_idx, sample in tqdm(self.dataset.splits['unseen'].features.iterrows()):
-            self.eval(evaluation, inp_idx, sample)
+        if isinstance(self.dataset.splits['unseen'].features, pd.DataFrame):
+            for inp_idx, sample in tqdm(self.dataset.splits['unseen'].features.iterrows()):
+                self.eval(evaluation, inp_idx, sample)
+        else:
+            for inp_idx, sample in tqdm(enumerate(self.dataset.splits['unseen'].features)):
+                self.eval(evaluation, inp_idx, sample)
 
         results = {
             "unseen_correct": self.predictions.correct,
@@ -42,7 +46,7 @@ class BaseDetector:
         return results
 
     @abstractmethod
-    def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
+    def eval(self, evaluation: Evaluation, index: int, row: Union[pd.Series, np.ndarray]):
         pass
 
     @abstractmethod
@@ -62,17 +66,9 @@ class BaseDetector:
             self._model_rep = {}
             # Get the model fingerprints
 
-            reshape_shape = self.dataset.get_resize_shape()
-
             for layer in self.model.layers:
-
-                if reshape_shape:
-                    features = self.dataset.splits['unseen'].resize(reshape_shape)
-                else:
-                    features = self.dataset.splits['unseen'].features
-
                 func_dense = keras.backend.function(self.model.input, [layer.output])
-                inp_tensor = keras.backend.constant(features)
+                inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
                 op = func_dense(inp_tensor)
                 self._model_rep[layer.name] = (func_dense, inp_tensor, op)
 
@@ -90,7 +86,7 @@ class RulesDetector(BaseDetector):
         self.correct_rules = ruleset[ruleset['kind'] == 'correct']
         self.incorrect_rules = ruleset[ruleset['kind'] == 'incorrect']
 
-    def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
+    def eval(self, evaluation: Evaluation, index: int, row: Union[pd.Series, np.ndarray]):
         # print(sample.to_list())
         corr_layer, corr_cover, found = self.eval_rules(index, self.correct_rules)
         inc_layer, inc_cover, found = self.eval_rules(index, self.incorrect_rules)
@@ -197,7 +193,7 @@ class ClassifierDetector(BaseDetector):
 
         print(stats)
 
-    def eval_classifiers(self, inp_idx: int, row: pd.Series) -> Tuple[list, list]:
+    def eval_classifiers(self, inp_idx: int, features: Union[pd.Series, np.ndarray]) -> Tuple[list, list]:
         corr_layer = []
         inc_layer = []
 
@@ -205,7 +201,13 @@ class ClassifierDetector(BaseDetector):
             predict_method = classifier.predict_proba if self._only_pure else classifier.predict
 
             if layer == 'input':
-                prediction = predict_method([row.to_numpy()])
+                if isinstance(features, pd.Series):
+                    prediction = predict_method([features.to_numpy()])
+                else:
+                    if len(features.shape) > 2:
+                        prediction = predict_method([features.flatten()])
+                    else:
+                        prediction = predict_method([features])
             else:
                 _, _, op = self.model_rep[layer]
 

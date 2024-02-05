@@ -20,15 +20,9 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
     if split not in ['train', 'val']:
         raise ValueError(f"Invalid split: {split}")
 
-    resize_shape = dataset.get_resize_shape()
     labels = []
 
-    if resize_shape:
-        input_features = dataset.splits[split].resize(resize_shape)
-    else:
-        input_features = dataset.splits[split].features
-
-    predictions = model.predict(input_features)
+    predictions = model.predict(dataset.splits[split].features)
     # check if the model is binary classification
     if len(predictions[0]) == 1:
         cnt_0 = 0
@@ -57,14 +51,7 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
 
 
 def predict_unseen(model: keras.Model, dataset: Dataset, split: str) -> Predictions:
-    resize_shape = dataset.get_resize_shape()
-
-    if resize_shape:
-        input_features = dataset.splits[split].resize(resize_shape)
-    else:
-        input_features = dataset.splits[split].features
-
-    unseen_ops = model.predict(input_features)
+    unseen_ops = model.predict(dataset.splits[split].features)
     predictions = Predictions()
 
     if len(unseen_ops[0]) == 1:

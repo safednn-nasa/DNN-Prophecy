@@ -164,25 +164,13 @@ class RuleExtractor:
         if split not in self.fingerprints:
             raise ValueError(f"Invalid split {split}")
 
-        resize_shape = self.dataset.get_resize_shape()
-
-        if resize_shape:
-            features = self.dataset.splits[split].resize(resize_shape)
-        else:
-            features = self.dataset.splits[split].features.to_numpy()
-
-        self.fingerprints[split]['input'] = {'activations': None, 'features': features}
+        self.fingerprints[split]['input'] = {'activations': None, 'features': self.dataset.splits[split].features}
 
         for layer in self.model.layers:
             if self._only_dense and 'dense' not in layer.name:
                 # skip non-dense layers
                 continue
 
-            if resize_shape:
-                input_features = self.dataset.splits[split].resize(resize_shape)
-            else:
-                input_features = self.dataset.splits[split].features.to_numpy()
-
-            activations, features = get_layer_fingerprint(self.model.input, layer, input_features)
+            activations, features = get_layer_fingerprint(self.model.input, layer, self.dataset.splits[split].features)
             self.fingerprints[split][layer.name] = {'activations': activations, 'features': features}
             print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

@@ -37,6 +37,8 @@ if __name__ == '__main__':
     extract_parser = subparsers.add_parser('extract')
     extract_parser.add_argument('-odl', '--only-dense-layers', action='store_true', default=False,
                                 help='Consider only dense layers')
+    extract_parser.add_argument('-ial', '--include-activation-layers', action='store_true', default=False,
+                                help='Include the activation layers associated to the dense layers')
     extract_parser.add_argument('-sr', '--skip-rules', action='store_true', default=False,
                                 help='Skip rules extraction')
 
@@ -62,7 +64,8 @@ if __name__ == '__main__':
 
     if args.subparser == 'extract':
         rule_extractor = RuleExtractor(model=model, dataset=dataset, settings=settings, skip_rules=args.skip_rules,
-                                       only_dense=args.only_dense_layers)
+                                       only_dense=args.only_dense_layers,
+                                       include_activation=args.include_activation_layers)
         ruleset = rule_extractor(path=classifiers_path)
 
         # TODO: maybe move this in the rule extractor class

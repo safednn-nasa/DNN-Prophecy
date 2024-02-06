@@ -58,14 +58,34 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 
 class RuleExtractor:
     def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings, only_dense: bool = False,
-                 skip_rules: bool = False, **kwargs):
+                 skip_rules: bool = False, include_activation: bool = False, **kwargs):
         self.model = model
         self.dataset = dataset
         self.settings = settings
         self.labels = {'train': {}, 'val': {}}
         self.fingerprints = {'train': {}, 'val': {}}
-        self._only_dense = only_dense
         self._skip_rules = skip_rules
+        self.layers = []
+
+        if only_dense and include_activation:
+            print("Dense layers and associated activation layers are considered for fingerprinting")
+            include_next = False
+
+            for layer in model.layers:
+                if layer.name.startswith('dense'):
+                    include_next = True
+                    self.layers.append(layer)
+                elif layer.name.startswith('activation') and include_next:
+                    include_next = False
+                    self.layers.append(layer)
+
+        elif only_dense:
+            print("Only dense layers are considered for fingerprinting")
+            self.layers = [layer for layer in self.layers if 'dense' in layer.name]
+        else:
+            self.layers = model.layers
+
+        print(f"Layers to be considered for fingerprinting: {[layer.name for layer in self.layers]}")
 
     @property
     def train_labels(self):
@@ -191,11 +211,7 @@ class RuleExtractor:
 
         self.fingerprints[split]['input'] = {'activations': None, 'features': self.dataset.splits[split].features}
 
-        for layer in self.model.layers:
-            if self._only_dense and 'dense' not in layer.name:
-                # skip non-dense layers
-                continue
-
+        for layer in self.layers:
             activations, features = get_layer_fingerprint(self.model.input, layer, self.dataset.splits[split].features)
             self.fingerprints[split][layer.name] = {'activations': activations, 'features': features}
             print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

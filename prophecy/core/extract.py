@@ -37,7 +37,7 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
         activations_list = []
         values_list = []
 
-        for i in tqdm(range(num_batches)):
+        for i in tqdm(range(num_batches), desc=f"Processing {layer.name}"):
             start_idx = i * batch_size
             end_idx = (i + 1) * batch_size
 
@@ -58,13 +58,14 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 
 class RuleExtractor:
     def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings, only_dense: bool = False,
-                 skip_rules: bool = False, include_activation: bool = False, **kwargs):
+                 skip_rules: bool = False, include_activation: bool = False, balance: bool = False, **kwargs):
         self.model = model
         self.dataset = dataset
         self.settings = settings
         self.labels = {'train': {}, 'val': {}}
         self.fingerprints = {'train': {}, 'val': {}}
         self._skip_rules = skip_rules
+        self._balance = balance
         self.layers = []
 
         if only_dense and include_activation:
@@ -81,7 +82,7 @@ class RuleExtractor:
 
         elif only_dense:
             print("Only dense layers are considered for fingerprinting")
-            self.layers = [layer for layer in self.layers if 'dense' in layer.name]
+            self.layers = [layer for layer in model.layers if 'dense' in layer.name]
         else:
             self.layers = model.layers
 
@@ -128,15 +129,17 @@ class RuleExtractor:
         :return:
         """
         print(f"{self.settings.rules.upper()} RULES:")
+
+        if self._balance:
+            self.get_labels('train')
+
         print(f"Invoking Dec-tree classifier based on {self.settings.fingerprint.upper()}.")
 
         # TODO: fix this
         if self.settings.fingerprint == 'features':
             fingerprints_tr = {_l: _f[self.settings.fingerprint] for _l, _f in self.train_fingerprints.items()}
-            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items()]
         else:
             fingerprints_tr = {_l: _f[self.settings.fingerprint] for _l, _f in self.train_fingerprints.items() if _l != 'input'}
-            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items() if _l != 'input']
 
         learners = learn_rules(labels=self.train_labels[self.settings.rules], fingerprints=fingerprints_tr,
                                activations=self.settings.fingerprint == 'activations', save_path=path)
@@ -144,11 +147,16 @@ class RuleExtractor:
         if self._skip_rules:
             return {}
 
-        return self._extract(learners, list(fingerprints_tr.values()), fingerprints_tst)
+        return self._extract(learners, list(fingerprints_tr.values()))
 
-    def _extract(self, learners: dict, fingerprints_tr: list, fingerprints_tst: list):
+    def _extract(self, learners: dict, fingerprints_tr: list):
         results = {}
         is_mis = True if self.settings.rules == 'accuracy' else False
+
+        if self.settings.fingerprint == 'features':
+            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items()]
+        else:
+            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items() if _l != 'input']
 
         for i, (layer, learner) in enumerate(learners.items(), 1):
             # TODO: get the tree and for every input just call predict and get the output
@@ -199,6 +207,28 @@ class RuleExtractor:
 
         print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
 
+        # randomly drop labels to balance the classes
+        if split == 'train' and self._balance:
+            print(f"Balancing {split.upper()} labels")
+            # get the number of samples in each class
+            unique, counts = np.unique(self.labels[split]['accuracy'], return_counts=True)
+            counts = dict(zip(unique, counts))
+            print("Counts:", counts)
+            # get the class with the maximum number of samples
+            max_class = max(counts, key=counts.get)
+            # get the class with the minimum number of samples
+            min_class = min(counts, key=counts.get)
+            # get the indexes of the samples in the maximum class
+            max_class_idx = np.where(self.labels[split]['accuracy'] == max_class)[0]
+            min_class_idx = np.where(self.labels[split]['accuracy'] == min_class)[0]
+            # randomly select from max_class_idx to balance the same number of samples in the minimum class
+            selected_max_class_idx = np.random.choice(max_class_idx, size=counts[min_class], replace=False)
+            new_ids = np.append(selected_max_class_idx, min_class_idx)
+            print("Length of new_ids:", len(new_ids))
+            self.labels[split]['decision'] = self.labels[split]['decision'][new_ids]
+            self.labels[split]['accuracy'] = self.labels[split]['accuracy'][new_ids]
+            self.dataset.splits[split].features = self.dataset.splits[split].features[new_ids]
+
     def get_model_fingerprints(self, split: str):
         """
             Collect the neuron values and activations of Train Data and Test Data after each layer
@@ -212,6 +242,7 @@ class RuleExtractor:
         self.fingerprints[split]['input'] = {'activations': None, 'features': self.dataset.splits[split].features}
 
         for layer in self.layers:
+            print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")
             activations, features = get_layer_fingerprint(self.model.input, layer, self.dataset.splits[split].features)
             self.fingerprints[split][layer.name] = {'activations': activations, 'features': features}
             print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

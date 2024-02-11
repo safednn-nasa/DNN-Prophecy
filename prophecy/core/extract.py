@@ -58,7 +58,8 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 
 class RuleExtractor:
     def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings, only_dense: bool = False,
-                 skip_rules: bool = False, include_activation: bool = False, balance: bool = False, **kwargs):
+                 skip_rules: bool = False, include_activation: bool = False, balance: bool = False,
+                 confidence: bool = False, **kwargs):
         self.model = model
         self.dataset = dataset
         self.settings = settings
@@ -66,6 +67,7 @@ class RuleExtractor:
         self.fingerprints = {'train': {}, 'val': {}}
         self._skip_rules = skip_rules
         self._balance = balance
+        self._confidence = confidence
         self.layers = []
 
         if only_dense and include_activation:
@@ -130,7 +132,7 @@ class RuleExtractor:
         """
         print(f"{self.settings.rules.upper()} RULES:")
 
-        if self._balance:
+        if self._balance or self._confidence:
             self.get_labels('train')
 
         print(f"Invoking Dec-tree classifier based on {self.settings.fingerprint.upper()}.")
@@ -184,34 +186,56 @@ class RuleExtractor:
         :return:
         """
 
-        eval_labels = get_eval_labels(self.model, self.dataset, split)
+        eval_labels, confidence = get_eval_labels(self.model, self.dataset, split)
+
+        # compute outliers by looking at the confidence
+        # minimum_confidence = Q1 - 1.5 * IQR
+        q1 = np.percentile(confidence, 25)
+        q3 = np.percentile(confidence, 75)
+        iqr = q3 - q1
+        minimum_confidence = q1 - 1.5 * iqr
 
         print(f"{split.upper()} LABELS:", eval_labels.shape)
 
-        self.labels[split]['accuracy'] = np.array([]).astype(int)
-        self.labels[split]['decision'] = np.array([]).astype(int)
+        # Initialize empty lists for decision and accuracy
+        decision_list = []
+        accuracy_list = []
 
         match_count = 0
         mismatch_count = 0
 
-        for idx in range(0, len(eval_labels)):
-            # if eval_labels[idx] == int(dataset.splits[split].labels.iloc[idx]['label']):
-            if eval_labels[idx] == self.dataset.splits[split].labels[idx]:
-                match_count = match_count + 1
-                self.labels[split]['decision'] = np.append(self.labels[split]['decision'], eval_labels[idx])
-                self.labels[split]['accuracy'] = np.append(self.labels[split]['accuracy'], 0)
+        # Iterate over labels and confidence together using enumerate
+        for idx, (label, confidence) in enumerate(zip(eval_labels, confidence)):
+            # Default values for decision and accuracy is misclassified
+            decision = 1000
+            accuracy = 1000
+
+            # Check if confidence is within the specified range
+            if self._confidence and confidence < minimum_confidence:
+                mismatch_count += 1
+                pass  # Leave decision and accuracy as default
+            elif label == self.dataset.splits[split].labels[idx]:
+                match_count += 1
+                decision = label
+                accuracy = 0
             else:
-                mismatch_count = mismatch_count + 1
-                self.labels[split]['decision'] = np.append(self.labels[split]['decision'], 1000)
-                self.labels[split]['accuracy'] = np.append(self.labels[split]['accuracy'], 1000)  # Misclassified
+                mismatch_count += 1
+                pass  # Leave decision and accuracy as default
+
+            decision_list.append(decision)
+            accuracy_list.append(accuracy)
+
+        self.labels[split]['decision'] = np.array(decision_list).astype(int)
+        self.labels[split]['accuracy'] = np.array(accuracy_list).astype(int)
 
         print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
+        # get the number of samples in each class
+        unique, counts = np.unique(self.labels[split]['accuracy'], return_counts=True)
+        print(f"{split.upper()} LABELS COUNT:", dict(zip(unique, counts)))
 
         # randomly drop labels to balance the classes
         if split == 'train' and self._balance:
             print(f"Balancing {split.upper()} labels")
-            # get the number of samples in each class
-            unique, counts = np.unique(self.labels[split]['accuracy'], return_counts=True)
             counts = dict(zip(unique, counts))
             print("Counts:", counts)
             # get the class with the maximum number of samples

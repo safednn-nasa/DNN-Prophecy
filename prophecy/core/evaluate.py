@@ -21,6 +21,7 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
         raise ValueError(f"Invalid split: {split}")
 
     labels = []
+    confidence = []
 
     predictions = model.predict(dataset.splits[split].features)
     # check if the model is binary classification
@@ -28,6 +29,7 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
         cnt_0 = 0
         cnt_1 = 1
         for i in range(0, len(predictions)):
+            confidence.append(np.abs(predictions[i][0] - 0.5))
             if predictions[i][0] > 0.5:
                 cnt_1 = cnt_1 + 1
                 labels.append(1)
@@ -40,6 +42,9 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
         # perform multi-class classification
         for i in range(0, len(predictions)):
             labels.append(np.argmax(predictions[i]))
+            # get confidence by getting the difference between the highest and second-highest value
+            confidence.append(np.max(predictions[i]) - np.partition(predictions[i], -2)[-2])
+
         # get labels count
         unique, counts = np.unique(labels, return_counts=True)
         counts_str = f"{split.upper()}: "
@@ -47,7 +52,7 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
             counts_str += f"Label {unique[i]}: {counts[i]}, "
         print(counts_str)
 
-    return np.array(labels)
+    return np.array(labels), confidence
 
 
 def predict_unseen(model: keras.Model, dataset: Dataset, split: str) -> Predictions:

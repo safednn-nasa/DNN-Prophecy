@@ -118,9 +118,9 @@ class Evaluation:
 
     def to_dict(self):
         return {
-            "uncertain": self.uncertain,
             "tot_pred_correct": self.tot_corr,
             "tot_pred_incorrect": self.tot_inc,
+            "uncertain": self.uncertain,
             "tps": self.true_pos,
             "fps": self.false_pos,
             "tns": self.true_neg,

@@ -1,2 +1,2 @@
 unseen_correct,unseen_incorrect,tot_pred_correct,tot_pred_incorrect,uncertain,tps,fps,tns,fns,precision,recall,f1,mcc
-8045,1955,7247,2753,0,1351,1402,6643,604,49.07,69.1,57.39,0.459
+8045,1955,6543,3457,0,1510,1947,6098,445,43.68,77.24,55.8,0.442

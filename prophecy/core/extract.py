@@ -186,12 +186,12 @@ class RuleExtractor:
         :return:
         """
 
-        eval_labels, confidence = get_eval_labels(self.model, self.dataset, split)
+        eval_labels, confidences = get_eval_labels(self.model, self.dataset, split)
 
         # compute outliers by looking at the confidence
         # minimum_confidence = Q1 - 1.5 * IQR
-        q1 = np.percentile(confidence, 25)
-        q3 = np.percentile(confidence, 75)
+        q1 = np.percentile(confidences, 25)
+        q3 = np.percentile(confidences, 75)
         iqr = q3 - q1
         minimum_confidence = q1 - 1.5 * iqr
 
@@ -205,7 +205,7 @@ class RuleExtractor:
         mismatch_count = 0
 
         # Iterate over labels and confidence together using enumerate
-        for idx, (label, confidence) in enumerate(zip(eval_labels, confidence)):
+        for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
             # Default values for decision and accuracy is misclassified
             decision = 1000
             accuracy = 1000
@@ -245,6 +245,17 @@ class RuleExtractor:
             # get the indexes of the samples in the maximum class
             max_class_idx = np.where(self.labels[split]['accuracy'] == max_class)[0]
             min_class_idx = np.where(self.labels[split]['accuracy'] == min_class)[0]
+
+            # get the
+            #if self._confidence:
+                # select the idx of the samples in the maximum class that have the highest confidence
+            #    confidence_max_class = np.array(confidences)[max_class_idx]
+            #    max_class_confidence_idx = zip(max_class_idx, confidence_max_class)
+                # sort the max_class_confidence_idx by confidence in descending order
+            #    max_class_confidence_idx = sorted(max_class_confidence_idx, key=lambda x: x[1], reverse=True)
+                # select the first min_class samples from max_class_confidence_idx
+            #    selected_max_class_idx = [x[0] for x in max_class_confidence_idx[:counts[min_class]]]
+            #else:
             # randomly select from max_class_idx to balance the same number of samples in the minimum class
             selected_max_class_idx = np.random.choice(max_class_idx, size=counts[min_class], replace=False)
             new_ids = np.append(selected_max_class_idx, min_class_idx)

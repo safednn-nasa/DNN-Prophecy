@@ -60,7 +60,7 @@ class Evaluation:
 
     def __call__(self, true_label: Any, pred_label: Any, is_pos: bool) -> str:
         if is_pos:
-            if true_label == pred_label:
+            if true_label != pred_label:
                 self.true_pos += 1
                 return 'tp'
             else:
@@ -68,7 +68,7 @@ class Evaluation:
                 return 'fp'
         else:
             # TODO: explain this condition
-            if true_label != pred_label:
+            if true_label == pred_label:
                 self.true_neg += 1
                 return 'tn'
             else:
@@ -96,11 +96,24 @@ class Evaluation:
         recall_precision = self.precision + self.recall
         return (2 * self.precision * self.recall) / recall_precision if recall_precision > 0 else 0
 
+    @property
+    def mcc(self):
+        covar = self.true_pos * self.true_neg - self.false_pos * self.false_neg
+        denom = np.sqrt((self.true_pos + self.false_pos) * (self.true_pos + self.false_neg) *
+                        (self.true_neg + self.false_pos) * (self.true_neg + self.false_neg))
+
+        if denom == 0:
+            print(f"Warning: MCC denominator is zero. True Pos: {self.true_pos}, False Pos: {self.false_pos}, "
+                  f"True Neg: {self.true_neg}, False Neg: {self.false_neg}")
+
+        return covar / denom if denom > 0 else 0
+
     def performance(self):
         return {
             "precision": round(self.precision * 100.0, 2),
             "recall": round(self.recall * 100.0, 2),
-            "f1": round(self.f1 * 100.0, 2)
+            "f1": round(self.f1 * 100.0, 2),
+            "mcc": round(self.mcc, 3)
         }
 
     def to_dict(self):

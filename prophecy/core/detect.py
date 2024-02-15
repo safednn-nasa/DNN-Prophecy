@@ -135,9 +135,9 @@ class RulesDetector(BaseDetector):
         stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
         # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
-        if corr_cnt == inc_cnt:
-            stats['eval'] = 'uncertain'
-            evaluation.uncertain += 1
+        #if corr_cnt == inc_cnt:
+        #    stats['eval'] = 'uncertain'
+        #    evaluation.uncertain += 1
             # if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
             #    false_neg_cor = false_neg_cor + 1
             #    true_neg_inc = true_neg_inc + 1
@@ -152,7 +152,7 @@ class RulesDetector(BaseDetector):
                               pred_label=self.predictions.labels[index], is_pos=True)
             stats['pred'] = pred
 
-        if inc_cnt > corr_cnt:
+        if inc_cnt >= corr_cnt:
             stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
             pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
@@ -220,22 +220,22 @@ class ClassifierDetector(BaseDetector):
         inc_cnt = len(inc_layer)
         stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
-        if corr_cnt == inc_cnt:
-            stats['eval'] = 'uncertain'
-            evaluation.uncertain += 1
+        #if corr_cnt == inc_cnt:
+        #    stats['eval'] = 'uncertain'
+        #    evaluation.uncertain += 1
 
         if corr_cnt > inc_cnt:
             stats['eval'] = 'correct'
             evaluation.tot_corr += 1
             pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=True)
+                              pred_label=self.predictions.labels[index], is_pos=False)
             stats['pred'] = pred
 
-        if inc_cnt > corr_cnt:
+        if inc_cnt >= corr_cnt:
             stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
             pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=False)
+                              pred_label=self.predictions.labels[index], is_pos=True)
             stats['pred'] = pred
 
         print(stats)

@@ -1,2 +1,2 @@
-unseen_correct,unseen_incorrect,uncertain,tot_pred_correct,tot_pred_incorrect,tps,fps,tns,fns,covered,coverage,precision,recall,f1
-122,24,14,125,7,109,16,4,3,132,90.41,87.2,97.32,91.98
+unseen_correct,unseen_incorrect,tot_pred_correct,tot_pred_incorrect,uncertain,tps,fps,tns,fns,covered,coverage,precision,recall,f1,mcc
+122,24,120,26,0,9,17,105,15,146,100.0,34.62,37.5,36.0,0.228

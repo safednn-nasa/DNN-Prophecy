@@ -117,14 +117,14 @@ class RulesDetector(BaseDetector):
         # parse the ruleset
         ruleset['neurons'] = ruleset['neurons'].apply(literal_eval)
         ruleset['signature'] = ruleset['signature'].apply(literal_eval)
+        self._target_layers = list(ruleset['layer'].unique())
 
         self.correct_rules = ruleset[ruleset['kind'] == 'correct']
         self.incorrect_rules = ruleset[ruleset['kind'] == 'incorrect']
 
     @property
     def target_layers(self):
-        # TODO: to be implemented
-        raise NotImplementedError
+        return self._target_layers
 
     def eval(self, evaluation: Evaluation, index: int, row: Union[pd.Series, np.ndarray]):
         # print(sample.to_list())
@@ -149,14 +149,14 @@ class RulesDetector(BaseDetector):
             stats['eval'] = 'correct'
             evaluation.tot_corr += 1
             pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=True)
+                              pred_label=self.predictions.labels[index], is_pos=False)
             stats['pred'] = pred
 
         if inc_cnt >= corr_cnt:
             stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
             pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=False)
+                              pred_label=self.predictions.labels[index], is_pos=True)
             stats['pred'] = pred
 
         print(stats)

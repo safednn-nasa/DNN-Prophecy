@@ -291,8 +291,17 @@ def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, finge
 
             if len(fingerprints_tr) > 0:
                 tr_suffixes = fingerprints_tr[layer - 1]
+
+                # flatten the suffixes for multidimensional fingerprints
+                if len(tr_suffixes.shape) > 2:
+                    tr_suffixes = np.array([x.flatten() for x in tr_suffixes])
+
             if len(fingerprints_tst) > 0:
                 tst_suffixes = fingerprints_tst[layer - 1]
+
+                # flatten the suffixes for multidimensional fingerprints
+                if len(tst_suffixes.shape) > 2:
+                    tst_suffixes = np.array([x.flatten() for x in tst_suffixes])
 
             tr_recall = 0
             # TODO: default values? should we keep them?

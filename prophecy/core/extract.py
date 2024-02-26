@@ -274,8 +274,10 @@ class RuleExtractor:
         if split not in self.fingerprints:
             raise ValueError(f"Invalid split {split}")
 
-        self.fingerprints[split]['input'] = {'activations': None,
-                                             'features': self.dataset.splits[split].features.to_numpy()}
+        self.fingerprints[split]['input'] = {'activations': None, 'features': self.dataset.splits[split].features}
+
+        if self.dataset.format == 'csv':
+            self.fingerprints[split]['input']['features'] = self.fingerprints[split]['input']['features'].to_numpy()
 
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")

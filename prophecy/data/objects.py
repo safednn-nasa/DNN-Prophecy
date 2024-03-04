@@ -108,12 +108,22 @@ class Evaluation:
 
         return covar / denom if denom > 0 else 0
 
+    @property
+    def false_positive_rate(self):
+        return self.false_pos / (self.false_pos + self.true_neg)
+
+    @property
+    def true_positive_rate(self):
+        return self.true_pos / (self.true_pos + self.false_neg)
+
     def performance(self):
         return {
+            "tpr": round(self.true_positive_rate * 100.0, 2),
+            "fpr": round(self.false_positive_rate * 100.0, 2),
             "precision": round(self.precision * 100.0, 2),
             "recall": round(self.recall * 100.0, 2),
             "f1": round(self.f1 * 100.0, 2),
-            "mcc": round(self.mcc, 3)
+            "mcc": round(self.mcc, 3),
         }
 
     def to_dict(self):

@@ -135,15 +135,9 @@ class RulesDetector(BaseDetector):
         stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
         # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
-        #if corr_cnt == inc_cnt:
+        if corr_cnt == inc_cnt:
         #    stats['eval'] = 'uncertain'
-        #    evaluation.uncertain += 1
-            # if self.dataset.splits['unseen'].labels[inp_idx] == labels[inp_idx]:
-            #    false_neg_cor = false_neg_cor + 1
-            #    true_neg_inc = true_neg_inc + 1
-            # else:
-            #    false_neg_inc = false_neg_inc + 1
-            #    true_neg_cor = true_neg_cor + 1
+            evaluation.uncertain += 1
         # TODO: the evaluation should be done with sklearn
         if corr_cnt > inc_cnt:
             stats['eval'] = 'correct'
@@ -220,9 +214,9 @@ class ClassifierDetector(BaseDetector):
         inc_cnt = len(inc_layer)
         stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
-        #if corr_cnt == inc_cnt:
+        if corr_cnt == inc_cnt:
         #    stats['eval'] = 'uncertain'
-        #    evaluation.uncertain += 1
+            evaluation.uncertain += 1
 
         if corr_cnt > inc_cnt:
             stats['eval'] = 'correct'

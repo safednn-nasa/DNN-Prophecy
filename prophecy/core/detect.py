@@ -12,17 +12,17 @@ from tqdm import tqdm
 from pathlib import Path
 from sklearn.tree import DecisionTreeClassifier
 
-from trustbench.core.dataset import Dataset
 from prophecy.data.objects import Predictions, Evaluation
 from prophecy.core.evaluate import predict_unseen
 from prophecy.core.helpers import check_pattern
 
 
 class BaseDetector:
-    def __init__(self, name: str, model: keras.Model, dataset: Dataset):
+    def __init__(self, name: str, model: keras.Model, features: pd.DataFrame, labels: np.ndarray):
         self.name = name
         self.model = model
-        self.dataset = dataset
+        self.features = features
+        self.labels = labels
         self._model_rep = None
         self._predictions = None
         self._target_layers = []
@@ -35,11 +35,11 @@ class BaseDetector:
     def __call__(self, **kwargs) -> dict:
         evaluation = Evaluation()
 
-        if isinstance(self.dataset.splits['unseen'].features, pd.DataFrame):
-            for inp_idx, sample in tqdm(self.dataset.splits['unseen'].features.iterrows()):
+        if isinstance(self.features, pd.DataFrame):
+            for inp_idx, sample in tqdm(self.features.iterrows()):
                 self.eval(evaluation, inp_idx, sample)
         else:
-            for inp_idx, sample in tqdm(enumerate(self.dataset.splits['unseen'].features)):
+            for inp_idx, sample in tqdm(enumerate(self.features)):
                 self.eval(evaluation, inp_idx, sample)
 
         results = {
@@ -63,7 +63,7 @@ class BaseDetector:
     @property
     def predictions(self) -> Predictions:
         if self._predictions is None:
-            self._predictions = predict_unseen(self.model, self.dataset, 'unseen')
+            self._predictions = predict_unseen(self.model, self.features, self.labels)
 
         return self._predictions
 
@@ -73,9 +73,9 @@ class BaseDetector:
             self._model_rep = {}
             # Get the model fingerprints
 
-            total_samples = self.dataset.splits['unseen'].features.shape[0]
+            total_samples = self.features.shape[0]
 
-            if self.dataset.format == 'npy' and total_samples > 5000:
+            if isinstance(self.features, np.ndarray) and total_samples > 5000:
                 self.get_batched_model_rep(total_samples)
             else:
                 for layer in self.model.layers:
@@ -83,7 +83,7 @@ class BaseDetector:
                         continue
 
                     func_dense = keras.backend.function(self.model.input, [layer.output])
-                    inp_tensor = keras.backend.constant(self.dataset.splits['unseen'].features)
+                    inp_tensor = keras.backend.constant(self.features)
                     op = func_dense(inp_tensor)
                     self._model_rep[layer.name] = (func_dense, inp_tensor, op)
 
@@ -100,7 +100,7 @@ class BaseDetector:
 
             for start in tqdm(range(0, total_samples, batch_size)):
                 end = min(start + batch_size, total_samples)
-                batch_features = self.dataset.splits['unseen'].features[start:end]
+                batch_features = self.features[start:end]
                 inp_tensor = keras.backend.constant(batch_features)
                 layer_inputs.append(inp_tensor)
                 op = func_dense(inp_tensor)
@@ -142,14 +142,14 @@ class RulesDetector(BaseDetector):
         if corr_cnt > inc_cnt:
             stats['eval'] = 'correct'
             evaluation.tot_corr += 1
-            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+            pred = evaluation(true_label=self.labels[index],
                               pred_label=self.predictions.labels[index], is_pos=False)
             stats['pred'] = pred
 
         if inc_cnt >= corr_cnt:
             stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
-            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+            pred = evaluation(true_label=self.labels[index],
                               pred_label=self.predictions.labels[index], is_pos=True)
             stats['pred'] = pred
 
@@ -162,7 +162,7 @@ class RulesDetector(BaseDetector):
 
         return {
             "covered": true_covered,
-            "coverage": round((true_covered / len(self.dataset.splits['unseen'].features)) * 100.0, 2)
+            "coverage": round((true_covered / len(self.features)) * 100.0, 2)
         }
 
     def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[list, bool, bool]:
@@ -221,14 +221,14 @@ class ClassifierDetector(BaseDetector):
         if corr_cnt > inc_cnt:
             stats['eval'] = 'correct'
             evaluation.tot_corr += 1
-            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+            pred = evaluation(true_label=self.labels[index],
                               pred_label=self.predictions.labels[index], is_pos=False)
             stats['pred'] = pred
 
         if inc_cnt >= corr_cnt:
             stats['eval'] = 'incorrect'
             evaluation.tot_inc += 1
-            pred = evaluation(true_label=self.dataset.splits['unseen'].labels[index],
+            pred = evaluation(true_label=self.labels[index],
                               pred_label=self.predictions.labels[index], is_pos=True)
             stats['pred'] = pred
 

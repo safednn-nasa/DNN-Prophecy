@@ -1,18 +1,11 @@
-import json
 from collections import Counter
-from typing import Any
 
 import numpy as np
 
 from sklearn.tree import DecisionTreeClassifier
 from tensorflow import keras
 from pathlib import Path
-from prophecy.utils.paths import models_path, settings_path
-from prophecy.data.objects import Settings
-
-
-RULES = ['decision', 'accuracy']
-FINGERPRINTS = ['features', 'activations']
+from prophecy.utils.paths import models_path
 
 
 def get_model(model_path: Path) -> keras.Model:
@@ -29,30 +22,6 @@ def lookup_models():
         raise ValueError(f"No models found in {models_path} directory")
 
     return models
-
-
-def lookup_settings():
-    res = {file.stem: file for file in settings_path.iterdir() if file.suffix == '.json'}
-
-    if len(res) == 0:
-        raise ValueError(f"No settings found in {settings_path} directory")
-
-    return res
-
-
-def load_settings(path: Path) -> Settings:
-    with open(path, 'r') as f:
-        settings_dict = json.load(f)
-
-    new_dict = {}
-    # parse settings dict by looking at fields and values
-    for k, v in settings_dict.items():
-        if k == 'rules' and v in RULES:
-            new_dict[k] = v
-        if k == 'fingerprint' and v in FINGERPRINTS:
-            new_dict[k] = v
-
-    return Settings(**new_dict)
 
 
 def sanity_check(ruleset: list, clf: DecisionTreeClassifier, by_class: bool = False) -> bool:

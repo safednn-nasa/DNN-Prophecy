@@ -1,29 +1,23 @@
 import keras
 import numpy as np
 
-from typing import Tuple
-
-from trustbench.core.dataset import Dataset, Split
+import pandas as pd
 from prophecy.data.objects import Predictions
 
 
-def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
+def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str):
     """
         Evaluate the model on the given features and labels
     :param model: The model to evaluate
-    :param dataset: The dataset to evaluate on
-    :param split: The split to evaluate on
+    :param features: The features to evaluate on
+    :param split_name: The split name
     :return: labels
     """
-
-    # check split is valid
-    if split not in ['train', 'val']:
-        raise ValueError(f"Invalid split: {split}")
 
     labels = []
     confidence = []
 
-    predictions = model.predict(dataset.splits[split].features)
+    predictions = model.predict(features)
     # check if the model is binary classification
     if len(predictions[0]) == 1:
         cnt_0 = 0
@@ -37,7 +31,7 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
                 cnt_0 = cnt_0 + 1
                 labels.append(0)
 
-        print(f"{split.upper()}: Label 0:", cnt_0, "Label 1:", cnt_1)
+        print(f"{split_name.upper()}: Label 0:", cnt_0, "Label 1:", cnt_1)
     else:
         # perform multi-class classification
         for i in range(0, len(predictions)):
@@ -47,7 +41,8 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
 
         # get labels count
         unique, counts = np.unique(labels, return_counts=True)
-        counts_str = f"{split.upper()}: "
+        counts_str = f"{split_name.upper()}: "
+
         for i in range(0, len(unique)):
             counts_str += f"Label {unique[i]}: {counts[i]}, "
         print(counts_str)
@@ -55,8 +50,8 @@ def get_eval_labels(model: keras.Model, dataset: Dataset, split: str):
     return np.array(labels), confidence
 
 
-def predict_unseen(model: keras.Model, dataset: Dataset, split: str) -> Predictions:
-    unseen_ops = model.predict(dataset.splits[split].features)
+def predict_unseen(model: keras.Model, features: pd.DataFrame, labels: np.ndarray) -> Predictions:
+    unseen_ops = model.predict(features)
     predictions = Predictions()
 
     if len(unseen_ops[0]) == 1:
@@ -69,14 +64,14 @@ def predict_unseen(model: keras.Model, dataset: Dataset, split: str) -> Predicti
                 cnt_1 += + 1
                 predictions.labels.append(1)
 
-                if dataset.splits[split].labels[i] == 1:
+                if labels[i] == 1:
                     predictions.correct += 1
                 else:
                     predictions.incorrect += 1
             else:
                 cnt_0 += 1
                 predictions.labels.append(0)
-                if dataset.splits[split].labels[i] == 0:
+                if labels[i] == 0:
                     predictions.correct += 1
                 else:
                     predictions.incorrect += 1
@@ -89,7 +84,7 @@ def predict_unseen(model: keras.Model, dataset: Dataset, split: str) -> Predicti
             prediction = np.argmax(unseen_ops[i])
             predictions.labels.append(prediction)
 
-            if dataset.splits[split].labels[i] == prediction:
+            if labels[i] == prediction:
                 predictions.correct += 1
             else:
                 predictions.incorrect += 1

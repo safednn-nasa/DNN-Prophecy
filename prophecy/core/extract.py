@@ -10,12 +10,8 @@ from keras import backend
 from keras.src.engine.keras_tensor import KerasTensor
 
 from prophecy.core.learn import learn_rules
-from trustbench.core.dataset import Dataset
-from prophecy.data.objects import Settings
-from prophecy.utils.misc import sanity_check
 from prophecy.core.evaluate import get_eval_labels
-from prophecy.core.helpers import (get_all_invariants_val, get_all_invariants, impure_rules,
-                                   describe_invariants_all_labels)
+from prophecy.core.helpers import (get_all_invariants_val, impure_rules, describe_invariants_all_labels)
 
 
 def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
@@ -56,15 +52,15 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
         return (outputs[0] > 0.0).astype('int'), outputs[0]
 
 
-class RuleExtractor:
-    def __init__(self, model: keras.Model, dataset: Dataset, settings: Settings, only_dense: bool = False,
-                 skip_rules: bool = False, include_activation: bool = False, balance: bool = False,
-                 confidence: bool = False, **kwargs):
+class Extractor:
+    def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
+                 val_features: pd.DataFrame, val_labels: np.ndarray, only_dense: bool = False, skip_rules: bool = False,
+                 balance: bool = False, include_activation: bool = False, confidence: bool = False, **kwargs):
         self.model = model
-        self.dataset = dataset
-        self.settings = settings
-        self.labels = {'train': {}, 'val': {}}
-        self.fingerprints = {'train': {}, 'val': {}}
+        self.features = {'train': train_features, 'val': val_features}
+        self.labels = {'train': train_labels, 'val': val_labels}
+        self.clf_labels = {'train': None, 'val': None}
+        self.fingerprints = {'train': None, 'val': None}
         self._skip_rules = skip_rules
         self._balance = balance
         self._confidence = confidence
@@ -91,29 +87,29 @@ class RuleExtractor:
         print(f"Layers to be considered for fingerprinting: {[layer.name for layer in self.layers]}")
 
     @property
-    def train_labels(self):
-        if len(self.labels['train']) == 0:
+    def clf_train_labels(self):
+        if self.clf_labels['train'] is None:
             self.get_labels('train')
 
-        return self.labels['train']
+        return self.clf_labels['train']
 
     @property
-    def val_labels(self):
-        if len(self.labels['val']) == 0:
+    def clf_val_labels(self):
+        if self.clf_labels['val'] is None:
             self.get_labels('val')
 
-        return self.labels['val']
+        return self.clf_labels['val']
 
     @property
     def train_fingerprints(self):
-        if len(self.fingerprints['train']) == 0:
+        if self.fingerprints['train'] is None:
             self.get_model_fingerprints('train')
 
         return self.fingerprints['train']
 
     @property
     def val_fingerprints(self):
-        if len(self.fingerprints['val']) == 0:
+        if self.fingerprints['val'] is None:
             self.get_model_fingerprints('val')
 
         return self.fingerprints['val']
@@ -130,21 +126,16 @@ class RuleExtractor:
                 3. Rules for incorrect behavior: P(F(x)) is true iff F(x) != L_ideal.
         :return:
         """
-        print(f"{self.settings.rules.upper()} RULES:")
 
         if self._balance or self._confidence:
             self.get_labels('train')
 
-        print(f"Invoking Dec-tree classifier based on {self.settings.fingerprint.upper()}.")
+        print(f"Invoking Dec-tree classifier based on FEATURES")
 
-        # TODO: fix this
-        if self.settings.fingerprint == 'features':
-            fingerprints_tr = {_l: _f[self.settings.fingerprint] for _l, _f in self.train_fingerprints.items()}
-        else:
-            fingerprints_tr = {_l: _f[self.settings.fingerprint] for _l, _f in self.train_fingerprints.items() if _l != 'input'}
+        fingerprints_tr = {_l: _f for _l, _f in self.train_fingerprints.items()}
 
-        learners = learn_rules(labels=self.train_labels[self.settings.rules], fingerprints=fingerprints_tr,
-                               activations=self.settings.fingerprint == 'activations', save_path=path)
+        learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
+                               activations=False, save_path=path)
 
         if self._skip_rules:
             return {}
@@ -153,29 +144,18 @@ class RuleExtractor:
 
     def _extract(self, learners: dict, fingerprints_tr: list):
         results = {}
-        is_mis = True if self.settings.rules == 'accuracy' else False
-
-        if self.settings.fingerprint == 'features':
-            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items()]
-        else:
-            fingerprints_tst = [_f[self.settings.fingerprint] for _l, _f in self.val_fingerprints.items() if _l != 'input']
 
         for i, (layer, learner) in enumerate(learners.items(), 1):
             # TODO: get the tree and for every input just call predict and get the output
-            print(f"\nRULES FROM LAYER {layer.upper()} IN TERMS OF {self.settings.fingerprint.upper()}\n")
-            invariants = get_all_invariants_val(learner) if self.settings.fingerprint == 'features' else \
-                get_all_invariants(learner)
+            print(f"\nRULES FROM LAYER {layer.upper()} IN TERMS OF FEATURES\n")
+            invariants = get_all_invariants_val(learner)
             print(f"InV {i-1}")
             impure_rules(invariants)
 
-            desc = describe_invariants_all_labels(invariants, i, fingerprints_tr, fingerprints_tst,
-                                                  self.train_labels[self.settings.rules],
-                                                  self.val_labels[self.settings.rules], ALL=True, MIS=is_mis)
+            desc = describe_invariants_all_labels(invariants, i, fingerprints_tr, list(self.val_fingerprints.values()),
+                                                  self.clf_train_labels,
+                                                  self.clf_val_labels, ALL=True, MIS=True)
             results[layer] = desc
-
-            #if not sanity_check(desc, learner):
-            #    raise ValueError(f"Sanity check failed for layer {layer}. "
-            #                     f"#rules: {len(desc)} | #leaves: {learner.get_n_leaves()}")
 
         return results
 
@@ -186,7 +166,7 @@ class RuleExtractor:
         :return:
         """
 
-        eval_labels, confidences = get_eval_labels(self.model, self.dataset, split)
+        eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
 
         # compute outliers by looking at the confidence
         # minimum_confidence = Q1 - 1.5 * IQR
@@ -198,7 +178,6 @@ class RuleExtractor:
         print(f"{split.upper()} LABELS:", eval_labels.shape)
 
         # Initialize empty lists for decision and accuracy
-        decision_list = []
         accuracy_list = []
 
         match_count = 0
@@ -207,30 +186,26 @@ class RuleExtractor:
         # Iterate over labels and confidence together using enumerate
         for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
             # Default values for decision and accuracy is misclassified
-            decision = 1000
             accuracy = 1000
 
             # Check if confidence is within the specified range
             if self._confidence and confidence < minimum_confidence:
                 mismatch_count += 1
                 pass  # Leave decision and accuracy as default
-            elif label == self.dataset.splits[split].labels[idx]:
+            elif label == self.labels[split][idx]:
                 match_count += 1
-                decision = label
                 accuracy = 0
             else:
                 mismatch_count += 1
                 pass  # Leave decision and accuracy as default
 
-            decision_list.append(decision)
             accuracy_list.append(accuracy)
 
-        self.labels[split]['decision'] = np.array(decision_list).astype(int)
-        self.labels[split]['accuracy'] = np.array(accuracy_list).astype(int)
+        self.clf_labels[split] = np.array(accuracy_list).astype(int)
 
         print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
         # get the number of samples in each class
-        unique, counts = np.unique(self.labels[split]['accuracy'], return_counts=True)
+        unique, counts = np.unique(self.clf_labels[split], return_counts=True)
         print(f"{split.upper()} LABELS COUNT:", dict(zip(unique, counts)))
 
         # randomly drop labels to balance the classes
@@ -243,26 +218,14 @@ class RuleExtractor:
             # get the class with the minimum number of samples
             min_class = min(counts, key=counts.get)
             # get the indexes of the samples in the maximum class
-            max_class_idx = np.where(self.labels[split]['accuracy'] == max_class)[0]
-            min_class_idx = np.where(self.labels[split]['accuracy'] == min_class)[0]
+            max_class_idx = np.where(self.clf_labels[split] == max_class)[0]
+            min_class_idx = np.where(self.clf_labels[split] == min_class)[0]
 
-            # get the
-            #if self._confidence:
-                # select the idx of the samples in the maximum class that have the highest confidence
-            #    confidence_max_class = np.array(confidences)[max_class_idx]
-            #    max_class_confidence_idx = zip(max_class_idx, confidence_max_class)
-                # sort the max_class_confidence_idx by confidence in descending order
-            #    max_class_confidence_idx = sorted(max_class_confidence_idx, key=lambda x: x[1], reverse=True)
-                # select the first min_class samples from max_class_confidence_idx
-            #    selected_max_class_idx = [x[0] for x in max_class_confidence_idx[:counts[min_class]]]
-            #else:
-            # randomly select from max_class_idx to balance the same number of samples in the minimum class
             selected_max_class_idx = np.random.choice(max_class_idx, size=counts[min_class], replace=False)
             new_ids = np.append(selected_max_class_idx, min_class_idx)
             print("Length of new_ids:", len(new_ids))
-            self.labels[split]['decision'] = self.labels[split]['decision'][new_ids]
-            self.labels[split]['accuracy'] = self.labels[split]['accuracy'][new_ids]
-            self.dataset.splits[split].features = self.dataset.splits[split].features[new_ids]
+            self.clf_labels[split] = self.clf_labels[split][new_ids]
+            self.features[split] = self.features[split][new_ids]
 
     def get_model_fingerprints(self, split: str):
         """
@@ -274,13 +237,13 @@ class RuleExtractor:
         if split not in self.fingerprints:
             raise ValueError(f"Invalid split {split}")
 
-        self.fingerprints[split]['input'] = {'activations': None, 'features': self.dataset.splits[split].features}
-
-        if self.dataset.format == 'csv':
-            self.fingerprints[split]['input']['features'] = self.fingerprints[split]['input']['features'].to_numpy()
+        if isinstance(self.features[split], pd.DataFrame):
+            self.fingerprints[split] = {'input': self.features[split].to_numpy()}
+        else:
+            self.fingerprints[split] = {'input': self.features[split]}
 
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")
-            activations, features = get_layer_fingerprint(self.model.input, layer, self.dataset.splits[split].features)
-            self.fingerprints[split][layer.name] = {'activations': activations, 'features': features}
+            activations, features = get_layer_fingerprint(self.model.input, layer, self.features[split])
+            self.fingerprints[split][layer.name] = features
             print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

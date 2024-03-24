@@ -1,3 +1,4 @@
+import sys
 from abc import abstractmethod
 
 import keras
@@ -10,10 +11,7 @@ from ast import literal_eval
 from typing import Tuple, Union
 from tqdm import tqdm
 from pathlib import Path
-from sklearn.tree import DecisionTreeClassifier
 
-from prophecy.data.objects import Predictions, Evaluation
-from prophecy.core.evaluate import predict_unseen
 from prophecy.core.helpers import check_pattern
 
 
@@ -26,46 +24,30 @@ class BaseDetector:
         self._model_rep = None
         self._predictions = None
         self._target_layers = []
+        self.stats = []
 
     @property
     @abstractmethod
     def target_layers(self):
         pass
 
-    def __call__(self, **kwargs) -> dict:
-        evaluation = Evaluation()
+    def __call__(self, **kwargs) -> list:
+        results = []
 
         if isinstance(self.features, pd.DataFrame):
-            for inp_idx, sample in tqdm(self.features.iterrows()):
-                self.eval(evaluation, inp_idx, sample)
+            iterator = self.features.iterrows()
         else:
-            for inp_idx, sample in tqdm(enumerate(self.features)):
-                self.eval(evaluation, inp_idx, sample)
+            iterator = enumerate(self.features)
 
-        results = {
-            "unseen_correct": self.predictions.correct,
-            "unseen_incorrect": self.predictions.incorrect
-        }
-        results.update(evaluation.to_dict())
-        results.update(self.stats(evaluation))
-        results.update(evaluation.performance())
+        for inp_idx, sample in tqdm(iterator, file=sys.stdout):
+            outcome = self.eval(inp_idx, sample)
+            results.append({'idx': inp_idx, 'outcome': outcome})
 
         return results
 
     @abstractmethod
-    def eval(self, evaluation: Evaluation, index: int, row: Union[pd.Series, np.ndarray]):
+    def eval(self, index: int, row: Union[pd.Series, np.ndarray]):
         pass
-
-    @abstractmethod
-    def stats(self, evaluation: Evaluation) -> dict:
-        pass
-
-    @property
-    def predictions(self) -> Predictions:
-        if self._predictions is None:
-            self._predictions = predict_unseen(self.model, self.features, self.labels)
-
-        return self._predictions
 
     @property
     def model_rep(self):
@@ -126,44 +108,25 @@ class RulesDetector(BaseDetector):
     def target_layers(self):
         return self._target_layers
 
-    def eval(self, evaluation: Evaluation, index: int, row: Union[pd.Series, np.ndarray]):
+    def eval(self, index: int, row: Union[pd.Series, np.ndarray]):
         # print(sample.to_list())
         corr_layer, corr_cover, found = self.eval_rules(index, self.correct_rules)
         inc_layer, inc_cover, found = self.eval_rules(index, self.incorrect_rules)
         corr_cnt = len(corr_layer)
         inc_cnt = len(inc_layer)
-        stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
+        stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_cover': corr_cover, 'inc_cover': inc_cover,
+                 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
-        # print("INPUT:", inp_indx , "CORR CNT:", corr_cnt, "INCORR CNT:", inc_cnt)
         if corr_cnt == inc_cnt:
-        #    stats['eval'] = 'uncertain'
-            evaluation.uncertain += 1
-        # TODO: the evaluation should be done with sklearn
-        if corr_cnt > inc_cnt:
+            stats['eval'] = 'uncertain'
+        elif corr_cnt > inc_cnt:
             stats['eval'] = 'correct'
-            evaluation.tot_corr += 1
-            pred = evaluation(true_label=self.labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=False)
-            stats['pred'] = pred
-
-        if inc_cnt >= corr_cnt:
+        elif inc_cnt > corr_cnt:
             stats['eval'] = 'incorrect'
-            evaluation.tot_inc += 1
-            pred = evaluation(true_label=self.labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=True)
-            stats['pred'] = pred
 
-        print(stats)
-        # save whether the sample was covered or not
-        evaluation.outputs.append(1) if corr_cover or inc_cover else evaluation.outputs.append(0)
+        self.stats.append(stats)
 
-    def stats(self, evaluation: Evaluation) -> dict:
-        true_covered = sum(evaluation.outputs) - evaluation.uncertain
-
-        return {
-            "covered": true_covered,
-            "coverage": round((true_covered / len(self.features)) * 100.0, 2)
-        }
+        return stats['eval']
 
     def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[list, bool, bool]:
         layers = []
@@ -208,31 +171,24 @@ class ClassifierDetector(BaseDetector):
 
         return self._classifiers
 
-    def eval(self, evaluation: Evaluation, index: int, row: pd.Series):
+    def eval(self, index: int, row: pd.Series):
         corr_layer, inc_layer = self.eval_classifiers(index, row)
         corr_cnt = len(corr_layer)
         inc_cnt = len(inc_layer)
         stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
 
         if corr_cnt == inc_cnt:
-        #    stats['eval'] = 'uncertain'
-            evaluation.uncertain += 1
+            stats['eval'] = 'uncertain'
 
-        if corr_cnt > inc_cnt:
+        elif corr_cnt > inc_cnt:
             stats['eval'] = 'correct'
-            evaluation.tot_corr += 1
-            pred = evaluation(true_label=self.labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=False)
-            stats['pred'] = pred
 
-        if inc_cnt >= corr_cnt:
+        elif inc_cnt > corr_cnt:
             stats['eval'] = 'incorrect'
-            evaluation.tot_inc += 1
-            pred = evaluation(true_label=self.labels[index],
-                              pred_label=self.predictions.labels[index], is_pos=True)
-            stats['pred'] = pred
 
-        print(stats)
+        self.stats.append(stats)
+
+        return stats['eval']
 
     def eval_classifiers(self, inp_idx: int, features: Union[pd.Series, np.ndarray]) -> Tuple[list, list]:
         corr_layer = []
@@ -269,6 +225,3 @@ class ClassifierDetector(BaseDetector):
             corr_layer.append(layer) if label == 0 else inc_layer.append(layer)
 
         return corr_layer, inc_layer
-
-    def stats(self, evaluation: Evaluation) -> dict:
-        return {}

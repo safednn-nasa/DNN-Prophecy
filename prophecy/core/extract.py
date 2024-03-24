@@ -143,19 +143,19 @@ class Extractor:
         return self._extract(learners, list(fingerprints_tr.values()))
 
     def _extract(self, learners: dict, fingerprints_tr: list):
-        results = {}
+        results = []
 
-        for i, (layer, learner) in enumerate(learners.items(), 1):
+        for layer_count, (layer_name, learner) in enumerate(learners.items(), 1):
             # TODO: get the tree and for every input just call predict and get the output
-            print(f"\nRULES FROM LAYER {layer.upper()} IN TERMS OF FEATURES\n")
+            print(f"\nRULES FROM LAYER {layer_name.upper()} IN TERMS OF FEATURES\n")
             invariants = get_all_invariants_val(learner)
-            print(f"InV {i-1}")
+            print(f"InV {layer_count-1}")
             impure_rules(invariants)
 
-            desc = describe_invariants_all_labels(invariants, i, fingerprints_tr, list(self.val_fingerprints.values()),
-                                                  self.clf_train_labels,
+            desc = describe_invariants_all_labels(invariants, layer_count, layer_name, fingerprints_tr,
+                                                  list(self.val_fingerprints.values()), self.clf_train_labels,
                                                   self.clf_val_labels, ALL=True, MIS=True)
-            results[layer] = desc
+            results.extend(desc)
 
         return results
 

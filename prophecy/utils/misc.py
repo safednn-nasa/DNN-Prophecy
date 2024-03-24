@@ -5,23 +5,15 @@ import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 from tensorflow import keras
 from pathlib import Path
-from prophecy.utils.paths import models_path
 
 
-def get_model(model_path: Path) -> keras.Model:
+def get_model(model_path: str) -> keras.Model:
+    model_path = Path(model_path)
+
     if not model_path.exists():
         raise ValueError(f"{model_path} does not exist")
 
     return keras.models.load_model(str(model_path))
-
-
-def lookup_models():
-    models = {file.stem: file for file in models_path.iterdir() if file.suffix == '.h5'}
-
-    if len(models) == 0:
-        raise ValueError(f"No models found in {models_path} directory")
-
-    return models
 
 
 def sanity_check(ruleset: list, clf: DecisionTreeClassifier, by_class: bool = False) -> bool:

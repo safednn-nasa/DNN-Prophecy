@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 import numpy as np
 import operator
@@ -51,7 +52,7 @@ def get_all_invariants(estimator):
     paths = get_all_paths_rec(0)
     print("Obtained all paths")
     invariants = {}
-    for p in tqdm(paths):
+    for p in tqdm(paths, desc="Processing paths for training set"):
         neuron_ids, neuron_sig, cl, nsamples = p
         if cl not in invariants:
             invariants[cl] = []
@@ -112,7 +113,7 @@ def get_all_invariants_val(estimator):
     paths = get_all_paths_rec(0)
     print("Obtained all paths")
     invariants = {}
-    for p in tqdm(paths):
+    for p in tqdm(paths, desc="Processing paths for validation set", file=sys.stdout):
         neuron_ids, neuron_sig, cl, nsamples = p
         if cl not in invariants:
             invariants[cl] = []
@@ -249,8 +250,9 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
     return Performance(coverage, prec, recall, f1)
 
 
-def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, fingerprints_tst, labels, labels_test,
-                                   ALL: bool = False, Threshold: int = 60, MIS: bool = True, Top: bool = False) -> list:
+def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fingerprints_tr, fingerprints_tst, labels,
+                                   labels_test, ALL: bool = False, Threshold: int = 60, MIS: bool = True,
+                                   Top: bool = False) -> list:
     if Top is True:
         print("PRINTING RULES WITH HIGHEST RECALL FOR CORRECT CLASSIFICATION TO EVERY LABEL.")
     elif ALL is True:
@@ -290,14 +292,14 @@ def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, finge
             tst_suffixes = []
 
             if len(fingerprints_tr) > 0:
-                tr_suffixes = fingerprints_tr[layer - 1]
+                tr_suffixes = fingerprints_tr[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints
                 if len(tr_suffixes.shape) > 2:
                     tr_suffixes = np.array([x.flatten() for x in tr_suffixes])
 
             if len(fingerprints_tst) > 0:
-                tst_suffixes = fingerprints_tst[layer - 1]
+                tst_suffixes = fingerprints_tst[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints
                 if len(tst_suffixes.shape) > 2:
@@ -308,7 +310,8 @@ def describe_invariants_all_labels(all_invariants, layer, fingerprints_tr, finge
             tr_prec = 100
             tst_recall = 0
             tst_prec = 0
-            rule = {"layer": layer, "neurons": neurons, "signature": signature, "support": support, "label": cl}
+            rule = {"layer": layer_name, "layer_count": layer_count, "neurons": neurons, "signature": signature,
+                    "support": support, "label": cl}
 
             if len(tr_suffixes) > 0:
                 train_performance = calc_prec_recall_f1(tr_suffixes, labels, neurons, signature, cl, is_val, supp=support)

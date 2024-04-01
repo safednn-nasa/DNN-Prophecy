@@ -1,6 +1,7 @@
 from typing import Union
 
 import keras
+import sys
 import pandas as pd
 import numpy as np
 
@@ -33,7 +34,7 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
         activations_list = []
         values_list = []
 
-        for i in tqdm(range(num_batches), desc=f"Processing {layer.name}"):
+        for i in tqdm(range(num_batches), desc=f"Processing {layer.name}", file=sys.stdout):
             start_idx = i * batch_size
             end_idx = (i + 1) * batch_size
 

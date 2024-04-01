@@ -5,17 +5,15 @@ import pandas as pd
 
 from pathlib import Path
 
-from prophecy.utils.misc import get_model
+from prophecy.utils.misc import get_model, read_split
 from prophecy.core.extract import Extractor
 from prophecy.core.detect import RulesDetector, ClassifierDetector
 from prophecy.utils.paths import results_path
 
 
 def run_analyze_command():
-    train_features = pd.read_csv(args.train_features)
-    train_labels = pd.read_csv(args.train_labels).to_numpy()
-    val_features = pd.read_csv(args.val_features)
-    val_labels = pd.read_csv(args.val_labels).to_numpy()
+    train_features, train_labels = read_split(args.train_features, args.train_labels)
+    val_features, val_labels = read_split(args.val_features, args.val_labels)
 
     rule_extractor = Extractor(model=model, train_features=train_features, train_labels=train_labels,
                                val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules,
@@ -27,8 +25,7 @@ def run_analyze_command():
 
 
 def run_classify_command():
-    test_features = pd.read_csv(args.test_features)
-    test_labels = pd.read_csv(args.test_labels).to_numpy()
+    test_features, test_labels = read_split(args.test_features, args.test_labels)
 
     file_name = 'results_clf_pure.csv' if args.only_pure else 'results_clf.csv'
     output_path = predictions_path / file_name
@@ -41,8 +38,7 @@ def run_classify_command():
 
 
 def run_detect_command():
-    test_features = pd.read_csv(args.test_features)
-    test_labels = np.loadtxt(args.test_labels, dtype=int)
+    test_features, test_labels = read_split(args.test_features, args.test_labels)
 
     output_path = predictions_path / 'results.csv'
     ruleset = pd.read_csv(rules_path)

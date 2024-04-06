@@ -80,7 +80,7 @@ class BaseDetector:
             layer_outputs = []
             func_dense = keras.backend.function(self.model.input, [layer.output])
 
-            for start in tqdm(range(0, total_samples, batch_size)):
+            for start in tqdm(range(0, total_samples, batch_size), desc=f"Processing {layer.name}", file=sys.stdout):
                 end = min(start + batch_size, total_samples)
                 batch_features = self.features[start:end]
                 inp_tensor = keras.backend.constant(batch_features)

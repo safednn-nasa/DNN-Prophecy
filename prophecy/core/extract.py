@@ -84,16 +84,15 @@ class Extractor:
             self.layers = [layer for layer in model.layers if 'dense' in layer.name]
         elif include_activation:
             print("Only activation layers of dense layers are considered for fingerprinting")
-            include_next = False
+            # include_next = False
 
-            for layer in model.layers:
-                self.layers.append(layer)
-
-                if layer.name.startswith('activation'):
-                    include_next = True
-                elif layer.name.startswith('dense') and include_next:
-                    include_next = False
-                    self.layers.append(layer)
+            #for layer in model.layers:
+            #    if layer.name.startswith('activation'):
+            #        include_next = True
+            #    elif layer.name.startswith('dense') and include_next:
+            #        include_next = False
+            #        self.layers.append(layer)
+            self.layers = [layer for layer in model.layers if 'activation' in layer.name]
         else:
             self.layers = model.layers
 

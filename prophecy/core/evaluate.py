@@ -17,7 +17,7 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
     labels = []
     confidence = []
 
-    predictions = model.predict(features)
+    predictions = model.predict(features, batch_size=128, workers=-1, use_multiprocessing=True, verbose=1)
     # check if the model is binary classification
     if len(predictions[0]) == 1:
         cnt_0 = 0

@@ -1,8 +1,10 @@
 import keras
 import numpy as np
+import sys
 
 import pandas as pd
 from prophecy.data.objects import Predictions
+from tqdm import tqdm
 
 
 def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str):
@@ -22,7 +24,7 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
     if len(predictions[0]) == 1:
         cnt_0 = 0
         cnt_1 = 1
-        for i in range(0, len(predictions)):
+        for i in tqdm(range(0, len(predictions)), desc=f"Evaluating {split_name} set", file=sys.stdout):
             confidence.append(np.abs(predictions[i][0] - 0.5))
             if predictions[i][0] > 0.5:
                 cnt_1 = cnt_1 + 1
@@ -34,7 +36,7 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
         print(f"{split_name.upper()}: Label 0:", cnt_0, "Label 1:", cnt_1)
     else:
         # perform multi-class classification
-        for i in range(0, len(predictions)):
+        for i in tqdm(range(0, len(predictions)), desc=f"Evaluating {split_name} set", file=sys.stdout):
             labels.append(np.argmax(predictions[i]))
             # get confidence by getting the difference between the highest and second-highest value
             confidence.append(np.max(predictions[i]) - np.partition(predictions[i], -2)[-2])

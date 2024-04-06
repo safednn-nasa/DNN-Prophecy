@@ -198,7 +198,7 @@ class Extractor:
 
         # Iterate over labels and confidence together using enumerate
         # for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
-        for idx, (label, confidence) in enumerate(eval_labels):
+        for idx, label in enumerate(eval_labels):
             # Default values for decision and accuracy is misclassified
             accuracy = 1000
 

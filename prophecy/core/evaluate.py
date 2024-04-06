@@ -15,9 +15,10 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
     :param split_name: The split name
     :return: labels
     """
+    # TODO: this function contains code for confidence calculation, but it is was disabled
 
     labels = []
-    confidence = []
+    # confidence = []
 
     predictions = model.predict(features, batch_size=128, workers=-1, use_multiprocessing=True, verbose=1)
     # check if the model is binary classification
@@ -25,7 +26,7 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
         cnt_0 = 0
         cnt_1 = 1
         for i in tqdm(range(0, len(predictions)), desc=f"Evaluating {split_name} set", file=sys.stdout):
-            confidence.append(np.abs(predictions[i][0] - 0.5))
+            # confidence.append(np.abs(predictions[i][0] - 0.5))
             if predictions[i][0] > 0.5:
                 cnt_1 = cnt_1 + 1
                 labels.append(1)
@@ -39,7 +40,7 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
         for i in tqdm(range(0, len(predictions)), desc=f"Evaluating {split_name} set", file=sys.stdout):
             labels.append(np.argmax(predictions[i]))
             # get confidence by getting the difference between the highest and second-highest value
-            confidence.append(np.max(predictions[i]) - np.partition(predictions[i], -2)[-2])
+            #confidence.append(np.max(predictions[i]) - np.partition(predictions[i], -2)[-2])
 
         # get labels count
         unique, counts = np.unique(labels, return_counts=True)
@@ -49,7 +50,8 @@ def get_eval_labels(model: keras.Model, features: pd.DataFrame, split_name: str)
             counts_str += f"Label {unique[i]}: {counts[i]}, "
         print(counts_str)
 
-    return np.array(labels), confidence
+    #return np.array(labels), confidence
+    return np.array(labels)
 
 
 def predict_unseen(model: keras.Model, features: pd.DataFrame, labels: np.ndarray) -> Predictions:

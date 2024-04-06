@@ -177,15 +177,16 @@ class Extractor:
         :param split: train/val
         :return:
         """
-
-        eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
+        # TODO: this method contains code for confidence based filtering of labels which was disabled
+        # eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
+        eval_labels = get_eval_labels(self.model, self.features[split], split_name=split)
 
         # compute outliers by looking at the confidence
         # minimum_confidence = Q1 - 1.5 * IQR
-        q1 = np.percentile(confidences, 25)
-        q3 = np.percentile(confidences, 75)
-        iqr = q3 - q1
-        minimum_confidence = q1 - 1.5 * iqr
+        # q1 = np.percentile(confidences, 25)
+        # q3 = np.percentile(confidences, 75)
+        # iqr = q3 - q1
+        # minimum_confidence = q1 - 1.5 * iqr
 
         print(f"{split.upper()} LABELS:", eval_labels.shape)
 
@@ -196,15 +197,16 @@ class Extractor:
         mismatch_count = 0
 
         # Iterate over labels and confidence together using enumerate
-        for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
+        # for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
+        for idx, (label, confidence) in enumerate(eval_labels):
             # Default values for decision and accuracy is misclassified
             accuracy = 1000
 
             # Check if confidence is within the specified range
-            if self._confidence and confidence < minimum_confidence:
-                mismatch_count += 1
-                pass  # Leave decision and accuracy as default
-            elif label == self.labels[split][idx]:
+            # if self._confidence and confidence < minimum_confidence:
+            #     mismatch_count += 1
+            #     pass  # Leave decision and accuracy as default
+            if label == self.labels[split][idx]:
                 match_count += 1
                 accuracy = 0
             else:

@@ -56,7 +56,7 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 class Extractor:
     def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
                  val_features: pd.DataFrame, val_labels: np.ndarray, only_dense: bool = False, skip_rules: bool = False,
-                 balance: bool = False, include_activation: bool = False, confidence: bool = False, **kwargs):
+                 balance: bool = False, only_activation: bool = False, confidence: bool = False, **kwargs):
         self.model = model
         self.features = {'train': train_features, 'val': val_features}
         self.labels = {'train': train_labels, 'val': val_labels}
@@ -66,8 +66,10 @@ class Extractor:
         self._balance = balance
         self._confidence = confidence
         self.layers = []
+        self.only_activation = only_activation
+        self.only_dense = only_dense
 
-        if only_dense and include_activation:
+        if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
             include_next = False
 
@@ -78,20 +80,11 @@ class Extractor:
                 elif layer.name.startswith('activation') and include_next:
                     include_next = False
                     self.layers.append(layer)
-
         elif only_dense:
             print("Only dense layers are considered for fingerprinting")
             self.layers = [layer for layer in model.layers if 'dense' in layer.name]
-        elif include_activation:
+        elif only_activation:
             print("Only activation layers of dense layers are considered for fingerprinting")
-            # include_next = False
-
-            #for layer in model.layers:
-            #    if layer.name.startswith('activation'):
-            #        include_next = True
-            #    elif layer.name.startswith('dense') and include_next:
-            #        include_next = False
-            #        self.layers.append(layer)
             self.layers = [layer for layer in model.layers if 'activation' in layer.name]
         else:
             self.layers = model.layers
@@ -251,10 +244,11 @@ class Extractor:
         if split not in self.fingerprints:
             raise ValueError(f"Invalid split {split}")
 
-        if isinstance(self.features[split], pd.DataFrame):
-            self.fingerprints[split] = {'input': self.features[split].to_numpy()}
-        else:
-            self.fingerprints[split] = {'input': self.features[split]}
+        if not (self.only_activation or self.only_dense):
+            if isinstance(self.features[split], pd.DataFrame):
+                self.fingerprints[split] = {'input': self.features[split].to_numpy()}
+            else:
+                self.fingerprints[split] = {'input': self.features[split]}
 
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")

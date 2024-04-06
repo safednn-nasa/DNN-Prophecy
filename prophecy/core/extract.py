@@ -139,8 +139,8 @@ class Extractor:
         :return:
         """
 
-        if self._balance or self._confidence:
-            self.get_labels('train')
+        #if self._balance or self._confidence:
+        self.get_labels('train')
 
         print(f"Invoking Dec-tree classifier based on FEATURES")
 

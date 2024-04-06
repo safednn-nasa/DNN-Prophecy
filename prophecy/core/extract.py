@@ -249,6 +249,8 @@ class Extractor:
                 self.fingerprints[split] = {'input': self.features[split].to_numpy()}
             else:
                 self.fingerprints[split] = {'input': self.features[split]}
+        else:
+            self.fingerprints[split] = {}
 
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")

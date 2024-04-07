@@ -56,7 +56,8 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 class Extractor:
     def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
                  val_features: pd.DataFrame, val_labels: np.ndarray, only_dense: bool = False, skip_rules: bool = False,
-                 balance: bool = False, only_activation: bool = False, confidence: bool = False, **kwargs):
+                 balance: bool = False, only_activation: bool = False, confidence: bool = False, random_state: int = 42,
+                 **kwargs):
         self.model = model
         self.features = {'train': train_features, 'val': val_features}
         self.labels = {'train': train_labels, 'val': val_labels}
@@ -68,6 +69,7 @@ class Extractor:
         self.layers = []
         self.only_activation = only_activation
         self.only_dense = only_dense
+        self.random_state = random_state
 
         if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
@@ -140,7 +142,7 @@ class Extractor:
         fingerprints_tr = {_l: _f for _l, _f in self.train_fingerprints.items()}
 
         learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
-                               activations=False, save_path=path)
+                               activations=False, save_path=path, random_state=self.random_state)
 
         if self._skip_rules:
             return {}

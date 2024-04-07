@@ -6,8 +6,8 @@ from typing import Dict
 from pathlib import Path
 
 
-def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_path: Path = None) \
-        -> Dict[str, tree.DecisionTreeClassifier]:
+def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_path: Path = None,
+                random_state: int = 42) -> Dict[str, tree.DecisionTreeClassifier]:
     """
         Run Dec-Tree Learning using Train Data to learn rules after each layer in terms of neuron features of
         activations
@@ -16,6 +16,7 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_pa
     :param fingerprints: dict of fingerprints
     :param activations: boolean indicating whether to use activations or features
     :param save_path: save path for the resulting estimator
+    :param random_state: random state for the estimator
     :return:
     """
 
@@ -37,7 +38,7 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_pa
             fingerprint = np.array([x.flatten() for x in fingerprint])
 
         #print(f"Invoking Dec-tree classifier based on neuron {output}. for layer {layer}")
-        basic_estimator = tree.DecisionTreeClassifier()
+        basic_estimator = tree.DecisionTreeClassifier(random_state=random_state)
         basic_estimator.fit(fingerprint, labels)
         #classifiers[f"{layer}_{output}"] = basic_estimator
         classifiers[layer] = basic_estimator

@@ -85,6 +85,8 @@ if __name__ == '__main__':
                                 help='Balance classes in the dataset for training the classifiers.')
     analyze_parser.add_argument('-c', '--confidence', action='store_true', default=False,
                                 help='Adjust labels in the dataset for training the classifiers with the confidence.')
+    analyze_parser.add_argument('-rs', '--random-state', type=int, help='Random state for reproducibility',
+                                default=42)
 
     args = parser.parse_args()
     model = get_model(args.model_path)

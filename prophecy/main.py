@@ -18,7 +18,7 @@ def run_analyze_command():
     rule_extractor = Extractor(model=model, train_features=train_features, train_labels=train_labels,
                                val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules,
                                only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
-                               only_activation=args.include_activation_layers)
+                               only_activation=args.only_activation_layers)
 
     ruleset = rule_extractor(path=classifiers_path)
     pd.DataFrame(ruleset).to_csv(rules_path, index=False)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-vy', '--val_labels', type=str, help='Validation labels', required=True)
     analyze_parser.add_argument('-odl', '--only-dense-layers', action='store_true', default=False,
                                 help='Consider only dense layers')
-    analyze_parser.add_argument('-ial', '--include-activation-layers', action='store_true', default=False,
+    analyze_parser.add_argument('-oal', '--only-activation-layers', action='store_true', default=False,
                                 help='Include the activation layers associated to the dense layers')
     analyze_parser.add_argument('-sr', '--skip-rules', action='store_true', default=False,
                                 help='Skip rules extraction')

@@ -24,7 +24,7 @@ Extract rules and train classifiers from the provided training and validation da
 
 
 ```shell
-pytjon -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir analyze [-h] -tx TRAIN_FEATURES -ty TRAIN_LABELS \
+python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir analyze [-h] -tx TRAIN_FEATURES -ty TRAIN_LABELS \
 						-vx VAL_FEATURES -vy VAL_LABELS [-odl] [-oal] [-sr] [-b] [-c] [-rs RANDOM_STATE]
 ```
 

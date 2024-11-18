@@ -23,6 +23,18 @@ def run_analyze_command():
     ruleset = rule_extractor(path=classifiers_path)
     pd.DataFrame(ruleset).to_csv(rules_path, index=False)
 
+def run_analyze_nocsv_command():
+    train_features, train_labels = args.train_features, args.train_labels
+    val_features, val_labels = args.val_features, args.val_labels
+
+    rule_extractor = Extractor(model=model, train_features=train_features, train_labels=train_labels,
+                               val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules,
+                               only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
+                               only_activation=args.only_activation_layers)
+
+    ruleset = rule_extractor(path=classifiers_path)
+    pd.DataFrame(ruleset).to_csv(rules_path, index=False)
+
 
 def run_classify_command():
     test_features, test_labels = read_split(args.test_features, args.test_labels)

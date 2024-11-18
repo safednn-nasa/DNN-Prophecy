@@ -111,8 +111,12 @@ if __name__ == '__main__':
     predictions_path = working_dir / "predictions"
     predictions_path.mkdir(parents=True, exist_ok=True)
 
-    if args.action == 'analyze':
-        run_analyze_command()
+    #if args.action == 'analyze':
+    if args.action.startswith('analyze'):
+        if args.action == 'analyze':
+            run_analyze_command()
+        if args.action == 'analyze_nocsv':
+            run_analyze_nocsv_command()
     elif args.action == 'infer':
         if args.infer_subparser == 'rules':
             run_detect_command()

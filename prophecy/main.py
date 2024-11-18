@@ -100,6 +100,24 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-rs', '--random-state', type=int, help='Random state for reproducibility',
                                 default=42)
 
+    analyze_parser = action_parser.add_parser('analyze_nocsv')
+    analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
+    analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=True)
+    analyze_parser.add_argument('-vx', '--val_features', type=str, help='Validation features', required=True)
+    analyze_parser.add_argument('-vy', '--val_labels', type=str, help='Validation labels', required=True)
+    analyze_parser.add_argument('-odl', '--only-dense-layers', action='store_true', default=False,
+                                help='Consider only dense layers')
+    analyze_parser.add_argument('-oal', '--only-activation-layers', action='store_true', default=False,
+                                help='Include the activation layers associated to the dense layers')
+    analyze_parser.add_argument('-sr', '--skip-rules', action='store_true', default=False,
+                                help='Skip rules extraction')
+    analyze_parser.add_argument('-b', '--balance', action='store_true', default=False,
+                                help='Balance classes in the dataset for training the classifiers.')
+    analyze_parser.add_argument('-c', '--confidence', action='store_true', default=False,
+                                help='Adjust labels in the dataset for training the classifiers with the confidence.')
+    analyze_parser.add_argument('-rs', '--random-state', type=int, help='Random state for reproducibility',
+                                default=42)
+
     args = parser.parse_args()
     model = get_model(args.model_path)
 

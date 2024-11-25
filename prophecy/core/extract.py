@@ -166,6 +166,43 @@ class Extractor:
 
         return results
 
+    def get_labels_dec(self, split: str):
+        """
+            Collect the labels for the rules
+        :param split: train/val
+        :return:
+        """
+        # TODO: this method contains code for confidence based filtering of labels which was disabled
+        # eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
+        eval_labels = get_eval_labels(self.model, self.features[split], split_name=split)
+
+        
+        self.clf_labels[split] = np.array(eval_labels).astype(int)
+      
+        # get the number of samples in each class
+        unique, counts = np.unique(self.clf_labels[split], return_counts=True)
+        print(f"{split.upper()} LABELS COUNT:", dict(zip(unique, counts)))
+
+        # randomly drop labels to balance the classes
+        if split == 'train' and self._balance:
+            print(f"Balancing {split.upper()} labels")
+            counts = dict(zip(unique, counts))
+            print("Counts:", counts)
+            # get the class with the maximum number of samples
+            max_class = max(counts, key=counts.get)
+            # get the class with the minimum number of samples
+            min_class = min(counts, key=counts.get)
+            # get the indexes of the samples in the maximum class
+            max_class_idx = np.where(self.clf_labels[split] == max_class)[0]
+            min_class_idx = np.where(self.clf_labels[split] == min_class)[0]
+
+            selected_max_class_idx = np.random.choice(max_class_idx, size=counts[min_class], replace=False)
+            new_ids = np.append(selected_max_class_idx, min_class_idx)
+            print("Length of new_ids:", len(new_ids))
+            self.clf_labels[split] = self.clf_labels[split][new_ids]
+            self.features[split] = self.features[split][new_ids]
+
+  
     def get_labels(self, split: str):
         """
             Collect the labels for the rules

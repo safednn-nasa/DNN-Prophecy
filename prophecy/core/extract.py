@@ -56,7 +56,7 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 class Extractor:
     def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
                  val_features: pd.DataFrame, val_labels: np.ndarray, only_dense: bool = False, skip_rules: bool = False,
-                 balance: bool = False, only_activation: bool = False, confidence: bool = False, random_state: int = 42,
+                 balance: bool = False, only_activation: bool = False, confidence: bool = False, random_state: int = 42, type: int = 1,
                  **kwargs):
         self.model = model
         self.features = {'train': train_features, 'val': val_features}
@@ -70,6 +70,7 @@ class Extractor:
         self.only_activation = only_activation
         self.only_dense = only_dense
         self.random_state = random_state
+        self.type = type
 
         if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
@@ -96,14 +97,20 @@ class Extractor:
     @property
     def clf_train_labels(self):
         if self.clf_labels['train'] is None:
-            self.get_labels('train')
+            if self.type == 1:
+              self.get_labels('train')
+            else:
+              self.get_labels_dec('train')
 
         return self.clf_labels['train']
 
     @property
     def clf_val_labels(self):
         if self.clf_labels['val'] is None:
-            self.get_labels('val')
+            if self.type == 1:
+              self.get_labels('val')
+            else:
+              self.get_labels_dec('val')
 
         return self.clf_labels['val']
 
@@ -135,7 +142,11 @@ class Extractor:
         """
 
         #if self._balance or self._confidence:
-        self.get_labels('train')
+        #self.get_labels('train')
+        if self.type == 1:
+              self.get_labels('train')
+            else:
+              self.get_labels_dec('train')
 
         print(f"Invoking Dec-tree classifier based on FEATURES")
 

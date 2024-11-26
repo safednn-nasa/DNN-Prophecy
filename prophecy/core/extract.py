@@ -179,7 +179,7 @@ class Extractor:
 
     def get_labels_dec(self, split: str):
         """
-            Collect the labels for the rules
+        Collect the labels for the rules
         :param split: train/val
         :return:
         """
@@ -187,8 +187,36 @@ class Extractor:
         # eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
         eval_labels = get_eval_labels(self.model, self.features[split], split_name=split)
 
+         # Initialize empty lists for decision and accuracy
+        accuracy_list = []
+
+        match_count = 0
+        mismatch_count = 0
+
+        # Iterate over labels and confidence together using enumerate
+        # for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
+        for idx, label in enumerate(eval_labels):
+            # Default values for decision and accuracy is misclassified
+            accuracy = 1000
+
+            # Check if confidence is within the specified range
+            # if self._confidence and confidence < minimum_confidence:
+            #     mismatch_count += 1
+            #     pass  # Leave decision and accuracy as default
+            if label == self.labels[split][idx]:
+                match_count += 1
+                accuracy = label
+            else:
+                mismatch_count += 1
+                pass  # Leave decision and accuracy as default
+
+            accuracy_list.append(accuracy)
+
+        self.clf_labels[split] = np.array(accuracy_list).astype(int)
+
+        print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
         
-        self.clf_labels[split] = np.array(eval_labels).astype(int)
+        
       
         # get the number of samples in each class
         unique, counts = np.unique(self.clf_labels[split], return_counts=True)

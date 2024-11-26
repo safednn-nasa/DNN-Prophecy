@@ -144,9 +144,9 @@ class Extractor:
         #if self._balance or self._confidence:
         #self.get_labels('train')
         if self.type == 1:
-              self.get_labels('train')
-            else:
-              self.get_labels_dec('train')
+          self.get_labels('train')
+        else:
+          self.get_labels_dec('train')
 
         print(f"Invoking Dec-tree classifier based on FEATURES")
 

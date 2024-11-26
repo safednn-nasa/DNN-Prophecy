@@ -254,11 +254,11 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                                    labels_test, ALL: bool = False, Threshold: int = 60, MIS: bool = True,
                                    Top: bool = False) -> list:
     if Top is True:
-        print("PRINTING RULES WITH HIGHEST RECALL FOR CORRECT CLASSIFICATION TO EVERY LABEL.")
+        print("PRINTING RULES WITH HIGHEST RECALL.")
     elif ALL is True:
-        print("PRINTING ALL RULES FOR CORRECT CLASSIFICATION FOR EVERY LABEL.")
+        print("PRINTING ALL RULES.")
     else:
-        print("PRINTING RULES FOR CORRECT CLASSIFICATION WITH TRAIN RECALL >= ", Threshold, "%.")
+        print("PRINTING RULES WITH TRAIN RECALL >= ", Threshold, "%.")
 
     if MIS is True:
         if Top is True:

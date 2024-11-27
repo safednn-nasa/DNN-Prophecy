@@ -86,8 +86,10 @@ if __name__ == '__main__':
                                 help='Adjust labels in the dataset for training the classifiers with the confidence.')
     analyze_parser.add_argument('-rs', '--random-state', type=int, help='Random state for reproducibility',
                                 default=42)
-    analyze_parser.add_argument('-type', '--type', type=int, help='Dec rules: 0, Accuracy rules: 1',
+    analyze_parser.add_argument('-type', '--type', type=int, help='Dec rules: 0, Accuracy rules: 1, Label based: 2',
                                 default=1)
+    analyze_parser.add_argument('-inptype', '--inptype', type=int, help='Model: 0, Neuron_acts_array: 1',
+                                default=0)
 
     args = parser.parse_args()
     model = get_model(args.model_path)

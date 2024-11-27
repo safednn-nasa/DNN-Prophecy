@@ -50,3 +50,18 @@ def learn_rules(labels: np.array, fingerprints: dict, activations: bool, save_pa
                 pickle.dump(basic_estimator, mf)
 
     return classifiers
+
+def learn_rules_arr(labels: np.array, fingerprints: np.array, save_path: Path = None,
+                random_state: int = 42) -> Dict[str, tree.DecisionTreeClassifier]:
+    
+    basic_estimator = tree.DecisionTreeClassifier(random_state=random_state)
+    basic_estimator.fit(fingerprints, labels)
+    classifiers[0] = basic_estimator
+
+    if save_path and save_path.exists():
+      model_path = save_path / f"{0}.pkl"
+
+    with model_path.open(mode='wb') as mf:
+      pickle.dump(basic_estimator, mf)
+
+    return classifiers

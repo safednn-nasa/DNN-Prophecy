@@ -156,8 +156,15 @@ class Extractor:
         if self.type == 2:
           label_arr = self.labels['train']
           self.clf_labels['train'] = label_arr.astype(int)
-        
+
         print(f"Invoking Dec-tree classifier based on FEATURES")
+      
+        if self.inptype == 1:
+          learners = learn_rules_arr(labels=self.clf_train_labels, fingerprints=self.fingerprints,
+                               activations=False, save_path=path, random_state=self.random_state)
+          return self._extract(learners, list(self.fingerprints))
+        
+        
 
         fingerprints_tr = {_l: _f for _l, _f in self.train_fingerprints.items()}
 

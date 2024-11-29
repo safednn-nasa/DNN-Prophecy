@@ -174,13 +174,6 @@ class Extractor:
     def _extract(self, learners: dict, fingerprints_tr: list):
         results = []
       
-        print("FINGERPRINTS:")
-        for indx in range(0, 50):
-          s1 = ""
-          for indx1 in range(0,128):
-            s1 += str(fingerprints_tr[0][indx][indx1]) + ","
-          print(s1)
-      
         for layer_count, (layer_name, learner) in enumerate(learners.items(), 1):
             # TODO: get the tree and for every input just call predict and get the output
             print(f"\nRULES FROM LAYER {layer_name.upper()} IN TERMS OF FEATURES\n")

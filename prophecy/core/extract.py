@@ -72,7 +72,7 @@ class Extractor:
         self.random_state = random_state
         self.type = type
         self.inptype = inptype
-
+                   
         if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
             include_next = False
@@ -159,13 +159,6 @@ class Extractor:
 
         print(f"Invoking Dec-tree classifier based on FEATURES")
       
-        if self.inptype == 1:
-          learners = learn_rules_arr(labels=self.clf_train_labels, fingerprints=self.fingerprints,
-                               activations=False, save_path=path, random_state=self.random_state)
-          return self._extract(learners, list(self.fingerprints))
-        
-        
-
         fingerprints_tr = {_l: _f for _l, _f in self.train_fingerprints.items()}
 
         learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
@@ -347,6 +340,10 @@ class Extractor:
         else:
             self.fingerprints[split] = {}
 
+        if (self.inptype == 1):
+            self.fingerprints[split]['current'] = self.features
+            return
+          
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")
             activations, features = get_layer_fingerprint(self.model.input, layer, self.features[split])

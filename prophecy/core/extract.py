@@ -343,7 +343,10 @@ class Extractor:
             self.fingerprints[split] = {}
 
         if (self.inptype == 1):
-            self.fingerprints[split]['current'] = self.features
+            if isinstance(self.features[split], pd.DataFrame):
+                self.fingerprints[split] = {'current': self.features[split].to_numpy()}
+            else:
+                self.fingerprints[split] = {'current': self.features[split]}
             return
           
         for layer in self.layers:

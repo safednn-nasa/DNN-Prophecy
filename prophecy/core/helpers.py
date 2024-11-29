@@ -203,6 +203,7 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
         # TODO: why precision is always 100?
         prec = 100
         if cl != 1000:
+            print("cl:", cl)
             recall = (supp / (total_labels[cl])) * 100.0
         else:
             recall = (supp / (total_fail)) * 100.0

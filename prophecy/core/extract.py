@@ -161,8 +161,12 @@ class Extractor:
       
         fingerprints_tr = {_l: _f for _l, _f in self.train_fingerprints.items()}
 
-        learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
+        if (self.vals == 1):
+          learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
                                activations=False, save_path=path, random_state=self.random_state)
+        else:
+          learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
+                               activations=True, save_path=path, random_state=self.random_state)
 
         if self._skip_rules:
             return {}
@@ -347,5 +351,8 @@ class Extractor:
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")
             activations, features = get_layer_fingerprint(self.model.input, layer, self.features[split])
-            self.fingerprints[split][layer.name] = features
+            if (self.vals == 1):
+              self.fingerprints[split][layer.name] = features
+            else:
+              self.fingerprints[split][layer.name] = activations
             print(f"Fingerprint after {layer.name}. ({activations.shape} inputs, {features.shape} neurons)")

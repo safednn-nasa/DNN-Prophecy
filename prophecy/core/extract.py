@@ -57,7 +57,7 @@ class Extractor:
     def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
                  val_features: pd.DataFrame, val_labels: np.ndarray, only_dense: bool = False, skip_rules: bool = False,
                  balance: bool = False, only_activation: bool = False, confidence: bool = False, random_state: int = 42, type: int = 1, 
-                 inptype: int = 0, **kwargs):
+                 inptype: int = 0, acts: bool = False, **kwargs):
         self.model = model
         self.features = {'train': train_features, 'val': val_features}
         self.labels = {'train': train_labels, 'val': val_labels}
@@ -72,6 +72,7 @@ class Extractor:
         self.random_state = random_state
         self.type = type
         self.inptype = inptype
+        self.acts = acts
                    
         if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
@@ -161,12 +162,9 @@ class Extractor:
       
         fingerprints_tr = {_l: _f for _l, _f in self.train_fingerprints.items()}
 
-        if (self.vals == 1):
-          learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
-                               activations=False, save_path=path, random_state=self.random_state)
-        else:
-          learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
-                               activations=True, save_path=path, random_state=self.random_state)
+        learners = learn_rules(labels=self.clf_train_labels, fingerprints=fingerprints_tr,
+                               activations=self.acts, save_path=path, random_state=self.random_state)
+
 
         if self._skip_rules:
             return {}
@@ -351,7 +349,7 @@ class Extractor:
         for layer in self.layers:
             print(f"\nFingerprinting {split.upper()} data after {layer.name} layer")
             activations, features = get_layer_fingerprint(self.model.input, layer, self.features[split])
-            if (self.vals == 1):
+            if (self.acts == False):
               self.fingerprints[split][layer.name] = features
             else:
               self.fingerprints[split][layer.name] = activations

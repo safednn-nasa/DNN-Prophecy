@@ -187,15 +187,21 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
         return Performance(-1, -1, -1, -1)
 
     TOT_LABELS = len(set(labels))
+    
     if ( 1000 in set(labels)):
         total_labels = np.zeros(TOT_LABELS - 1)
+        print("TOTAL LABELS:",TOT_LABELS)
+        for indx in range(0, TOT_LABELS - 1):
+            total_labels[indx] = len(np.where(labels == indx)[0])
+            print(indx,":", total_labels[indx])
     else:
         total_labels = np.zeros(TOT_LABELS)
+        print("TOTAL LABELS:",TOT_LABELS)
+        for indx in range(0, TOT_LABELS):
+            total_labels[indx] = len(np.where(labels == indx)[0])
+            print(indx,":", total_labels[indx])
         
-    print("TOTAL LABELS:",TOT_LABELS)
-    for indx in range(0, TOT_LABELS - 1):
-        total_labels[indx] = len(np.where(labels == indx)[0])
-        print(indx,":", total_labels[indx])
+    
 
     total_fail = len(np.where(labels == 1000)[0])
 

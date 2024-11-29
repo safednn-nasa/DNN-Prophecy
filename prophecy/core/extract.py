@@ -175,7 +175,8 @@ class Extractor:
         results = []
       
         print("FINGERPRINTS:")
-        print(fingerprints_tr[0])
+        for indx in range(0, 50):
+          print(fingerprints_tr[0][0][indx)
       
         for layer_count, (layer_name, learner) in enumerate(learners.items(), 1):
             # TODO: get the tree and for every input just call predict and get the output

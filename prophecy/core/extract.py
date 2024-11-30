@@ -12,7 +12,7 @@ from keras.src.engine.keras_tensor import KerasTensor
 
 from prophecy.core.learn import learn_rules
 from prophecy.core.evaluate import get_eval_labels
-from prophecy.core.helpers import (get_all_invariants_val, impure_rules, describe_invariants_all_labels)
+from prophecy.core.helpers import (get_all_invariants_val, get_all_invariants, impure_rules, describe_invariants_all_labels)
 
 
 def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,

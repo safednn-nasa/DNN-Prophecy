@@ -73,7 +73,8 @@ class Extractor:
         self.type = type
         self.inptype = inptype
         self.acts = acts
-                   
+
+        print("CONFIG PARAMS: TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts)
         if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
             include_next = False

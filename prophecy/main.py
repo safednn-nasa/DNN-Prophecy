@@ -90,6 +90,8 @@ if __name__ == '__main__':
                                 default=1)
     analyze_parser.add_argument('-inptype', '--inptype', type=int, help='Model: 0, Neuron_acts_array: 1',
                                 default=0)
+    analyze_parser.add_argument('-acts', '--acts', type=bool, help='Model: 0, Neuron_acts_array: 1',
+                                default=False)
 
     args = parser.parse_args()
     model = get_model(args.model_path)

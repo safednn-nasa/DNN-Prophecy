@@ -178,7 +178,11 @@ class Extractor:
         for layer_count, (layer_name, learner) in enumerate(learners.items(), 1):
             # TODO: get the tree and for every input just call predict and get the output
             print(f"\nRULES FROM LAYER {layer_name.upper()} IN TERMS OF FEATURES\n")
-            invariants = get_all_invariants_val(learner)
+
+            if (self.acts == False):
+              invariants = get_all_invariants_val(learner)
+            else:
+              invariants = get_all_invariants(learner)
             print(f"InV {layer_count-1}")
             impure_rules(invariants)
 

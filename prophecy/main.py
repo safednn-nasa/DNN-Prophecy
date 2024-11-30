@@ -18,7 +18,7 @@ def run_analyze_command():
     rule_extractor = Extractor(model=model, train_features=train_features, train_labels=train_labels,
                                val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules,
                                only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
-                               only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype)
+                               only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype, acts=args.acts)
 
     ruleset = rule_extractor(path=classifiers_path)
     pd.DataFrame(ruleset).to_csv(rules_path, index=False)
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                                 default=1)
     analyze_parser.add_argument('-inptype', '--inptype', type=int, help='Model: 0, Neuron_acts_array: 1',
                                 default=0)
-    analyze_parser.add_argument('-acts', '--acts', type=bool, help='Model: 0, Neuron_acts_array: 1',
+    analyze_parser.add_argument('-acts', '--acts', type=bool, help='On/Off: True, Values: False',
                                 default=False)
 
     args = parser.parse_args()

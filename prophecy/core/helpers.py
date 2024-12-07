@@ -281,6 +281,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
     ruleset = []
 
     for cl, invars in all_invariants.items():
+        print("class:",cl)
         if cl == -1:
             print("impure:")
             print(invars[0])

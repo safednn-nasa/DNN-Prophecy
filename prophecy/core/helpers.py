@@ -291,6 +291,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
             continue
 
         for idx in range(0, len(invars)):
+            print("idx:",idx)
             if Top and idx > 0:
                 continue
 

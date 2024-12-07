@@ -293,7 +293,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
         for idx in range(0, len(invars)):
             print("idx:",idx)
             if Top and idx > 0:
-                continue
+                break
 
             inv = invars[idx]
             neurons = inv[0]

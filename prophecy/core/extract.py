@@ -189,6 +189,7 @@ class Extractor:
             desc = describe_invariants_all_labels(invariants, layer_count, layer_name, fingerprints_tr,
                                                   list(self.val_fingerprints.values()), self.clf_train_labels,
                                                   self.clf_val_labels, ALL=True, MIS=True)
+            print("helper done")
             results.extend(desc)
 
         return results

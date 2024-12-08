@@ -1,1 +1,0 @@
-GTSRB models and files

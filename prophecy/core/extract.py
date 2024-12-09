@@ -67,7 +67,7 @@ class Extractor:
         self._balance = balance
         self._confidence = confidence
         self.layers = []
-        self.layer_name = None
+        self.layer_name = layer_name
         self.only_activation = only_activation
         self.only_dense = only_dense
         self.random_state = random_state

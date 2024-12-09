@@ -18,7 +18,7 @@ def run_analyze_command():
     rule_extractor = Extractor(model=model, train_features=train_features, train_labels=train_labels,
                                val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules, layer_name=args.layer_name,
                                only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
-                               only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype, acts=args.acts)
+                               only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype, acts=args.acts, top=args.top)
     #print("before rule extract")
     ruleset = rule_extractor(path=classifiers_path)
     #print("after rule extract")
@@ -94,7 +94,9 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-acts', '--acts', type=bool, help='On/Off: True, Values: False',
                                 default=False)
     analyze_parser.add_argument('-layer_name', '--layer_name', type=str, help='Name of dense or activation layer',
-                                default=null)
+                                default=None)
+    analyze_parser.add_argument('-top', '--top', type=bool, help='Top rules or All rules',
+                                default=False)
 
     args = parser.parse_args()
     model = get_model(args.model_path)

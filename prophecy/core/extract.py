@@ -55,7 +55,7 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
 
 class Extractor:
     def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
-                 val_features: pd.DataFrame, val_labels: np.ndarray, only_dense: bool = False, skip_rules: bool = False,
+                 val_features: pd.DataFrame, val_labels: np.ndarray, layer_name: str = None, only_dense: bool = False, skip_rules: bool = False,
                  balance: bool = False, only_activation: bool = False, confidence: bool = False, random_state: int = 42, type: int = 1, 
                  inptype: int = 0, acts: bool = False, **kwargs):
         self.model = model
@@ -67,6 +67,7 @@ class Extractor:
         self._balance = balance
         self._confidence = confidence
         self.layers = []
+        self.layer_name = None
         self.only_activation = only_activation
         self.only_dense = only_dense
         self.random_state = random_state
@@ -74,8 +75,9 @@ class Extractor:
         self.inptype = inptype
         self.acts = acts
 
-        print("CONFIG PARAMS: TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts)
-        if only_dense and only_activation:
+        print("CONFIG PARAMS: TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts, ",LAYER NAME:", self.layer_name)
+        if self.layer_name == None:
+          if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
             include_next = False
 
@@ -86,14 +88,25 @@ class Extractor:
                 elif layer.name.startswith('activation') and include_next:
                     include_next = False
                     self.layers.append(layer)
-        elif only_dense:
+          elif only_dense:
             print("Only dense layers are considered for fingerprinting")
             self.layers = [layer for layer in model.layers if 'dense' in layer.name]
-        elif only_activation:
+          elif only_activation:
             print("Only activation layers of dense layers are considered for fingerprinting")
             self.layers = [layer for layer in model.layers if 'activation' in layer.name]
-        else:
+          else:
             self.layers = model.layers
+        else:
+          print("Layer Name:", self.layer_name)
+          for layer in model.layers:
+            if (not layer.name.equals(self.layer_name)):
+              continue
+            if layer.name.startswith('dense') or layer.name.startswith('activation'):
+              self.layers.append(layer)
+          if (len(self.layers) == 0):
+            print("Specified layer is not a dense or activation layer.")
+            exit(0)
+          
 
         print(f"Layers to be considered for fingerprinting: {[layer.name for layer in self.layers]}")
 

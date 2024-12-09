@@ -20,6 +20,7 @@ def run_analyze_command():
                                only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
                                only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype, acts=args.acts, top=args.top)
     #print("before rule extract")
+    print("LAYER NAME:", args.layer_name)
     ruleset = rule_extractor(path=classifiers_path)
     #print("after rule extract")
     pd.DataFrame(ruleset).to_csv(rules_path, index=False)

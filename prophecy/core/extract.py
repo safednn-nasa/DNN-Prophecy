@@ -266,6 +266,7 @@ class Extractor:
             if (typ == 0): # PREDICTIONS based labels
                accuracy = label
                accuracy_list.append(accuracy)
+               match_count += 1
                continue
               
             if label == self.labels[split][idx]:

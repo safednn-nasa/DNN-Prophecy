@@ -165,13 +165,17 @@ class Extractor:
         #if self._balance or self._confidence:
         #self.get_labels('train')
 
-        if self.type == 1:
-          self.get_labels('train')
-        if self.type == 0:
-          self.get_labels_dec('train')
-        if self.type == 3: # INPUT LABEL ARRAY based
-          label_arr = self.labels['train']
-          self.clf_labels['train'] = label_arr.astype(int)
+        self.get_labels('train', self.type)
+      
+        #if self.type == 0: # PREDICTIONS based
+        #   self.get_labels('train',typ=0)
+        #if self.type == 1: # ACCURACY based
+        #   self.get_labels('train',typ=1)
+        #if self.type == 2: # ACCURACY PER LABELS
+        #   self.get_labels_dec('train')
+        #if self.type == 3: # INPUT LABEL ARRAY based
+        #   label_arr = self.labels['train']
+        #   self.clf_labels['train'] = label_arr.astype(int)
 
         print(f"Invoking Dec-tree classifier based on FEATURES")
       
@@ -215,74 +219,9 @@ class Extractor:
             results.extend(desc)
 
         return results
-   
-          
-    def get_labels_dec(self, split: str):
-        """
-        Collect the labels for the rules
-        :param split: train/val
-        :return:
-        """
-        # TODO: this method contains code for confidence based filtering of labels which was disabled
-        # eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
-        eval_labels = get_eval_labels(self.model, self.features[split], split_name=split)
-
-         # Initialize empty lists for decision and accuracy
-        accuracy_list = []
-
-        match_count = 0
-        mismatch_count = 0
-
-        # Iterate over labels and confidence together using enumerate
-        # for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
-        for idx, label in enumerate(eval_labels):
-            # Default values for decision and accuracy is misclassified
-            accuracy = 1000
-
-            # Check if confidence is within the specified range
-            # if self._confidence and confidence < minimum_confidence:
-            #     mismatch_count += 1
-            #     pass  # Leave decision and accuracy as default
-            if label == self.labels[split][idx]:
-                match_count += 1
-                accuracy = label
-            else:
-                mismatch_count += 1
-                pass  # Leave decision and accuracy as default
-
-            accuracy_list.append(accuracy)
-
-        self.clf_labels[split] = np.array(accuracy_list).astype(int)
-
-        print(f"{split.upper()} ACCURACY:", (match_count / (match_count + mismatch_count)) * 100.0)
-        
-        
-      
-        # get the number of samples in each class
-        unique, counts = np.unique(self.clf_labels[split], return_counts=True)
-        print(f"{split.upper()} LABELS COUNT:", dict(zip(unique, counts)))
-
-        # randomly drop labels to balance the classes
-        if split == 'train' and self._balance:
-            print(f"Balancing {split.upper()} labels")
-            counts = dict(zip(unique, counts))
-            print("Counts:", counts)
-            # get the class with the maximum number of samples
-            max_class = max(counts, key=counts.get)
-            # get the class with the minimum number of samples
-            min_class = min(counts, key=counts.get)
-            # get the indexes of the samples in the maximum class
-            max_class_idx = np.where(self.clf_labels[split] == max_class)[0]
-            min_class_idx = np.where(self.clf_labels[split] == min_class)[0]
-
-            selected_max_class_idx = np.random.choice(max_class_idx, size=counts[min_class], replace=False)
-            new_ids = np.append(selected_max_class_idx, min_class_idx)
-            print("Length of new_ids:", len(new_ids))
-            self.clf_labels[split] = self.clf_labels[split][new_ids]
-            self.features[split] = self.features[split][new_ids]
 
   
-    def get_labels(self, split: str):
+    def get_labels(self, split: str, typ=1):
         """
             Collect the labels for the rules
         :param split: train/val
@@ -290,6 +229,11 @@ class Extractor:
         """
         # TODO: this method contains code for confidence based filtering of labels which was disabled
         # eval_labels, confidences = get_eval_labels(self.model, self.features[split], split_name=split)
+      
+        if (typ == 3): # INPUT LABEL ARRAY based
+          self.clf_labels[split] = np.array(self.labels[split]).astype(int)
+          return
+          
         eval_labels = get_eval_labels(self.model, self.features[split], split_name=split)
 
         # compute outliers by looking at the confidence
@@ -309,6 +253,7 @@ class Extractor:
 
         # Iterate over labels and confidence together using enumerate
         # for idx, (label, confidence) in enumerate(zip(eval_labels, confidences)):
+
         for idx, label in enumerate(eval_labels):
             # Default values for decision and accuracy is misclassified
             accuracy = 1000
@@ -317,9 +262,18 @@ class Extractor:
             # if self._confidence and confidence < minimum_confidence:
             #     mismatch_count += 1
             #     pass  # Leave decision and accuracy as default
+            
+            if (typ == 0): # PREDICTIONS based labels
+               accuracy = label
+               accuracy_list.append(accuracy)
+               continue
+              
             if label == self.labels[split][idx]:
                 match_count += 1
-                accuracy = 0
+                if (typ == 1): # ACCURACY based labels
+                  accuracy = 0
+                if (typ == 2): # ACCURACY per label based
+                  accuracy = label
             else:
                 mismatch_count += 1
                 pass  # Leave decision and accuracy as default

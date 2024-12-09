@@ -16,12 +16,12 @@ def run_analyze_command():
     val_features, val_labels = read_split(args.val_features, args.val_labels)
 
     rule_extractor = Extractor(model=model, train_features=train_features, train_labels=train_labels,
-                               val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules,
+                               val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules, layer_name=args.layer_name,
                                only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
                                only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype, acts=args.acts)
-    print("before rule extract")
+    #print("before rule extract")
     ruleset = rule_extractor(path=classifiers_path)
-    print("after rule extract")
+    #print("after rule extract")
     pd.DataFrame(ruleset).to_csv(rules_path, index=False)
 
 def run_classify_command():
@@ -93,6 +93,8 @@ if __name__ == '__main__':
                                 default=0)
     analyze_parser.add_argument('-acts', '--acts', type=bool, help='On/Off: True, Values: False',
                                 default=False)
+    analyze_parser.add_argument('-layer_name', '--layer_name', type=str, help='Name of dense or activation layer',
+                                default=null)
 
     args = parser.parse_args()
     model = get_model(args.model_path)

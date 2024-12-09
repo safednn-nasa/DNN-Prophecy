@@ -114,25 +114,13 @@ class Extractor:
     @property
     def clf_train_labels(self):
         if self.clf_labels['train'] is None:
-          if self.type == 1:
-            self.get_labels('train')
-          if self.type == 0:
-            self.get_labels_dec('train')
-          if self.type == 2:
-            label_arr = self.labels['train']
-            self.clf_labels['train'] = label_arr.astype(int)
+           self.get_labels('train',self.type)
         return self.clf_labels['train']
 
     @property
     def clf_val_labels(self):
         if self.clf_labels['val'] is None:
-          if self.type == 1:
-            self.get_labels('val')
-          if self.type == 0:
-            self.get_labels_dec('val')
-          if self.type == 2:
-            label_arr = self.labels['val']
-            self.clf_labels['val'] = label_arr.astype(int)
+          self.get_labels('val',self.type)
         return self.clf_labels['val']
 
     @property

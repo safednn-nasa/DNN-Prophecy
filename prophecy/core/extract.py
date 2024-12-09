@@ -57,7 +57,7 @@ class Extractor:
     def __init__(self, model: keras.Model, train_features: pd.DataFrame, train_labels: np.ndarray,
                  val_features: pd.DataFrame, val_labels: np.ndarray, layer_name: str = None, only_dense: bool = False, skip_rules: bool = False,
                  balance: bool = False, only_activation: bool = False, confidence: bool = False, random_state: int = 42, type: int = 1, 
-                 inptype: int = 0, acts: bool = False, **kwargs):
+                 inptype: int = 0, acts: bool = False, top: bool = False, **kwargs):
         self.model = model
         self.features = {'train': train_features, 'val': val_features}
         self.labels = {'train': train_labels, 'val': val_labels}
@@ -74,8 +74,9 @@ class Extractor:
         self.type = type
         self.inptype = inptype
         self.acts = acts
+        self.top = top
 
-        print("CONFIG PARAMS: TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts, ",LAYER NAME:", self.layer_name)
+        print("CONFIG PARAMS: ",LAYER NAME:", self.layer_name, TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts, ",Top/All:", self.top)
         if self.layer_name == None:
           if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")
@@ -199,9 +200,17 @@ class Extractor:
             print(f"InV {layer_count-1}")
             impure_rules(invariants)
 
+            top_rules = False
+            all_rules = False
+          
+            if self.top:
+              top_rules = True
+            else:
+              all_rules = True
+
             desc = describe_invariants_all_labels(invariants, layer_count, layer_name, fingerprints_tr,
                                                   list(self.val_fingerprints.values()), self.clf_train_labels,
-                                                  self.clf_val_labels, Top=True, MIS=True)
+                                                  self.clf_val_labels, Top=top_rules, ALL=all_rules,  MIS=True)
             print("helper done")
             results.extend(desc)
 

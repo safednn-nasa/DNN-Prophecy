@@ -169,7 +169,7 @@ class Extractor:
           self.get_labels('train')
         if self.type == 0:
           self.get_labels_dec('train')
-        if self.type == 2:
+        if self.type == 3: # INPUT LABEL ARRAY based
           label_arr = self.labels['train']
           self.clf_labels['train'] = label_arr.astype(int)
 

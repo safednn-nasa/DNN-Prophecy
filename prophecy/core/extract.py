@@ -100,7 +100,7 @@ class Extractor:
         else:
           print("Layer Name:", self.layer_name)
           for layer in model.layers:
-            if (not layer.name.equals(self.layer_name)):
+            if (layer.name != self.layer_name):
               continue
             if layer.name.startswith('dense') or layer.name.startswith('activation'):
               self.layers.append(layer)

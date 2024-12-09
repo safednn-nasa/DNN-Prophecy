@@ -200,9 +200,13 @@ class Extractor:
             else:
               all_rules = True
 
+            misclass = True
+            if (self.type == 0) or (self.type == 3):
+              misclass = False
+
             desc = describe_invariants_all_labels(invariants, layer_count, layer_name, fingerprints_tr,
                                                   list(self.val_fingerprints.values()), self.clf_train_labels,
-                                                  self.clf_val_labels, Top=top_rules, ALL=all_rules,  MIS=True)
+                                                  self.clf_val_labels, Top=top_rules, ALL=all_rules,  MIS=misclass)
             #print("helper done")
             results.extend(desc)
 

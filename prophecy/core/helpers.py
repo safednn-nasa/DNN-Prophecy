@@ -186,20 +186,23 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
     if cl not in set(labels):
         return Performance(-1, -1, -1, -1)
 
-    TOT_LABELS = len(set(labels))
+    set_labs = set(labels)
+    TOT_LABELS = len(set_labs)
     print(TOT_LABELS)
     
-    if ( 1000 in set(labels)):
+    if ( 1000 in set_labs):
         total_labels = np.zeros(TOT_LABELS - 1)
         print("1000: TOTAL LABELS:",TOT_LABELS)
         for indx in range(0, TOT_LABELS - 1):
-            total_labels[indx] = len(np.where(labels == indx)[0])
+            lbl_indx = set_labs[indx]
+            total_labels[indx] = len(np.where(labels == lbl_indx)[0])
        #     print(indx,":", total_labels[indx])
     else:
         total_labels = np.zeros(TOT_LABELS)
         print("NOT MIS: TOTAL LABELS:",TOT_LABELS)
         for indx in range(0, TOT_LABELS):
-            total_labels[indx] = len(np.where(labels == indx)[0])
+            lbl_indx = set_labs[indx]
+            total_labels[indx] = len(np.where(labels == lbl_indx)[0])
        #     print(indx,":", total_labels[indx])
         
     

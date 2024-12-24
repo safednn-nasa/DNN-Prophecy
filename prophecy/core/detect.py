@@ -195,7 +195,7 @@ class ClassifierDetector(BaseDetector):
         inc_layer = []
 
         for layer, classifier in self.classifiers.items():
-            print("LAYER:", layer.name)
+            #print("LAYER:", layer.name)
             predict_method = classifier.predict_proba if self._only_pure else classifier.predict
 
             if layer == 'input':

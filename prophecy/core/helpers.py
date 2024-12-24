@@ -190,9 +190,11 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
     TOT_LABELS = len(set_labs)
     print(TOT_LABELS)
 
+    dist_labels = np.array(list(set_labs))
+
     if ( 1000 in set_labs):
         print("1000:")
-        max = np.max((set(labels)).remove(1000))
+        max = np.max(dist_labels.remove(1000))
         total_labels = np.zeros(max)
         for indx in set_labs:
             if (indx == 1000):
@@ -201,7 +203,7 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
        #     print(indx,":", total_labels[indx])
     else:
         print("NOT MIS: TOTAL LABELS:",TOT_LABELS)
-        max = np.max(set(labels))
+        max = np.max(dist_labels)
         total_labels = np.zeros(max)
         for indx in set_labs:
             total_labels[indx] = len(np.where(labels == indx)[0])

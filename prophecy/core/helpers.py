@@ -195,7 +195,7 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
 
     if ( 1000 in set_labs):
         print("1000:")
-        max = np.max(dist_labels.remove(1000))
+        max = np.max((list(dist_labels)).remove(1000))
         total_labels = np.zeros(max+1)
         for indx in set_labs:
             if (indx == 1000):

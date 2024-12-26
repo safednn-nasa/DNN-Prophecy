@@ -314,6 +314,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
             tst_suffixes = []
 
             if len(fingerprints_tr) > 0:
+                print("FINGER TRAIN:", np.shape(fingerprints_tr))
                 tr_suffixes = fingerprints_tr[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints
@@ -321,7 +322,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                     tr_suffixes = np.array([x.flatten() for x in tr_suffixes])
 
             if len(fingerprints_tst) > 0:
-                print("FINGER TST:",fingerprints_tst[layer_count - 1])
+                print("FINGER TST:", np.shape(fingerprints_tst))
                 tst_suffixes = fingerprints_tst[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints

@@ -170,6 +170,7 @@ def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False):
     # have provided on/off signature for the provided neurons.
     #
     # The returned cluster is an array of indices (into mnist.train.images).
+    print(np.shape(suffixes))
     if (VAL == False):
         return np.where((suffixes[:, neuron_ids] == neuron_sig).all(axis=1))[0]
 

@@ -26,6 +26,8 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
     """
     func = backend.function(model_input, [layer.output])
 
+    print("FEATURES:", np.shape(features))
+                            
     if features.shape[0] > 5000 and isinstance(features, np.ndarray):
         batch_size = 256
         num_samples = len(features)

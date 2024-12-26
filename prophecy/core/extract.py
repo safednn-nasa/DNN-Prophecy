@@ -102,8 +102,8 @@ class Extractor:
           for layer in model.layers:
             if (layer.name != self.layer_name):
               continue
-            if layer.name.startswith('dense') or layer.name.startswith('activation'):
-              self.layers.append(layer)
+            #if layer.name.startswith('dense') or layer.name.startswith('activation'):
+            self.layers.append(layer)
           if (len(self.layers) == 0):
             print("Specified layer is not a dense or activation layer.")
             exit(0)

@@ -311,7 +311,7 @@ class Extractor:
         if split not in self.fingerprints:
             raise ValueError(f"Invalid split {split}")
 
-        if not (self.only_activation or self.only_dense):
+        if not (self.only_activation or self.only_dense or (self.layer_name != None)):
             if isinstance(self.features[split], pd.DataFrame):
                 self.fingerprints[split] = {'input': self.features[split].to_numpy()}
             else:

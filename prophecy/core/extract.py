@@ -207,8 +207,8 @@ class Extractor:
               misclass = False
 
             finger_val = list(self.val_fingerprints.values())
-            print("FINGER TRAIN SHAPE:", np.shape(fingerprints_tr))
-            print("FINGER VAL SHAPE:", np.shape(finger_val))
+            #print("FINGER TRAIN SHAPE:", np.shape(fingerprints_tr))
+            #print("FINGER VAL SHAPE:", np.shape(finger_val))
             desc = describe_invariants_all_labels(invariants, layer_count, layer_name, fingerprints_tr,
                                                   list(self.val_fingerprints.values()), self.clf_train_labels,
                                                   self.clf_val_labels, Top=top_rules, ALL=all_rules,  MIS=misclass)

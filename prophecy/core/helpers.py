@@ -170,7 +170,7 @@ def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False):
     # have provided on/off signature for the provided neurons.
     #
     # The returned cluster is an array of indices (into mnist.train.images).
-    print(np.shape(suffixes))
+    #print(np.shape(suffixes))
     if (VAL == False):
         return np.where((suffixes[:, neuron_ids] == neuron_sig).all(axis=1))[0]
 
@@ -314,7 +314,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
             tst_suffixes = []
 
             if len(fingerprints_tr) > 0:
-                print("FINGER TRAIN:", np.shape(fingerprints_tr))
+                #print("FINGER TRAIN:", np.shape(fingerprints_tr))
                 tr_suffixes = fingerprints_tr[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints
@@ -322,7 +322,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                     tr_suffixes = np.array([x.flatten() for x in tr_suffixes])
 
             if len(fingerprints_tst) > 0:
-                print("FINGER TST:", np.shape(fingerprints_tst))
+                #print("FINGER TST:", np.shape(fingerprints_tst))
                 tst_suffixes = fingerprints_tst[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints

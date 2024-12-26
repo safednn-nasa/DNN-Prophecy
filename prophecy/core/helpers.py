@@ -320,6 +320,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                     tr_suffixes = np.array([x.flatten() for x in tr_suffixes])
 
             if len(fingerprints_tst) > 0:
+                print("FINGER TST:",fingerprints_tst[layer_count - 1])
                 tst_suffixes = fingerprints_tst[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints
@@ -339,6 +340,7 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                 rule.update(train_performance.to_dict("train"))
 
             if len(tst_suffixes) > 0:
+                print("TST SUFF:",tst_suffixes)
                 test_performance = calc_prec_recall_f1(tst_suffixes, labels_test, neurons, signature, cl, is_val)
                 rule.update(test_performance.to_dict("test"))
 

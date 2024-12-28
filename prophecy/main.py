@@ -19,10 +19,10 @@ def run_analyze_command():
                                val_features=val_features, val_labels=val_labels, skip_rules=args.skip_rules, layer_name=args.layer_name,
                                only_dense=args.only_dense_layers, balance=args.balance, confidence=args.confidence,
                                only_activation=args.only_activation_layers, type=args.type, inptype=args.inptype, acts=args.acts, top=args.top)
-    #print("before rule extract")
-    print("LAYER NAME:", args.layer_name)
+    
+    
     ruleset = rule_extractor(path=classifiers_path)
-    #print("after rule extract")
+    
     pd.DataFrame(ruleset).to_csv(rules_path, index=False)
 
 def run_classify_command():
@@ -100,7 +100,7 @@ if __name__ == '__main__':
                                 default=False)
 
     args = parser.parse_args()
-    print("ACT:",args.acts)
+    
     model = get_model(args.model_path)
 
     working_dir = Path(args.workdir) if args.workdir else results_path

@@ -26,7 +26,7 @@ def get_layer_fingerprint(model_input: KerasTensor, layer: keras.layers.Layer,
     """
     func = backend.function(model_input, [layer.output])
 
-    #print("FEATURES:", np.shape(features))
+    
                             
     if features.shape[0] > 5000 and isinstance(features, np.ndarray):
         batch_size = 256
@@ -207,12 +207,11 @@ class Extractor:
               misclass = False
 
             finger_val = list(self.val_fingerprints.values())
-            #print("FINGER TRAIN SHAPE:", np.shape(fingerprints_tr))
-            #print("FINGER VAL SHAPE:", np.shape(finger_val))
+
             desc = describe_invariants_all_labels(invariants, layer_count, layer_name, fingerprints_tr,
                                                   list(self.val_fingerprints.values()), self.clf_train_labels,
                                                   self.clf_val_labels, Top=top_rules, ALL=all_rules,  MIS=misclass)
-            #print("helper done")
+          
             results.extend(desc)
 
         return results
@@ -300,7 +299,7 @@ class Extractor:
 
             selected_max_class_idx = np.random.choice(max_class_idx, size=counts[min_class], replace=False)
             new_ids = np.append(selected_max_class_idx, min_class_idx)
-            print("Length of new_ids:", len(new_ids))
+            
             self.clf_labels[split] = self.clf_labels[split][new_ids]
             self.features[split] = self.features[split][new_ids]
 

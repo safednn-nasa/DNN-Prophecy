@@ -189,16 +189,13 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
 
     set_labs = set(labels)
     TOT_LABELS = len(set_labs)
-    print(TOT_LABELS)
+    
 
     dist_labels_lst = list(set_labs)
     dist_labels = np.array(dist_labels_lst)
 
     if ( 1000 in set_labs):
-        print("1000:")
-        print(dist_labels_lst)
         dist_labels_lst.remove(1000)
-        print(dist_labels_lst)
         max = np.max(np.array(dist_labels_lst))
         total_labels = np.zeros(max+1)
         for indx in set_labs:
@@ -207,7 +204,6 @@ def calc_prec_recall_f1(suffixes, labels, neurons, signature, cl, VAL, supp=-1) 
             total_labels[indx] = len(np.where(labels == indx)[0])
        #     print(indx,":", total_labels[indx])
     else:
-        print("NOT MIS: TOTAL LABELS:",TOT_LABELS)
         max = np.max(dist_labels)
         total_labels = np.zeros(max+1)
         for indx in set_labs:
@@ -326,7 +322,6 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                     tr_suffixes = np.array([x.flatten() for x in tr_suffixes])
 
             if len(fingerprints_tst) > 0:
-                #print("FINGER TST:", np.shape(fingerprints_tst))
                 tst_suffixes = fingerprints_tst[layer_count - 1]
 
                 # flatten the suffixes for multidimensional fingerprints
@@ -346,7 +341,6 @@ def describe_invariants_all_labels(all_invariants, layer_count, layer_name, fing
                 rule.update(train_performance.to_dict("train"))
 
             if len(tst_suffixes) > 0:
-                print("TST SUFF:",tst_suffixes)
                 test_performance = calc_prec_recall_f1(tst_suffixes, labels_test, neurons, signature, cl, is_val)
                 rule.update(test_performance.to_dict("test"))
 

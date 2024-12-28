@@ -100,6 +100,7 @@ if __name__ == '__main__':
                                 default=False)
 
     args = parser.parse_args()
+    print("ACT:",args.acts)
     model = get_model(args.model_path)
 
     working_dir = Path(args.workdir) if args.workdir else results_path

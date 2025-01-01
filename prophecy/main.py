@@ -55,7 +55,7 @@ def run_detect_command():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Infer Data Precondition')
     parser.add_argument('-m', '--model_path', type=str, help='Model to infer the precondition',
-                        required=True)
+                        required=False)
     parser.add_argument('-wd', '--workdir', type=str, help='Working directory', required=False)
 
     action_parser = parser.add_subparsers(dest='action')
@@ -100,8 +100,11 @@ if __name__ == '__main__':
                                 default=False)
 
     args = parser.parse_args()
-    
-    model = get_model(args.model_path)
+
+    if (args.inptype == 1):
+        model = None
+    else:
+        model = get_model(args.model_path)
 
     working_dir = Path(args.workdir) if args.workdir else results_path
 

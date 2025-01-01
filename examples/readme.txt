@@ -4,3 +4,5 @@ Example notebooks demonstrating the use of Prophecy for classification and regre
 
 2. ACASX_ProphecyTool.ipynb: Demostrates use of Prophecy to extract rules for the ACASXU model. Demonstrates use of Marabou to prove the rules.
 Presents sketch of the code to perform compositional verification.
+
+3. GTSRB_ProphecyTool.ipynb: Demostrates use of Prophecy to extract rules for the GTSRB model.

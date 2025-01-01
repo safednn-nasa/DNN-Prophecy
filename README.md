@@ -18,6 +18,9 @@ $ pip install -r requirements.txt
 
 ## Usage
 
+#### Example Notebooks
+The examples folder contains a number of notebooks using Prophecy.
+
 ### Analyze Command
 
 Extract rules and train classifiers from the provided training and validation datasets.
@@ -32,8 +35,7 @@ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir analyze [-h] 
 
 - -tx, --train_features (required): Path to the training features.
 - -ty, --train_labels (required): Path to the training labels.
-- -vx, --val_features (required): Path to the validation features.
-- -vy, --val_labels (required): Path to the validation labels.
+- -vx, --val_features (required): Path to the validation features.- -vy, --val_labels (required): Path to the validation labels.
 - -odl, --only-dense-layers: Consider only dense layers.
 - -oal, --only-activation-layers: Include the activation layers associated with the dense layers.
 - -sr, --skip-rules: Skip rules extraction.
@@ -51,37 +53,4 @@ $ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir analyze -tx
 -vx /path/to/val_features.csv -vy /path/to/val_labels.csv -odl -oal 
 ```
 
-### Infer Command
 
-Run inference using the specified model and test dataset.
-
-```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer [-h] -tx TEST_FEATURES -ty TEST_LABELS {rules,classifiers} ...
-```
-
-#### Subcommands
-- rules: Detect rule violations on the test data.
-- classifiers: Classify test data using pre-trained classifiers.
-
-
-#### Common Arguments:
-- -tx, --test_features (required): Path to the test features.
-- -ty, --test_labels (required): Path to the test labels.
-
-
-#### rules Arguments:
-- -t, --threshold: Sets the F1-threshold for selecting rules (default: 0.0).
-
-#### classifiers Arguments:
-- -op, --only-pure: Consider only classifications with 100% probability.
-
-#### Examples
-- Evaluate a given model on unseen data with the extracted rules
-```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer -tx /path/to/test_features.csv -ty /path/to/test_labels.csv rules
-```
-
-- Evaluate a given model on unseen data with the trained classifiers
-```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer -tx /path/to/test_features.csv -ty /path/to/test_labels.csv classifiers 
-```

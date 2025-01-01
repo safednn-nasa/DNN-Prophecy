@@ -78,7 +78,14 @@ class Extractor:
         self.acts = acts
         self.top = top
 
-        print("CONFIG PARAMS: LAYER NAME:", self.layer_name, ",TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts, ",Top/All:", self.top)
+        print("CONFIG PARAMS:")
+        if (self.layer_name != None):
+          print("LAYER NAME:", self.layer_name)
+        print("TYPE:", self.type, ",INP TYPE:", self.inptype, ",ACTS:", self.acts, ",Top:", self.top)
+        
+        if (self.inptype == 1):
+          return
+          
         if self.layer_name == None:
           if only_dense and only_activation:
             print("Dense layers and associated activation layers are considered for fingerprinting")

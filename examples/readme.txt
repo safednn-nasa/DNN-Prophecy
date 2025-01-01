@@ -5,4 +5,8 @@ Example notebooks demonstrating the use of Prophecy for classification and regre
 2. ACASX_ProphecyTool.ipynb: Demostrates use of Prophecy to extract rules for the ACASXU model. Demonstrates use of Marabou to prove the rules.
 Presents sketch of the code to perform compositional verification.
 
-3. GTSRB_ProphecyTool.ipynb: Demostrates use of Prophecy to extract rules for the GTSRB model.
+3. GTSRB_ProphecyTool.ipynb: Demostrates use of Prophecy to extract rules for a model for GTSRB classification.
+
+4. KJ_TaxiNet_ProphecyTool.ipynb: Taxinet is a regression model for center-line tracking on airport runways. It takes in images of the runway and produces two outputs; cross-track error (cte) and head error (he). KJ_Taxinet is a smaller model which takes in down-sampled images of the runway.
+This notebook demonstrates the application of Prophecy to extract rules satisfying the safety property (|cte| > safety threshold) , (|he| > safety threshold). It also demonstrates the usage of Marabou to prove these rules.
+

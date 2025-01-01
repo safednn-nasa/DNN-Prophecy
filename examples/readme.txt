@@ -12,3 +12,14 @@ This notebook demonstrates the application of Prophecy to extract rules satisfyi
 This is a replication of the work published in 	Ismet Burak Kadron, Divya Gopinath, Corina S. Pasareanu, Huafeng Yu:
 Case Study: Analysis of Autonomous Center Line Tracking Neural Networks. VSTTE 2021: 104-121.
 
+5. Airfoil_Self_Noise_ProphecyTool.ipynb: Regression model to prediction of acoustic noise generation from airfoil: 
+5D input:
+Frequency [Hz]
+Airfoil angle of attack [deg]
+Chord length [m]
+Free-stream velocity [m/s]
+Suction side displacement thickness [m]
+1D output:
+Scaled sound pressure level at given frequency [dB]
+
+Extracts rules and uses Marabou to generate proofs.

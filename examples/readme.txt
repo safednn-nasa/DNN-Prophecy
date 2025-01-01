@@ -23,3 +23,5 @@ Suction side displacement thickness [m]
 Scaled sound pressure level at given frequency [dB]
 
 Extracts rules and uses Marabou to generate proofs.
+
+6. ProphecyTool_with_CLIP.ipynb: Demonstrates application of Prophecy to extract rules using the fingerprints and zero-shot classification labels of a CLIP model trained on the RIVAL-10 dataset.

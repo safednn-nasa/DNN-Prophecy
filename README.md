@@ -23,12 +23,13 @@ The examples folder contains a number of notebooks using Prophecy.
 
 ### Analyze Command
 
-Extract rules and train classifiers from the provided training and validation datasets.
+Extract rules from the provided training and validation datasets.
 
 
 ```shell
 python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir analyze [-h] -tx TRAIN_FEATURES -ty TRAIN_LABELS \
-						-vx VAL_FEATURES -vy VAL_LABELS [-odl] [-oal] [-sr] [-b] [-c] [-rs RANDOM_STATE]
+						-vx VAL_FEATURES -vy VAL_LABELS [-odl] [-oal] [-sr] [-b] [-c] [-rs RANDOM_STATE] \
+						[-layer_name] [-inptype] [-type] [-acts] [-top]
 ```
 
 #### Arguments

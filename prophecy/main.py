@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if (args.inptype == 1):
+    if (args.action.startswith('analyze') and args.inptype == 1):
         model = None
     else:
         model = get_model(args.model_path)

@@ -1,4 +1,11 @@
-### Infer Command
+Uses Prophecy to extract rules for correct vs incorrect behavior.
+Image models and datasets: MNIST,CIFAR
+Tabular model and dataset: PD (PIMA diabetes)
+
+The rules are then used to classify runtime inputs as "CORRECTLY CLASSIFIED", "INCORRECTLY CLASSIFIED", "UNCERTAIN".
+The following Prophecy command line arguments are used at runtime.
+
+###Infer Command
 
 Run inference using the specified model and test dataset.
 
@@ -6,12 +13,12 @@ Run inference using the specified model and test dataset.
 $ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer [-h] -tx TEST_FEATURES -ty TEST_LABELS {rules,classifiers} ...
 ```
 
-#### Subcommands
+####Subcommands
 - rules: Detect rule violations on the test data.
 - classifiers: Classify test data using pre-trained classifiers.
 
 
-#### Common Arguments:
+####Common Arguments:
 - -tx, --test_features (required): Path to the test features.
 - -ty, --test_labels (required): Path to the test labels.
 

@@ -68,7 +68,8 @@ def run_prove_command(lab: int):
     print("LAYER, NEURONS AND SIGNATURE:")
     top_rule_layer = ruleset['layer']
     print("LAYER:", top_rule_layer)
-    
+
+    rule_neurons_df = ruleset['neurons']
     rule_neurons_list = []
     rule_neurons = (rule_neurons_df.array[0]).split(",")
     for indx in range(0, len(rule_neurons)):
@@ -78,7 +79,8 @@ def run_prove_command(lab: int):
         rule_neurons_list.append(int(rule_neurons[indx]))
     
     print("NEURONS:",rule_neurons_list)
-    
+
+    rule_sig_df = ruleset['signature']
     rule_sig_list = []
     rule_sig = (rule_sign_df.array[0]).split(",")
     for indx in range(0, len(rule_sig)):

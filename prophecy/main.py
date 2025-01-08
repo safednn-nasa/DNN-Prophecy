@@ -56,7 +56,7 @@ def run_prove_command(lab: int):
 
     output_path = predictions_path / 'results.txt'
 
-    ruleset = pd.read_csv(_output_path)
+    ruleset = pd.read_csv(output_path)
     ruleset = ruleset[ruleset['label'] == lab]
     ruleset = ruleset.reset_index()
     ruleset = ruleset[ruleset.index == 0]

@@ -98,6 +98,8 @@ class RulesProve:
         print("FINGERPRINT EXAM:", finger_ex[0])
 
         return (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex[0], fngr_ex[0])
+
+    def solve_marabou():
         
     def __call__(self, **kwargs) -> str:
         results = ""

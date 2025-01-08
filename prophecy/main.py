@@ -82,7 +82,7 @@ def run_prove_command(lab: int):
 
     rule_sig_df = ruleset['signature']
     rule_sig_list = []
-    rule_sig = (rule_sign_df.array[0]).split(",")
+    rule_sig = (rule_sig_df.array[0]).split(",")
     for indx in range(0, len(rule_sig)):
         rule_sig[indx] = (rule_sig[indx]).strip()
         rule_sig[indx] = (rule_sig[indx]).replace("[", "")

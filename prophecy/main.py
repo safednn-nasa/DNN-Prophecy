@@ -57,9 +57,14 @@ def run_prove_command():
     output_path = predictions_path / 'results.txt'
     ruleset = pd.read_csv(rules_path)
     ruleset = ruleset[ruleset['test_precision'] >= 90.0]
+    ruleset = ruleset[ruleset['label'] == label]
+    ruleset = ruleset[ruleset.index == 0]
 
-    prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
-    results = prove_marabou()
+    print("PROVE RULE with Label:", label)
+    print(ruleset)
+
+    #prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
+    #results = prove_marabou()
 
 
 if __name__ == '__main__':

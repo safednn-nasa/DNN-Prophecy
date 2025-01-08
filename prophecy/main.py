@@ -62,11 +62,31 @@ def run_prove_command(lab: int):
 
 
     print("PROVE RULE with Label:", lab)
-    print("neurons:", ruleset['neurons'])
-    print("signature:", ruleset['signature'])
+    print("RULES as NEURONS AND SIGNATURE:")
+    rule_neurons_list = []
+    rule_neurons = (dense_14_rule_neurons.array[0]).split(",")
+    for indx in range(0, len(rule_neurons)):
+        rule_neurons[indx] = (rule_neurons[indx]).strip()
+        rule_neurons[indx] = (rule_neurons[indx]).replace("[", "")
+        rule_neurons[indx] = (rule_neurons[indx]).replace("]","")
+        rule_neurons_list.append(int(rule_neurons[indx]))
+    
+    print("NEURONS:",rule_neurons_list)
+    
+    rule_sig_list = []
+    rule_sig = (dense_14_rule_signature.array[0]).split(",")
+    for indx in range(0, len(rule_sig)):
+        rule_sig[indx] = (rule_sig[indx]).strip()
+        rule_sig[indx] = (rule_sig[indx]).replace("[", "")
+        rule_sig[indx] = (rule_sig[indx]).replace("]","")
+        rule_sig_list.append(int(rule_sig[indx]))
+        
+    print("SIGNATURE:",rule_sig_list)
+
     print("ONNX MODEL:", onnx_model)
-    print("FEATURES:", train_features)
-    print("LABELS:", train_labels)
+    print("FEATURES:", np.shape(train_features))
+    print("LABELS:", np.shape(train_labels))
+    
     #prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
     #results = prove_marabou()
 

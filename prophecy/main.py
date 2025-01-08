@@ -55,9 +55,10 @@ def run_prove_command(lab: int):
     train_features, train_labels = read_split(args.train_features, args.train_labels)
 
     output_path = predictions_path / 'results.txt'
-    ruleset = pd.read_csv(rules_path)
-    ruleset = ruleset[ruleset['test_precision'] >= 90.0]
+
+    ruleset = pd.read_csv(_output_path)
     ruleset = ruleset[ruleset['label'] == lab]
+    ruleset = ruleset.reset_index()
     ruleset = ruleset[ruleset.index == 0]
 
     rule_neurons_df = ruleset['neurons']
@@ -81,12 +82,14 @@ def run_prove_command(lab: int):
         rule_sig[indx] = (rule_sig[indx]).strip()
         rule_sig[indx] = (rule_sig[indx]).replace("[", "")
         rule_sig[indx] = (rule_sig[indx]).replace("]","")
-        rule_sig_list.append(int(rule_sig[indx]))
-        #if (indx % 2 == 0):
-        #    rule_sig[indx] = (rule_sig[indx]).replace("'", "")
-        #    rule_sig_list.append(rule_sig[indx])
-        #else:
-        #    rule_sig_list.append(float(rule_sig[indx]))
+        if (len(rule_sig) == len(rule_neurons)):
+            rule_sig_list.append(int(rule_sig[indx]))
+        else:
+            if (indx % 2 == 0):
+                rule_sig[indx] = (rule_sig[indx]).replace("'", "")
+                rule_sig_list.append(rule_sig[indx])
+            else:
+                rule_sig_list.append(float(rule_sig[indx]))
         
     print("SIGNATURE:",rule_sig_list)
 

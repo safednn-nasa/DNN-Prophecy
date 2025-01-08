@@ -102,7 +102,7 @@ class RulesProve:
     def __call__(self, **kwargs) -> str:
         results = ""
 
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = get_bounds()
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = self.get_bounds()
 
         
         return results

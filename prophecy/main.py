@@ -82,6 +82,11 @@ def run_prove_command(lab: int):
         rule_sig[indx] = (rule_sig[indx]).replace("[", "")
         rule_sig[indx] = (rule_sig[indx]).replace("]","")
         rule_sig_list.append(int(rule_sig[indx]))
+        #if (indx % 2 == 0):
+        #    rule_sig[indx] = (rule_sig[indx]).replace("'", "")
+        #    rule_sig_list.append(rule_sig[indx])
+        #else:
+        #    rule_sig_list.append(float(rule_sig[indx]))
         
     print("SIGNATURE:",rule_sig_list)
 

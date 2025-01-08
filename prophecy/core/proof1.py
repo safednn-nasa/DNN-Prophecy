@@ -12,7 +12,7 @@ from typing import Tuple, Union
 from tqdm import tqdm
 from pathlib import Path
 
-from prophecy.core.helpers import check_pattern
+from prophecy.core.helpers import check_pattern, get_suffix_cluster
 
 
 class RulesProve:
@@ -26,10 +26,7 @@ class RulesProve:
         self.features = features
         self.labels = labels
         
-
-    def __call__(self, **kwargs) -> str:
-        results = ""
-
+    def get_bounds() -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
         x_train = self.features
         x_train_flat = []
@@ -62,233 +59,50 @@ class RulesProve:
             fngprnt = (fingerprints > 0.0).astype('int')
             indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
         else:
-            indices = get_suffix_cluster(self.neurons, self.sig, fngprnt, VAL=True)
+            indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
         print("indices:", len(indices))
 
-x_train3 = []
-fngprnt3 = []
-inp_ex = []
-finger_ex = []
-for indx in range(0, len(indices)):
-    if (indx == 0):
-     # print("INP:",x_train_flat[indices[indx]])
-      inp_ex.append(x_train_flat[indices[indx]])
-     # print("FINGER:",fingerprints[indices[indx]])
-      finger_ex.append(fingerprints[indices[indx]])
-    x_train3.append(x_train_flat[indices[indx]])
-    fngprnt3.append(fingerprints[indices[indx]])
+        x_train3 = []
+        fngprnt3 = []
+        inp_ex = []
+        finger_ex = []
+        for indx in range(0, len(indices)):
+            if (indx == 0):
+                inp_ex.append(x_train_flat[indices[indx]])
+                finger_ex.append(fingerprints[indices[indx]])
+            x_train3.append(x_train_flat[indices[indx]])
+            fngprnt3.append(fingerprints[indices[indx]])
+        x_train3 = np.array(x_train3)
+        fngprnt3 = np.array(fngprnt3)
 
-x_train3 = np.array(x_train3)
-fngprnt3 = np.array(fngprnt3)
+        print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
+        x_train_min3 = np.zeros(length)
+        x_train_max3 = np.zeros(length)
+        for indx in range(0,length):
+          x_train_min3[indx] = np.min(x_train3[:,indx])
+          x_train_max3[indx] = np.max(x_train3[:,indx])
 
-print(np.shape(x_train3))
-x_train_min3 = np.zeros(length)
-x_train_max3 = np.zeros(length)
+        print(x_train_min3)
+        print(x_train_max3)
 
-for indx in range(0,length):
-  x_train_min3[indx] = np.min(x_train3[:,indx])
-  x_train_max3[indx] = np.max(x_train3[:,indx])
-
-print(x_train_min3)
-print(x_train_max3)
-
-print(np.shape(fngprnt3))
-fngprnt_min3 = np.zeros(len(fngprnt3[0]))
-fngprnt_max3 = np.zeros(len(fngprnt3[0]))
-
-for indx in range(0,len(fngprnt3[0])):
-  fngprnt_min3[indx] = np.min(fngprnt3[:,indx])
-  fngprnt_max3[indx] = np.max(fngprnt3[:,indx])
-
-print(fngprnt_min3)
-print(fngprnt_max3)
-
-print("INPUT EXAM:", inp_ex[0])
-print("FINGERPRINT EXAM:", finger_ex[0])
+        print("GET MIN,MAX BOUNDS OF NEURONS SATISFYING RULE")
+        fngprnt_min3 = np.zeros(len(fngprnt3[0]))
+        fngprnt_max3 = np.zeros(len(fngprnt3[0]))
+        for indx in range(0,len(fngprnt3[0])):
+            fngprnt_min3[indx] = np.min(fngprnt3[:,indx])
+            fngprnt_max3[indx] = np.max(fngprnt3[:,indx])
+        print(fngprnt_min3)
+        print(fngprnt_max3)
         
+        print("INPUT EXAM:", inp_ex[0])
+        print("FINGERPRINT EXAM:", finger_ex[0])
+
+    return (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex[0], fngr_ex[0])
+        
+    def __call__(self, **kwargs) -> str:
+        results = ""
+
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = get_bounds()
 
         
-
         return results
-
-    @abstractmethod
-    def eval(self, index: int, row: Union[pd.Series, np.ndarray]):
-        pass
-
-    @property
-    def model_rep(self):
-        if self._model_rep is None:
-            self._model_rep = {}
-            # Get the model fingerprints
-
-            total_samples = self.features.shape[0]
-
-            if isinstance(self.features, np.ndarray) and total_samples > 5000:
-                self.get_batched_model_rep(total_samples)
-            else:
-                for layer in self.model.layers:
-                    if layer.name not in self.target_layers:
-                        continue
-
-                    func_dense = keras.backend.function(self.model.input, [layer.output])
-                    inp_tensor = keras.backend.constant(self.features)
-                    op = func_dense(inp_tensor)
-                    self._model_rep[layer.name] = (func_dense, inp_tensor, op)
-
-        return self._model_rep
-
-    def get_batched_model_rep(self, total_samples: int,  batch_size=256):
-        for layer in self.model.layers:
-            if layer.name not in self.target_layers:
-                continue
-
-            layer_inputs = []
-            layer_outputs = []
-            func_dense = keras.backend.function(self.model.input, [layer.output])
-
-            for start in tqdm(range(0, total_samples, batch_size), desc=f"Processing {layer.name}", file=sys.stdout):
-                end = min(start + batch_size, total_samples)
-                batch_features = self.features[start:end]
-                inp_tensor = keras.backend.constant(batch_features)
-                layer_inputs.append(inp_tensor)
-                op = func_dense(inp_tensor)
-                layer_outputs.append(op)
-
-            self._model_rep[layer.name] = (func_dense, tf.concat(layer_inputs, axis=0),
-                                           np.concatenate(layer_outputs, axis=1))
-
-
-class RulesDetector(BaseDetector):
-    def __init__(self, ruleset: pd.DataFrame, **kw):
-        print("DETECT CORRECT, INCORRECT, UNCERTAIN on UNSEEN DATA")
-        super().__init__(name="rules", **kw)
-        # parse the ruleset
-        ruleset['neurons'] = ruleset['neurons'].apply(literal_eval)
-        ruleset['signature'] = ruleset['signature'].apply(literal_eval)
-        self._target_layers = list(ruleset['layer'].unique())
-
-        self.correct_rules = ruleset[ruleset['kind'] == 'correct']
-        self.incorrect_rules = ruleset[ruleset['kind'] == 'incorrect']
-
-    @property
-    def target_layers(self):
-        return self._target_layers
-
-    def eval(self, index: int, row: Union[pd.Series, np.ndarray]):
-        # print(sample.to_list())
-        corr_layer, corr_cover, found = self.eval_rules(index, self.correct_rules)
-        inc_layer, inc_cover, found = self.eval_rules(index, self.incorrect_rules)
-        corr_cnt = len(corr_layer)
-        inc_cnt = len(inc_layer)
-        stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_cover': corr_cover, 'inc_cover': inc_cover,
-                 'corr_layer': corr_layer, 'inc_layer': inc_layer}
-
-        if corr_cnt == inc_cnt:
-            stats['eval'] = 'uncertain'
-        elif corr_cnt > inc_cnt:
-            stats['eval'] = 'correct'
-        elif inc_cnt > corr_cnt:
-            stats['eval'] = 'incorrect'
-
-        self.stats.append(stats)
-
-        return stats['eval']
-
-    def eval_rules(self, inp_idx: int, ruleset: pd.DataFrame) -> Tuple[list, bool, bool]:
-        layers = []
-        cover = False
-        found = False
-
-        for layer, rows in ruleset.groupby('layer', sort=False):
-            found = False
-            for i, row in rows.iterrows():
-                # TODO: check if this applies for other settings
-                func_dense, inp_tensor, op = self.model_rep['dense'] if layer == 'input' else self.model_rep[layer]
-                found = check_pattern(op[0][inp_idx], row['neurons'], row['signature'])
-
-                if found:
-                    cover = True
-                    layers.append(layer)
-                    break
-
-        return layers, cover, found
-
-
-class ClassifierDetector(BaseDetector):
-    def __init__(self, learners_path: Path, only_pure: bool = False, **kw):
-        super().__init__(name="classifier", **kw)
-        self.learners_path = learners_path
-        self._classifiers = {}
-        self._only_pure = only_pure
-
-    @property
-    def target_layers(self):
-        if len(self._target_layers) == 0:
-            self._target_layers = list(self.classifiers.keys())
-
-        return self._target_layers
-
-    @property
-    def classifiers(self):
-        if self._classifiers == {}:
-            for classifier_path in self.learners_path.iterdir():
-                if classifier_path.is_file() and classifier_path.suffix == '.pkl':
-                    self._classifiers[classifier_path.stem] = pickle.load(open(classifier_path, 'rb'))
-
-        return self._classifiers
-
-    def eval(self, index: int, row: pd.Series):
-        corr_layer, inc_layer = self.eval_classifiers(index, row)
-        corr_cnt = len(corr_layer)
-        inc_cnt = len(inc_layer)
-        stats = {'idx': index, 'corr': corr_cnt, 'inc': inc_cnt, 'corr_layer': corr_layer, 'inc_layer': inc_layer}
-
-        if corr_cnt == inc_cnt:
-            stats['eval'] = 'uncertain'
-
-        elif corr_cnt > inc_cnt:
-            stats['eval'] = 'correct'
-
-        elif inc_cnt > corr_cnt:
-            stats['eval'] = 'incorrect'
-
-        self.stats.append(stats)
-
-        return stats['eval']
-
-    def eval_classifiers(self, inp_idx: int, features: Union[pd.Series, np.ndarray]) -> Tuple[list, list]:
-        corr_layer = []
-        inc_layer = []
-
-        for layer, classifier in self.classifiers.items():
-            #print("LAYER:", layer.name)
-            predict_method = classifier.predict_proba if self._only_pure else classifier.predict
-
-            if layer == 'input':
-                if isinstance(features, pd.Series):
-                    prediction = predict_method([features.to_numpy()])
-                else:
-                    if len(features.shape) > 2:
-                        prediction = predict_method([features.flatten()])
-                    else:
-                        prediction = predict_method([features])
-            else:
-                _, _, op = self.model_rep[layer]
-
-                if len(op[0][inp_idx].shape) > 2:
-                    prediction = predict_method([op[0][inp_idx].flatten()])
-                else:
-                    prediction = predict_method([op[0][inp_idx]])
-
-            if self._only_pure:
-                if prediction[0][0] not in [0.0, 1.0]:
-                    print(f"Uncertain prediction for layer {layer} with probabilities {prediction[0]}")
-                    continue
-                # get the class with the highest probability
-                label = classifier.classes_[np.argmax(prediction[0])]
-            else:
-                label = prediction[0]
-
-            corr_layer.append(layer) if label == 0 else inc_layer.append(layer)
-
-        return corr_layer, inc_layer

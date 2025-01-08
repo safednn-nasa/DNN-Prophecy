@@ -30,10 +30,15 @@ class RulesProve:
     def __call__(self, **kwargs) -> str:
         results = ""
 
-        func_dense = None
+        func_layer = None
         for layer in self.model.layers:
             if layer.name == self.layer_nm:
-                func_dense = keras.backend.function(self.model.input, [layer.output])
+                func_layer = keras.backend.function(self.model.input, [layer.output])
+
+        fingerprint_layer = []
+        if (func_layer != None):
+            fingerprint_layer = func_layer(self.features)
+        
 
         
 

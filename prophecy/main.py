@@ -62,7 +62,8 @@ def run_prove_command(lab: int):
 
     print("PROVE RULE with Label:", lab)
     print(ruleset)
-
+    print("ONNX MODEL:", onnx_model)
+    
     #prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
     #results = prove_marabou()
 
@@ -131,7 +132,7 @@ if __name__ == '__main__':
         model = get_model(args.model_path)
 
     if (args.action == 'prove'):
-        onnx_model = get_model(args.onnx_path)
+        onnx_model = args.onnx_path
         
 
     working_dir = Path(args.workdir) if args.workdir else results_path

@@ -60,10 +60,13 @@ def run_prove_command(lab: int):
     ruleset = ruleset[ruleset['label'] == lab]
     ruleset = ruleset[ruleset.index == 0]
 
+
     print("PROVE RULE with Label:", lab)
-    print(ruleset)
+    print("neurons:", ruleset['neurons'])
+    print("signature:", ruleset['signature'])
     print("ONNX MODEL:", onnx_model)
-    
+    print("FEATURES:", train_features)
+    print("LABELS:", train_labels)
     #prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
     #results = prove_marabou()
 

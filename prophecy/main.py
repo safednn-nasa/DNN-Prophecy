@@ -8,6 +8,7 @@ from pathlib import Path
 from prophecy.utils.misc import get_model, read_split
 from prophecy.core.extract import Extractor
 from prophecy.core.detect import RulesDetector, ClassifierDetector
+from prophecy.core.proof1 import RulesProve
 from prophecy.utils.paths import results_path
 
 

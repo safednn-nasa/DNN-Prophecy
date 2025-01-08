@@ -58,14 +58,17 @@ def run_prove_command(lab: int):
 
     ruleset = pd.read_csv(rules_path)
     ruleset = ruleset[ruleset['label'] == lab]
+    ruleset = ruleset.sort_values(by=['support'], ascending=False)
     ruleset = ruleset.reset_index()
     ruleset = ruleset[ruleset.index == 0]
 
-    rule_neurons_df = ruleset['neurons']
-    rule_sign_df = ruleset['signature']
     
-    print("PROVE RULE with Label:", lab)
-    print("RULES as NEURONS AND SIGNATURE:")
+    print("PROVE RULE for Label:", lab)
+    print("RULE WITH HIGHEST SUPPORT ON TRAIN DATA")
+    print("LAYER, NEURONS AND SIGNATURE:")
+    top_rule_layer = ruleset['layer']
+    print("LAYER:", top_rule_layer)
+    
     rule_neurons_list = []
     rule_neurons = (rule_neurons_df.array[0]).split(",")
     for indx in range(0, len(rule_neurons)):
@@ -97,7 +100,7 @@ def run_prove_command(lab: int):
     print("FEATURES:", np.shape(train_features))
     print("LABELS:", np.shape(train_labels))
     
-    #prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
+    prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels)
     #results = prove_marabou()
 
 

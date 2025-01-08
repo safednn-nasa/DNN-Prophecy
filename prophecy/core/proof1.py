@@ -17,7 +17,7 @@ from prophecy.core.helpers import check_pattern
 
 class RulesProve:
     #RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels)
-    def __init__(self, model: keras.Model, onnx_model: str, layer_nm: str, neurons: list(), sig: list(), features: pd.DataFrame, labels: np.ndarray):
+    def __init__(self, model: keras.Model, onnx_model: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray):
         self.model = model
         self.onnx_path = onnx_model
         self.layer_nm = layer_nm
@@ -27,17 +27,15 @@ class RulesProve:
         self.labels = labels
         
 
-    def __call__(self, **kwargs) -> list:
-        results = []
+    def __call__(self, **kwargs) -> str:
+        results = ""
 
-        if isinstance(self.features, pd.DataFrame):
-            iterator = self.features.iterrows()
-        else:
-            iterator = enumerate(self.features)
+        func_dense = None
+        for layer in self.model.layers:
+            if layer.name == self.layer_nm:
+                func_dense = keras.backend.function(self.model.input, [layer.output])
 
-        for inp_idx, sample in tqdm(iterator, file=sys.stdout):
-            outcome = self.eval(inp_idx, sample)
-            results.append({'idx': inp_idx, 'outcome': outcome})
+        
 
         return results
 

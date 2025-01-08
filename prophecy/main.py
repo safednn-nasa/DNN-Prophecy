@@ -60,11 +60,13 @@ def run_prove_command(lab: int):
     ruleset = ruleset[ruleset['label'] == lab]
     ruleset = ruleset[ruleset.index == 0]
 
-
+    rule_neurons_df = ruleset['neurons']
+    rule_sign_df = ruleset['signature']
+    
     print("PROVE RULE with Label:", lab)
     print("RULES as NEURONS AND SIGNATURE:")
     rule_neurons_list = []
-    rule_neurons = (dense_14_rule_neurons.array[0]).split(",")
+    rule_neurons = (rule_neurons_df.array[0]).split(",")
     for indx in range(0, len(rule_neurons)):
         rule_neurons[indx] = (rule_neurons[indx]).strip()
         rule_neurons[indx] = (rule_neurons[indx]).replace("[", "")
@@ -74,7 +76,7 @@ def run_prove_command(lab: int):
     print("NEURONS:",rule_neurons_list)
     
     rule_sig_list = []
-    rule_sig = (dense_14_rule_signature.array[0]).split(",")
+    rule_sig = (rule_sign_df.array[0]).split(",")
     for indx in range(0, len(rule_sig)):
         rule_sig[indx] = (rule_sig[indx]).strip()
         rule_sig[indx] = (rule_sig[indx]).replace("[", "")

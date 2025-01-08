@@ -51,6 +51,16 @@ def run_detect_command():
     pd.DataFrame(results).to_csv(output_path, index=False)
     pd.DataFrame(detector.stats).to_csv(predictions_path / 'stats.csv', index=False)
 
+def run_prove_command():
+    train_features, train_labels = read_split(args.train_features, args.train_labels)
+
+    output_path = predictions_path / 'results.txt'
+    ruleset = pd.read_csv(rules_path)
+    ruleset = ruleset[ruleset['test_precision'] >= 90.0]
+
+    prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
+    results = prove_marabou()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Infer Data Precondition')
@@ -59,6 +69,7 @@ if __name__ == '__main__':
     parser.add_argument('-wd', '--workdir', type=str, help='Working directory', required=False)
 
     action_parser = parser.add_subparsers(dest='action')
+    
     infer_parser = action_parser.add_parser('infer')
     infer_parser.add_argument('-tx', '--test_features', type=str, help='Test features', required=True)
     infer_parser.add_argument('-ty', '--test_labels', type=str, help='Test labels', required=True)
@@ -99,12 +110,24 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-top', '--top', type=bool, help='Top rules or All rules',
                                 default=False)
 
+    analyze_parser = action_parser.add_parser('prove')
+    analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
+    analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
+    analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=True)
+    analyze_parser.add_argument('-label', '--label', type=int, default=0,
+                                help='select top rules for given label.')
+    
+
     args = parser.parse_args()
 
-    if (args.action.startswith('analyze') and args.inptype == 1):
+    if ((args.action == 'analyze') and (args.inptype == 1)):
         model = None
     else:
         model = get_model(args.model_path)
+
+    if (args.action == 'prove'):
+        onnx_model = get_model(args.onnx_path)
+        
 
     working_dir = Path(args.workdir) if args.workdir else results_path
 
@@ -114,12 +137,10 @@ if __name__ == '__main__':
     predictions_path = working_dir / "predictions"
     predictions_path.mkdir(parents=True, exist_ok=True)
 
-    #if args.action == 'analyze':
-    if args.action.startswith('analyze'):
-        if args.action == 'analyze':
-            run_analyze_command()
-        if args.action == 'analyze_nocsv':
-            run_analyze_nocsv_command()
+    if args.action == 'analyze':
+        run_analyze_command()
+    elif args.action == 'prove':
+        run_prove_command()
     elif args.action == 'infer':
         if args.infer_subparser == 'rules':
             run_detect_command()

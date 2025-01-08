@@ -17,19 +17,11 @@ from prophecy.core.helpers import check_pattern
 
 class RulesProve:
     def __init__(self, model: keras.Model, onnx_model: str, ruleset: pd.DataFrame, features: pd.DataFrame, labels: np.ndarray):
-        self.name = name
         self.model = model
+        self.onnx_path = onnx_model
+        self.ruleset = ruleset
         self.features = features
         self.labels = labels
-        self._model_rep = None
-        self._predictions = None
-        self._target_layers = []
-        self.stats = []
-
-    @property
-    @abstractmethod
-    def target_layers(self):
-        pass
 
     def __call__(self, **kwargs) -> list:
         results = []

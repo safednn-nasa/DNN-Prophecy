@@ -15,8 +15,9 @@ from pathlib import Path
 from prophecy.core.helpers import check_pattern
 
 
-class BaseDetector:
-    def __init__(self, name: str, model: keras.Model, features: pd.DataFrame, labels: np.ndarray):
+class RulesProve
+RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
+    def __init__(self, model: keras.Model, features: pd.DataFrame, labels: np.ndarray):
         self.name = name
         self.model = model
         self.features = features

@@ -17,7 +17,7 @@ from prophecy.core.helpers import check_pattern, get_suffix_cluster
 
 class RulesProve:
     #RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels)
-    def __init__(self, model: keras.Model, onnx_model: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray):
         self.model = model
         self.onnx_path = onnx_model
         self.layer_nm = layer_nm

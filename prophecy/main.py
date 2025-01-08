@@ -51,16 +51,16 @@ def run_detect_command():
     pd.DataFrame(results).to_csv(output_path, index=False)
     pd.DataFrame(detector.stats).to_csv(predictions_path / 'stats.csv', index=False)
 
-def run_prove_command():
+def run_prove_command(lab: int):
     train_features, train_labels = read_split(args.train_features, args.train_labels)
 
     output_path = predictions_path / 'results.txt'
     ruleset = pd.read_csv(rules_path)
     ruleset = ruleset[ruleset['test_precision'] >= 90.0]
-    ruleset = ruleset[ruleset['label'] == label]
+    ruleset = ruleset[ruleset['label'] == lab]
     ruleset = ruleset[ruleset.index == 0]
 
-    print("PROVE RULE with Label:", label)
+    print("PROVE RULE with Label:", lab)
     print(ruleset)
 
     #prove_marabou = RulesProve(model=model, onnx_model, ruleset=ruleset, features=train_features, labels=train_labels)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
     analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
     analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=True)
-    analyze_parser.add_argument('-label', '--label', type=int, default=0,
+    analyze_parser.add_argument('-label', '--lab', type=int, default=0,
                                 help='select top rules for given label.')
     
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     if args.action == 'analyze':
         run_analyze_command()
     elif args.action == 'prove':
-        run_prove_command()
+        run_prove_command(args.lab)
     elif args.action == 'infer':
         if args.infer_subparser == 'rules':
             run_detect_command()

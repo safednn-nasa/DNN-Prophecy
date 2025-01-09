@@ -105,7 +105,7 @@ class RulesProve:
 
         (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = self.get_bounds()
 
-        (self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int ):
+        #(self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int ):
         solve_query = SolveMarabou(onnx_model_nm=self.onnx_path,onnx_layer_nm="dense_14_1/Identity:0",x_train_min_layer=x_train_min_layer,x_train_max_layer=x_train_max_layer,fngprnt_min_layer=fngprnt_min_layer,fngprnt_max_layer=fngprnt_max_layer,lab=self.lab )
         solve_query()
         return results

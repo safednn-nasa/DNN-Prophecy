@@ -13,12 +13,11 @@ from tqdm import tqdm
 from pathlib import Path
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
-#from prophecy.core.solveMarabou import SolveMarabou
+from prophecy.core.solveMarabou import SolveMarabou
 
 
 class RulesProve:
-    #RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels)
-    def __init__(self, model: keras.Model, onnx_model_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.layer_nm = layer_nm
@@ -26,6 +25,7 @@ class RulesProve:
         self.sig = sig
         self.features = features
         self.labels = labels
+        self.lab = lab
         
     def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
@@ -105,6 +105,7 @@ class RulesProve:
 
         (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = self.get_bounds()
 
-        #solve_query = SolveMarabou()
-        #results += solve_query()
+        (self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int ):
+        solve_query = SolveMarabou(onnx_model_nm=self.onnx_path,onnx_layer_nm="dense_14_1/Identity:0",x_train_min_layer=x_train_min_layer,x_train_max_layer=x_train_max_layer,fngprnt_min_layer=fngprnt_min_layer,fngprnt_max_layer=fngprnt_max_layer,lab=self.lab )
+        solve_query()
         return results

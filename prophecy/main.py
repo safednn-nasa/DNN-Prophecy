@@ -109,6 +109,10 @@ def run_prove_command(lab: int):
 
 
 if __name__ == '__main__':
+    path = os.environ['PATH']
+    print(path)
+    os.environ['PATH'] = path + ':../Marabou/:../Marabou/build:../Marabou/build/bin'
+    print(os.environ['PATH'])
     parser = argparse.ArgumentParser(description='Infer Data Precondition')
     parser.add_argument('-m', '--model_path', type=str, help='Model to infer the precondition',
                         required=False)
@@ -173,12 +177,7 @@ if __name__ == '__main__':
 
     if (args.action == 'prove'):
         onnx_model = args.onnx_path
-        path = os.environ['PATH']
-        print(path)
-        os.environ['PATH'] = path + ':../Marabou/:../Marabou/build:../Marabou/build/bin'
-        print(os.environ['PATH'])
         
-
     working_dir = Path(args.workdir) if args.workdir else results_path
 
     rules_path = working_dir / 'ruleset.csv'

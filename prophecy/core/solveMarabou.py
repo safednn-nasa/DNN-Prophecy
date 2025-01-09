@@ -58,16 +58,16 @@ class SolveMarabou:
         self.network_a.addConstraint(label_var >= v + 0.001)
         print(v, ":",indx)
         
-    sat_unsat,vals,stats = self.network_a.solve(options = self.options)
-    print("sat_unsat:", sat_unsat)
+      sat_unsat,vals,stats = self.network_a.solve(options = self.options)
+      print("sat_unsat:", sat_unsat)
     
-    if (sat_unsat == 'sat'):
-      print("SAT for label:", label)
-      print("vals:", vals)
-      prove = False
-      break
-    else:
-      print("UNSAT for label:", label)
+      if (sat_unsat == 'sat'):
+        print("SAT for label:", label)
+        print("vals:", vals)
+        prove = False
+        break
+      else:
+        print("UNSAT for label:", label)
 
     if (prove == True):
       print("Rule Proved!!")

@@ -10,28 +10,24 @@ class SolveMarabou:
     self.filename = onnx_model_nm
     self.network_a = Marabou.read_onnx(self.filename)
 
-  def _call_
+  def __call__(self, **kwargs) -> str:
     print("INPUT VARS")
-    self.invars = self.network_a.inputVars[0][0].flatten()
+    invars = self.network_a.inputVars[0][0].flatten()
     print(invars)
+    
+    for indx in range(0,len(invars)):
+      i = invars[indx]
+      v = Var(i)
+      self.network_a.setLowerBound(i,self.x_train_min_layer[i])
+      self.network_a.setUpperBound(i,self.x_train_max_layer[i])
+      #network_a.setLowerBound(i,inp_ex[0][indx])
+      #network_a.setUpperBound(i,inp_ex[0][indx])
 
 
-for indx in range(0,len(invars)):
-    i = invars[indx]
-    v = Var(i)
-    network_a.setLowerBound(i,x_train_min3[i])
-    network_a.setUpperBound(i,x_train_max3[i])
-    #network_a.setLowerBound(i,inp_ex[0][indx])
-    #network_a.setUpperBound(i,inp_ex[0][indx])
-
-
-print("LAYER VARS MAP")
-print(network_a.layerNameToVariables)
-
-dense_14_neurons = network_a.layerNameToVariables["dense_14_1/Identity:0"][0]
-print(np.shape(dense_14_neurons))
-print(len(dense_14_neurons))
-print(dense_14_neurons[0])
+    neurons = self.network_a.layerNameToVariables["dense_14_1/Identity:0"][0]
+    print(np.shape(dense_14_neurons))
+    print(len(dense_14_neurons))
+    print(dense_14_neurons[0])
 
 
 

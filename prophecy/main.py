@@ -173,6 +173,10 @@ if __name__ == '__main__':
 
     if (args.action == 'prove'):
         onnx_model = args.onnx_path
+        path = os.environ['PATH']
+        print(path)
+        os.environ['PATH'] = path + ':../Marabou/:../Marabou/build:../Marabou/build/bin'
+        print(os.environ['PATH'])
         
 
     working_dir = Path(args.workdir) if args.workdir else results_path

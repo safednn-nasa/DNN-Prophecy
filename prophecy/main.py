@@ -112,8 +112,8 @@ def run_prove_command(lab: int):
 if __name__ == '__main__':
     path = os.environ['PATH']
     print(path)
-    os.environ['PATH'] = path + ':../Marabou/:../Marabou/build:../Marabou/build/bin'
-    print(os.environ['PATH'])
+    #os.environ['PATH'] = path + ':../Marabou/:../Marabou/build:../Marabou/build/bin'
+    #print(os.environ['PATH'])
     parser = argparse.ArgumentParser(description='Infer Data Precondition')
     parser.add_argument('-m', '--model_path', type=str, help='Model to infer the precondition',
                         required=False)

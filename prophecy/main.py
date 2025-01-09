@@ -68,7 +68,8 @@ def run_prove_command(lab: int):
     print("RULE WITH HIGHEST SUPPORT ON TRAIN DATA")
     print("LAYER, NEURONS AND SIGNATURE:")
     top_rule_layer = ruleset['layer']
-    print("LAYER:", (top_rule_layer.array[0]).strip())
+    top_rule_layer_nm = (top_rule_layer.array[0]).strip()
+    print("LAYER:", top_rule_layer_nm)
 
     rule_neurons_df = ruleset['neurons']
     rule_neurons_list = []
@@ -103,7 +104,7 @@ def run_prove_command(lab: int):
     print("FEATURES:", np.shape(train_features))
     print("LABELS:", np.shape(train_labels))
     
-    prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels)
+    prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels)
     results = prove_marabou()
 
 

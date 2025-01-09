@@ -5,7 +5,7 @@ from maraboupy.MarabouCore import *
 from maraboupy.MarabouPythonic import *
 
 class SolveMarabou:
-  def _init_(self, onnx_model_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int ):
+  def _init_(self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int ):
     self.options = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
     self.filename = onnx_model_nm
     self.network_a = Marabou.read_onnx(self.filename)
@@ -14,6 +14,7 @@ class SolveMarabou:
     self.fngprnt_min_layer = fngprnt_min_layer
     self.fngprnt_max_layer = fngprnt_max_layer
     self.lab = lab
+    self.onnx_layer_nm = onnx_layer_nm
 
   def __call__(self, **kwargs):
     print("INPUT VARS")
@@ -29,7 +30,8 @@ class SolveMarabou:
       #network_a.setUpperBound(i,inp_ex[0][indx])
 
     print("LAYER VARS")
-    neurons = self.network_a.layerNameToVariables["dense_14_1/Identity:0"][0]
+ #   onnx_layer_nm = "dense_14_1/Identity:0"
+    neurons = self.network_a.layerNameToVariables[self.onnx_layer_nm][0]
     print(np.shape(neurons))
     
     for indx in range(0, len(neurons)):

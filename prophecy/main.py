@@ -68,7 +68,7 @@ def run_prove_command(lab: int):
     print("RULE WITH HIGHEST SUPPORT ON TRAIN DATA")
     print("LAYER, NEURONS AND SIGNATURE:")
     top_rule_layer = ruleset['layer']
-    print("LAYER:", top_rule_layer.array[0])
+    print("LAYER:", (top_rule_layer.array[0]).strip())
 
     rule_neurons_df = ruleset['neurons']
     rule_neurons_list = []

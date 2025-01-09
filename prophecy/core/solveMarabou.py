@@ -5,7 +5,7 @@ import numpy as np
 #from maraboupy.MarabouPythonic import *
 
 class SolveMarabou:
-  def _init_(self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int ):
+  def __init__(self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int):
     self.options = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
     self.filename = onnx_model_nm
     self.network_a = Marabou.read_onnx(self.filename)

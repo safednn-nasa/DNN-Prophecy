@@ -27,7 +27,7 @@ class RulesProve:
         self.features = features
         self.labels = labels
         
-    def get_bounds() -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
+    def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
         x_train = self.features
         x_train_flat = []

@@ -113,8 +113,9 @@ class RulesProve:
         print(os.environ['PATH'])
 
         os.chdir('/content/drive/MyDrive/Marabou_bld')
+        os.system("python /content/ProphecyPlus/solveMarabou/main.py")
 
-        python solveMarabou.main
+        
         
         #onnx_model_nm=self.onnx_path
         #onnx_layer_nm="dense_14_1/Identity:0"

@@ -5,6 +5,7 @@ from maraboupy.MarabouCore import *
 from maraboupy.MarabouPythonic import *
 
 if __name__ == '__main__':
+  os.system("pwd")
   options = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
   filename = "./resources/onnx/cnn_max_mninst2.onnx"
   network_a = Marabou.read_onnx(filename)

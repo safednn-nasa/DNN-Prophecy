@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import bin.Marabou
+import prophecy.core.Marabou.build.bin.Marabou
 #from maraboupy.MarabouCore import *
 #from maraboupy.MarabouPythonic import *
 

@@ -1,0 +1,16 @@
+# train and val datasets (image directory or *.txt file with image paths)
+with_rider: /root/siqi/Feature-Mining-for-Object-Detection/split_result/with_rider_val.txt  # 118k images
+without_rider: /root/siqi/Feature-Mining-for-Object-Detection/split_result/without_rider_val.txt # 5k images
+other: /root/siqi/Feature-Mining-for-Object-Detection/split_result/other_rider_val.txt # 5k images
+# test: ../coco/testdev2017.txt  # 20k images for submission to https://competitions.codalab.org/competitions/20794
+
+# number of classes
+nc: 25
+
+# class names
+names: ['animal', 'flat.driveable_surface', 'human.pedestrian.adult', 'human.pedestrian.child', 
+        'human.pedestrian.construction_worker', 'human.pedestrian.personal_mobility', 'human.pedestrian.police_officer', 
+        'human.pedestrian.stroller', 'human.pedestrian.wheelchair', 'movable_object.barrier', 'movable_object.debris', 
+        'movable_object.pushable_pullable', 'movable_object.trafficcone', 'static_object.bicycle_rack', 'vehicle.bicycle', 
+        'vehicle.bus.bendy', 'vehicle.bus.rigid', 'vehicle.car', 'vehicle.construction', 'vehicle.ego', 
+        'vehicle.emergency.ambulance', 'vehicle.emergency.police', 'vehicle.motorcycle', 'vehicle.trailer', 'vehicle.truck']

@@ -14,15 +14,15 @@ Marabou defines key functions that make up the main user interface to Maraboupy
 '''
 
 import warnings
-from maraboupy.MarabouCore import *
+from Marabou.maraboupy.MarabouCore import *
 
 # Import parsers if required packages are installed
 try:
-    from maraboupy.MarabouNetworkNNet import *
+    from Marabou.maraboupy.MarabouNetworkNNet import *
 except ImportError:
     warnings.warn("NNet parser is unavailable because the numpy package is not installed")
 try:
-    from maraboupy.MarabouNetworkONNX import *
+    from Marabou.maraboupy.MarabouNetworkONNX import *
 except ImportError:
     warnings.warn("ONNX parser is unavailable because onnx or onnxruntime packages are not installed")
 

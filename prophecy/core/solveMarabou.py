@@ -1,6 +1,6 @@
 import os
 import numpy as np
-#from maraboupy import Marabou
+from prophecy.core.maraboupy import Marabou
 #from maraboupy.MarabouCore import *
 #from maraboupy.MarabouPythonic import *
 

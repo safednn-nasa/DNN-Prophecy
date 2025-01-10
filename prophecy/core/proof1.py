@@ -13,7 +13,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
-from prophecy.core.Marabou.build.solveMarabou import SolveMarabou
+from Marabou.solveMarabou import SolveMarabou
 
 
 class RulesProve:

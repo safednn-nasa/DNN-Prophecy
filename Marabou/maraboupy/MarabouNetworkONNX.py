@@ -16,8 +16,8 @@ MarabouNetworkONNX represents neural networks with piecewise linear constraints 
 '''
 import onnx
 import onnxruntime
-from maraboupy.MarabouNetwork import MarabouNetwork
-from maraboupy.parsers.ONNXParser import ONNXParser
+from Marabou.maraboupy.MarabouNetwork import MarabouNetwork
+from Marabou.maraboupy.parsers.ONNXParser import ONNXParser
 import os
 
 class MarabouNetworkONNX(MarabouNetwork):

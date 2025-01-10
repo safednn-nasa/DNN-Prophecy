@@ -15,6 +15,7 @@ from pathlib import Path
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
 #from Marabou.solveMarabou import SolveMarabou
+from maraboupy import Marabou
 
 
 class RulesProve:
@@ -107,18 +108,18 @@ class RulesProve:
         (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = self.get_bounds()
 
         
-        path = os.environ['PATH']
-        print(path)
-        os.environ['PATH'] = path + ':/content/drive/MyDrive/Marabou_bld:/content/drive/MyDrive/Marabou_bld/build:/content/drive/MyDrive/Marabou_bld/build/bin'
-        print(os.environ['PATH'])
+        #path = os.environ['PATH']
+        #print(path)
+        #os.environ['PATH'] = path + ':/content/drive/MyDrive/Marabou_bld:/content/drive/MyDrive/Marabou_bld/build:/content/drive/MyDrive/Marabou_bld/build/bin'
+        #print(os.environ['PATH'])
 
-        os.chdir('/content/drive/MyDrive/Marabou_bld')
-        os.system("pwd")
-        os.system("ls -lt")
-        #from maraboupy import Marabou
-        options = Marabou_bld.maraboupy.Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
-        filename = "./resources/onnx/cnn_max_mninst2.onnx"
-        network_a =  Marabou_bld.maraboupy.Marabou.read_onnx(filename)
+        #os.chdir('/content/drive/MyDrive/Marabou_bld')
+        #os.system("pwd")
+        #os.system("ls -lt")
+       
+        options = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
+        filename = self.onnx_path
+        network_a =  maraboupy.Marabou.read_onnx(filename)
         
         #os.system("python /content/ProphecyPlus/solveMarabou/main.py")
 

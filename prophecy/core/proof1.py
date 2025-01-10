@@ -112,9 +112,66 @@ class RulesProve:
         os.environ['PATH'] = path + ':/content/drive/MyDrive/Marabou_bld:/content/drive/MyDrive/Marabou_bld/build:/content/drive/MyDrive/Marabou_bld/build/bin'
         print(os.environ['PATH'])
         
-        #solve_query = SolveMarabou(onnx_model_nm=self.onnx_path,onnx_layer_nm="dense_14_1/Identity:0",x_train_min_layer=x_train_min_layer,x_train_max_layer=x_train_max_layer,fngprnt_min_layer=fngprnt_min_layer,fngprnt_max_layer=fngprnt_max_layer,lab=self.lab )
-        #solve_query()
+        onnx_model_nm=self.onnx_path
+        onnx_layer_nm="dense_14_1/Identity:0"
+        lab=self.lab
+        #x_train_min_layer=x_train_min_layer,x_train_max_layer=x_train_max_layer,fngprnt_min_layer=fngprnt_min_layer,fngprnt_max_layer=fngprnt_max_layer,
+        
         
         os.chdir('/content/drive/MyDrive/Marabou_bld')
+
+        print("INPUT VARS")
+        invars = self.network_a.inputVars[0][0].flatten()
+        print(invars)
+    
+        for indx in range(0,len(invars)):
+            i = invars[indx]
+            v = Var(i)
+            self.network_a.setLowerBound(i,self.x_train_min_layer[i])
+            self.network_a.setUpperBound(i,self.x_train_max_layer[i])
+            #network_a.setLowerBound(i,inp_ex[0][indx])
+            #network_a.setUpperBound(i,inp_ex[0][indx])
+
+        print("LAYER VARS")
+        neurons = self.network_a.layerNameToVariables[self.onnx_layer_nm][0]
+        print(np.shape(neurons))
+    
+        for indx in range(0, len(neurons)):
+            neuron_indx = neurons[indx] - neurons[0]
+            self.network_a.setLowerBound(neurons[indx], self.fngprnt_min_layer[neuron_indx])
+            self.network_a.setUpperBound(neurons[indx], self.fngprnt_max_layer[neuron_indx])
+            #network_a.setLowerBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] - 0.1)
+            #network_a.setUpperBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] + 0.1)
+
+        print("OUTPUT VARS")
+        outvars = self.network_a.outputVars[0].flatten()
+        print(outvars)
+
+        rule_label = self.lab
+        prove = True
+        for label in range(0,  len(outvars)):
+            if (label == rule_label):
+                continue
+            label_var = Var(outvars[label])
+            for indx in range(0,  len(outvars)):
+                v = Var(outvars[indx])
+                if (indx == label):
+                    continue
+                self.network_a.addConstraint(label_var >= v + 0.001)
+                print(v, ":",indx)
+        
+            sat_unsat,vals,stats = self.network_a.solve(options = self.options)
+            print("sat_unsat:", sat_unsat)
+            
+            if (sat_unsat == 'sat'):
+                print("SAT for label:", label)
+                print("vals:", vals)
+                prove = False
+                break
+            else:
+                print("UNSAT for label:", label)
+
+        if (prove == True):
+            print("Rule Proved!!")
         
         return results

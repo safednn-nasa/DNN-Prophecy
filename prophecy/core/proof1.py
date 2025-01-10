@@ -114,7 +114,8 @@ class RulesProve:
 
         os.chdir('/content/drive/MyDrive/Marabou_bld')
         os.system("pwd")
-        from maraboupy import Marabou
+        os.system("ls -lt")
+        #from maraboupy import Marabou
         options = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
         filename = "./resources/onnx/cnn_max_mninst2.onnx"
         network_a = Marabou.read_onnx(filename)

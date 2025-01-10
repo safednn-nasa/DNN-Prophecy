@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import Marabou
+import bin.Marabou
 #from maraboupy.MarabouCore import *
 #from maraboupy.MarabouPythonic import *
 

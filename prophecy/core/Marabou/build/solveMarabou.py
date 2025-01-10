@@ -3,6 +3,7 @@ import numpy as np
 #import prophecy.core.Marabou.build.bin.Marabou
 #from maraboupy.MarabouCore import *
 #from maraboupy.MarabouPythonic import *
+import Marabou
 
 class SolveMarabou:
   def __init__(self, onnx_model_nm: str, onnx_layer_nm: str, x_train_min_layer: np.array, x_train_max_layer: np.array, fngprnt_min_layer: np.array, fngprnt_max_layer: np.array, lab: int):

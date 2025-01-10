@@ -18,8 +18,8 @@ from typing import List
 import numpy as np
 from onnx import numpy_helper
 from onnx.helper import get_attribute_value
-from maraboupy import MarabouUtils
-from maraboupy.parsers.InputQueryBuilder import InputQueryBuilder
+from Marabou.maraboupy import MarabouUtils
+from Marabou.maraboupy.parsers.InputQueryBuilder import InputQueryBuilder
 from onnx import TensorProto
 import itertools
 from copy import copy

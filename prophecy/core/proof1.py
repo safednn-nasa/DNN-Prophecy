@@ -149,10 +149,10 @@ class RulesProve:
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
-            #network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
-            #network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
-            network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
-            network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
+            network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+            network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
+            #network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
+            #network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
 
         print("OUTPUT VARS")
         outvars = network_a.outputVars[0].flatten()

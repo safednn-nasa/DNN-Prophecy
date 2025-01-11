@@ -114,9 +114,10 @@ class RulesProve:
         onnx_model_nm=self.onnx_path
         h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
         print("h5_onnx_map:", np.shape(h5_onnx_map))
-        onnx_layer_nm = h5_onnx_map[self.layer_nm]
-        print("onnx layer name:",onnx_layer_nm)
-        #onnx_layer_nm="dense_14_1/Identity:0"
+        print(h5_onnx_map)
+        #onnx_layer_nm = h5_onnx_map[self.layer_nm]
+        #print("onnx layer name:",onnx_layer_nm)
+        onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
         
         options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)

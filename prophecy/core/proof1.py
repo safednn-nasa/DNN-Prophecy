@@ -108,13 +108,12 @@ class RulesProve:
     def __call__(self, **kwargs) -> str:
         results = ""
 
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fngr_ex) = self.get_bounds()
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fingr_ex) = self.get_bounds()
 
         
         onnx_model_nm=self.onnx_path
         onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
-        #x_train_min_layer=x_train_min_layer,x_train_max_layer=x_train_max_layer,fngprnt_min_layer=fngprnt_min_layer,fngprnt_max_layer=fngprnt_max_layer,
         
         options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
         filename = onnx_model_nm
@@ -127,10 +126,10 @@ class RulesProve:
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
-            network_a.setLowerBound(i,x_train_min_layer[i])
-            network_a.setUpperBound(i,x_train_max_layer[i])
-            #network_a.setLowerBound(i,inp_ex[0][indx])
-            #network_a.setUpperBound(i,inp_ex[0][indx])
+            #network_a.setLowerBound(i,x_train_min_layer[i])
+            #network_a.setUpperBound(i,x_train_max_layer[i])
+            network_a.setLowerBound(i,inp_ex[0][indx])
+            network_a.setUpperBound(i,inp_ex[0][indx])
 
         print("LAYER VARS")
         neurons_layer = network_a.layerNameToVariables[onnx_layer_nm][0]
@@ -138,10 +137,10 @@ class RulesProve:
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
-            network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
-            network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
-            #network_a.setLowerBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] - 0.1)
-            #network_a.setUpperBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] + 0.1)
+            #network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+            #network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
+            network_a.setLowerBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] - 0.1)
+            network_a.setUpperBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] + 0.1)
 
         print("OUTPUT VARS")
         outvars = network_a.outputVars[0].flatten()

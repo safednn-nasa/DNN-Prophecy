@@ -15,6 +15,7 @@ from pathlib import Path
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
 #from Marabou.solveMarabou import SolveMarabou
+sys.path.append("/content/drive/MyDrive/Marabou')
 from maraboupy import Marabou
 
 
@@ -119,7 +120,7 @@ class RulesProve:
        
         options = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
         filename = self.onnx_path
-        network_a =  maraboupy.Marabou.read_onnx(filename)
+        network_a =  Marabou.read_onnx(filename)
         
         #os.system("python /content/ProphecyPlus/solveMarabou/main.py")
 

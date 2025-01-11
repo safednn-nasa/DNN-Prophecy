@@ -102,10 +102,11 @@ def run_prove_command(lab: int):
     print("SIGNATURE:",rule_sig_list)
 
     print("ONNX MODEL:", onnx_model)
+    print("ONNX MAP:", onnx_map)
     print("FEATURES:", np.shape(train_features))
     print("LABELS:", np.shape(train_labels))
     
-    prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab)
+    prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab)
     results = prove_marabou()
 
 
@@ -163,6 +164,7 @@ if __name__ == '__main__':
 
     analyze_parser = action_parser.add_parser('prove')
     analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
+    analyze_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
     analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
     analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=True)
     analyze_parser.add_argument('-label', '--lab', type=int, default=0,
@@ -178,6 +180,7 @@ if __name__ == '__main__':
 
     if (args.action == 'prove'):
         onnx_model = args.onnx_path
+        onnx_map = args.onnx_map
         
     working_dir = Path(args.workdir) if args.workdir else results_path
 

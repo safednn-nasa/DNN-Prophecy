@@ -21,9 +21,10 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int):
         self.model = model
         self.onnx_path = onnx_model_nm
+        self.onnx_map = onnx_map_nm
         self.layer_nm = layer_nm
         self.neurons = neurons
         self.sig = sig
@@ -111,7 +112,11 @@ class RulesProve:
 
         
         onnx_model_nm=self.onnx_path
-        onnx_layer_nm="dense_14_1/Identity:0"
+        h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
+        print("h5_onnx_map:", np.shape(h5_onnx_map))
+        onnx_layer_nm = h5_onnx_map[self.layer_nm]
+        print("onnx layer name:",onnx_layer_nm)
+        #onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
         
         options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)

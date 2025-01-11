@@ -108,7 +108,7 @@ class RulesProve:
     def __call__(self, **kwargs) -> str:
         results = ""
 
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, fingr_ex) = self.get_bounds()
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
 
         
         onnx_model_nm=self.onnx_path
@@ -117,7 +117,7 @@ class RulesProve:
         print(h5_onnx_map)
         #onnx_layer_nm = h5_onnx_map[self.layer_nm]
         #print("onnx layer name:",onnx_layer_nm)
-        onnx_layer_nm="dense_14_1/Identity:0"
+        #onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
         
         options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)

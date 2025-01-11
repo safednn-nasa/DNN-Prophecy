@@ -15,7 +15,7 @@ from pathlib import Path
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
 #from Marabou.solveMarabou import SolveMarabou
-sys.path.append("/content/drive/MyDrive/Marabou')
+sys.path.append('/content/drive/MyDrive/Marabou')
 from maraboupy import Marabou
 
 

@@ -138,10 +138,10 @@ class RulesProve:
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
-            #network_a.setLowerBound(i,x_train_min_layer[i])
-            #network_a.setUpperBound(i,x_train_max_layer[i])
-            network_a.setLowerBound(i,inp_ex[indx])
-            network_a.setUpperBound(i,inp_ex[indx])
+            network_a.setLowerBound(i,x_train_min_layer[i])
+            network_a.setUpperBound(i,x_train_max_layer[i])
+            #network_a.setLowerBound(i,inp_ex[indx])
+            #network_a.setUpperBound(i,inp_ex[indx])
 
         print("LAYER VARS")
         neurons_layer = network_a.layerNameToVariables[onnx_layer_nm][0]

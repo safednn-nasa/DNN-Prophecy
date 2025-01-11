@@ -114,9 +114,16 @@ class RulesProve:
         onnx_model_nm=self.onnx_path
         h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
         print("h5_onnx_map:", np.shape(h5_onnx_map))
-        print(h5_onnx_map)
-        #onnx_layer_nm = h5_onnx_map[self.layer_nm]
-        #print("onnx layer name:",onnx_layer_nm)
+        onnx_layer_nm = None
+        for indx1 in range(0,len(h5_onnx_map)):
+            if (h5_onnx_map[indx1][0] == self.layer_nm):
+                onnx_layer_nm = h5_onnx_map[indx1][1]
+                break
+        if (onnx_layer_nm != None):
+            print("onnx layer name:",onnx_layer_nm)
+        else:
+            print("could not find the onnx layer mapped to the h5 layer", self.layer_nm)
+            
         #onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
         

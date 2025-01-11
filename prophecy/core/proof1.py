@@ -119,7 +119,7 @@ class RulesProve:
         network_a = Marabou.read_onnx(filename)
 
         print("INPUT VARS")
-        invars = self.network_a.inputVars[0][0].flatten()
+        invars = network_a.inputVars[0][0].flatten()
         print(invars)
     
         for indx in range(0,len(invars)):
@@ -131,13 +131,13 @@ class RulesProve:
             #network_a.setUpperBound(i,inp_ex[0][indx])
 
         print("LAYER VARS")
-        neurons = network_a.layerNameToVariables[onnx_layer_nm][0]
-        print(np.shape(neurons))
+        neurons_layer = network_a.layerNameToVariables[onnx_layer_nm][0]
+        print(np.shape(neurons_layer))
     
-        for indx in range(0, len(neurons)):
-            neuron_indx = neurons[indx] - neurons[0]
-            network_a.setLowerBound(neurons[indx], fngprnt_min_layer[neuron_indx])
-            network_a.setUpperBound(neurons[indx], fngprnt_max_layer[neuron_indx])
+        for indx in range(0, len(neurons_layer)):
+            neuron_indx = neurons_layer[indx] - neurons_layer[0]
+            network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+            network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
             #network_a.setLowerBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] - 0.1)
             #network_a.setUpperBound(dense_14_neurons[indx], finger_ex[0][neuron_indx] + 0.1)
 

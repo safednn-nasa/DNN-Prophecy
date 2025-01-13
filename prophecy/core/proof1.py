@@ -106,10 +106,13 @@ class RulesProve:
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, inp_ex[0], finger_ex[0])
         
     def __call__(self, **kwargs) -> bool:
-        results = False
-
+        
         (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
 
+        results = False
+        iter = 0
+        while (results == False):
+            
         
         onnx_model_nm=self.onnx_path
         h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)

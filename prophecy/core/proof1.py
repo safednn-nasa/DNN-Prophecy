@@ -181,6 +181,7 @@ class RulesProve:
                 break
             else:
                 print("UNSAT for label:", label)
+        
 
         if (prove == True):
             print("Rule Proved!!")

@@ -141,12 +141,12 @@ class RulesProve:
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
-            if (self.iter == 0):
-                network_a.setLowerBound(i,inp_ex[indx])
-                network_a.setUpperBound(i,inp_ex[indx])
-            if (self.iter > 0):
-                network_a.setLowerBound(i,x_train_min_layer[i])
-                network_a.setUpperBound(i,x_train_max_layer[i])
+           # if (self.iter == 0):
+            network_a.setLowerBound(i,inp_ex[indx])
+            network_a.setUpperBound(i,inp_ex[indx])
+           # if (self.iter > 0):
+            network_a.setLowerBound(i,x_train_min_layer[i])
+            network_a.setUpperBound(i,x_train_max_layer[i])
             
 
         print("LAYER VARS")
@@ -155,12 +155,12 @@ class RulesProve:
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
-            if ((self.iter == 0) or (self.iter == 1)):
-                network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
-                network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
-            if (self.iter == 2):
-                network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
-                network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
+           # if ((self.iter == 0) or (self.iter == 1)):
+            network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
+            network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
+            #if (self.iter == 2):
+            network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+            network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
             
 
         print("OUTPUT VARS")
@@ -179,8 +179,17 @@ class RulesProve:
                     continue
                 network_a.addConstraint(label_var >= v + 0.001)
                 print(v, ":",indx)
-        
-            sat_unsat,vals,stats = network_a.solve(options = options1)
+
+
+            sat_unsat = None
+            vals = None
+            stats = None
+            try:
+                sat_unsat, vals, stats = func_timeout.func_timeout(120, network_a.solve(options = options1))
+            except func_timeout.FunctionTimedOut:
+                print("Solve timed out after two mins")
+                
+           
             print("sat_unsat:", sat_unsat)
             
             if (sat_unsat == 'sat'):

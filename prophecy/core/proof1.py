@@ -14,7 +14,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 import time
-import func_timeout
+#import func_timeout
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
 sys.path.append('/content/drive/MyDrive/Marabou')

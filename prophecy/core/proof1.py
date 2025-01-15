@@ -130,7 +130,8 @@ class RulesProve:
         #onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
      
-        options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=90,snc=True)
+        #options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=90,snc=True)
+        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=120)
         filename = onnx_model_nm
         network_a = Marabou.read_onnx(filename)
 

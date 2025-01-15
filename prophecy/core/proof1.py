@@ -188,7 +188,7 @@ class RulesProve:
             
             network_a.solve(options = options1)
            # try:
-                sat_unsat, vals, stats = func_timeout.func_timeout(50, network_a.solve(options = options1))
+           #    sat_unsat, vals, stats = func_timeout.func_timeout(50, network_a.solve(options = options1))
            # except func_timeout.FunctionTimedOut:
            #     print("Solve timed out after two mins")
                 

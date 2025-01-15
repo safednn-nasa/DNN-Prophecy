@@ -131,7 +131,7 @@ class RulesProve:
         lab=self.lab
         
        # options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
-        options1 = Marabou.createOptions(verbosity = 1,snc=True)
+        options1 = Marabou.createOptions(verbosity = 1,numWorkers=4,timeoutInSeconds=20,snc=True)
         filename = onnx_model_nm
         network_a = Marabou.read_onnx(filename)
 

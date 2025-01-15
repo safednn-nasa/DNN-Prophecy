@@ -131,7 +131,7 @@ class RulesProve:
         lab=self.lab
         
        # options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
-        options1 = Marabou.createOptions(verbosity = 1,numWorkers=4,timeoutInSeconds=20,snc=True)
+        options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=50,snc=True)
         filename = onnx_model_nm
         network_a = Marabou.read_onnx(filename)
 
@@ -185,10 +185,12 @@ class RulesProve:
             sat_unsat = None
             vals = None
             stats = None
-            try:
+            
+            network_a.solve(options = options1)
+           # try:
                 sat_unsat, vals, stats = func_timeout.func_timeout(50, network_a.solve(options = options1))
-            except func_timeout.FunctionTimedOut:
-                print("Solve timed out after two mins")
+           # except func_timeout.FunctionTimedOut:
+           #     print("Solve timed out after two mins")
                 
            
             print("sat_unsat:", sat_unsat)

@@ -130,7 +130,8 @@ class RulesProve:
         #onnx_layer_nm="dense_14_1/Identity:0"
         lab=self.lab
         
-        options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
+       # options1 = Marabou.createOptions(verbosity = 1, numWorkers=1, numBlasThreads=1,snc=True)
+        options1 = Marabou.createOptions(verbosity = 1,snc=True)
         filename = onnx_model_nm
         network_a = Marabou.read_onnx(filename)
 
@@ -185,7 +186,7 @@ class RulesProve:
             vals = None
             stats = None
             try:
-                sat_unsat, vals, stats = func_timeout.func_timeout(120, network_a.solve(options = options1))
+                sat_unsat, vals, stats = func_timeout.func_timeout(50, network_a.solve(options = options1))
             except func_timeout.FunctionTimedOut:
                 print("Solve timed out after two mins")
                 

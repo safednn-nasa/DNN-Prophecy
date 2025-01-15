@@ -143,11 +143,11 @@ class RulesProve:
             i = invars[indx]
             v = Var(i)
            # if (self.iter == 0):
-            network_a.setLowerBound(i,inp_ex[indx])
-            network_a.setUpperBound(i,inp_ex[indx])
+           # network_a.setLowerBound(i,inp_ex[indx])
+           # network_a.setUpperBound(i,inp_ex[indx])
            # if (self.iter > 0):
-           # network_a.setLowerBound(i,x_train_min_layer[i])
-           # network_a.setUpperBound(i,x_train_max_layer[i])
+            network_a.setLowerBound(i,x_train_min_layer[i])
+            network_a.setUpperBound(i,x_train_max_layer[i])
             
 
         print("LAYER VARS")

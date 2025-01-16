@@ -197,22 +197,23 @@ class RulesProve:
             if (sat_unsat == 'sat'):
                 print("SAT for label:", label)
                 print("vals:", vals)
-               # prove = False
                 sat_lbls.append(label)
+                
             if (sat_unsat == 'unsat'):
                 print("UNSAT for label:", label)
                 unsat_lbls.append(label)
         
 
-        if (len(sat_lbls) == 0):
-            print("RULE PROVED!!")
-            results = True
-            return results
             
         if (len(unsat_lbls) > 0):
             print("Rule Proved for the following labels.")
             for indx1 in range(0, len(unsat_lbls)):
                 print("LABEL:", unsat_lbls[indx1])
+            if (len(unsat_lbls) == len(outvars):
+                print("RULE PROVED!!")
+                results = True
+            
+                
         if (len(sat_lbls) > 0):
             print("Rule NOT proved for the following labels.")
             for indx1 in range(0, len(sat_lbls)):

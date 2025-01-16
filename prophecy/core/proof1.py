@@ -111,7 +111,7 @@ class RulesProve:
 
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, inp_ex[0], finger_ex[0])
         
-    def __call__(self, **kwargs) -> bool,list:
+    def __call__(self, **kwargs) -> (bool,list):
         
         (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
 

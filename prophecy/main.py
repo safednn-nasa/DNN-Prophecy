@@ -119,10 +119,20 @@ def run_prove_command(lab: int):
     
     results = False
     it = 0
+    unsolved_labs = []
+    for indx in range(0,10):
+        if (indx == lab):
+            continue
+        unsolved_labs.append(indx)
+        
     while (results == False):
         print("ITERATION #:", it)
-        prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it)
-        results = prove_marabou()
+        print("UNSOLVED LABELS:", unsolved_labs)
+        prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs)
+        results,unsolved = prove_marabou()
+        unsolved_labs = []
+        for indx in range(0,len(unsolved)):
+            unsolved_labs.append(unsolved[indx])
         it = it + 1
 
 

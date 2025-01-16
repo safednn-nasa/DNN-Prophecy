@@ -24,7 +24,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
@@ -34,6 +34,7 @@ class RulesProve:
         self.features = features
         self.labels = labels
         self.lab = lab
+        self.iter = iter
         
     def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
@@ -142,12 +143,12 @@ class RulesProve:
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
-           # if (self.iter == 0):
-           # network_a.setLowerBound(i,inp_ex[indx])
-           # network_a.setUpperBound(i,inp_ex[indx])
-           # if (self.iter > 0):
-            network_a.setLowerBound(i,x_train_min_layer[i])
-            network_a.setUpperBound(i,x_train_max_layer[i])
+            if (self.iter ==  2):
+                network_a.setLowerBound(i,inp_ex[indx])
+                network_a.setUpperBound(i,inp_ex[indx])
+            if ((self.iter == 0) or (self.iter == 1)):
+               network_a.setLowerBound(i,x_train_min_layer[i])
+               network_a.setUpperBound(i,x_train_max_layer[i])
             
 
         print("LAYER VARS")
@@ -156,12 +157,12 @@ class RulesProve:
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
-           # if ((self.iter == 0) or (self.iter == 1)):
-            #network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
-            #network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
-            #if (self.iter == 2):
-            network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
-            network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
+            if (self.iter > 0):
+                network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
+                network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
+            if (self.iter == 0):
+                network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+                network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
             
 
         print("OUTPUT VARS")

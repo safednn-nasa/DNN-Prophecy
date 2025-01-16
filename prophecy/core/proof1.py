@@ -215,7 +215,7 @@ class RulesProve:
             
                 
         if (len(sat_lbls) > 0):
-            print("Rule NOT proved for the following labels.")
+            print("CEs for the following labels.")
             for indx1 in range(0, len(sat_lbls)):
                 print("LABEL:", sat_lbls[indx1])
         

@@ -61,12 +61,12 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze [-h]
 $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze -tx /path/to/train_features.npy -ty /path/to/train_labels.npy \
 -vx /path/to/val_features.npy -vy /path/to/val_labels.npy -odl -oal -type 0 -acts True -top True
 ```
-### Infer Command
+### Monitor Command
 
-Run inference using the specified model and test dataset.
+Monitor model's behavior on unseen inputs and classify them as correctly classified, mis-classified or uncertain.
 
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer [-h] -tx TEST_FEATURES -ty TEST_LABELS {rules,classifiers} ...
+$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor [-h] -tx TEST_FEATURES -ty TEST_LABELS {rules,classifiers} ...
 ```
 
 #### Subcommands
@@ -88,11 +88,11 @@ $ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer [-h] 
 #### Examples
 - Evaluate a given model on unseen data with the extracted rules
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer -tx /path/to/test_features.csv -ty /path/to/test_labels.csv rules
+$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor -tx /path/to/test_features.csv -ty /path/to/test_labels.csv rules
 ```
 
 - Evaluate a given model on unseen data with the trained classifiers
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir infer -tx /path/to/test_features.csv -ty /path/to/test_labels.csv classifiers 
+$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor -tx /path/to/test_features.csv -ty /path/to/test_labels.csv classifiers 
 ```
 

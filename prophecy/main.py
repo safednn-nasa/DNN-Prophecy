@@ -120,10 +120,10 @@ def run_prove_command(lab: int):
     results = False
     it = 0
     unsolved_labs = []
-    for indx in range(0,10):
-        if (indx == lab):
-            continue
-        unsolved_labs.append(indx)
+    #for indx in range(0,10):
+    #    if (indx == lab):
+    #        continue
+    #    unsolved_labs.append(indx)
         
     while (results == False):
         print("ITERATION #:", it)

@@ -177,9 +177,23 @@ class RulesProve:
         sat_lbls = []
         unsat_lbls = []
         
-        for label in range(0,  len(outvars)):
-            if ((label == rule_label) or (label not in self.unsolved)):
-                continue
+        unsolved_labs = []
+        if (self.iter == 0):
+            for label in range(0,len(outvars)):
+                if (label == rule_label):
+                    continue
+                unsolved_labs.append(label)
+        else:
+            for indx in range(0, self.unsolved):
+                unsolved_labs.append(self.unsolved[indx])
+                
+        print("UNSOLVED LABS:", unsolved_labs)
+
+        for indx in range(0,  len(unsolved_labs)):
+            #if ((label == rule_label) or (label not in self.unsolved)):
+            #    continue
+
+            label = unsolved_labs[indx]
             
             label_var = Var(outvars[label])
             for indx in range(0,  len(outvars)):
@@ -206,7 +220,6 @@ class RulesProve:
             if (sat_unsat == 'unsat'):
                 print("UNSAT for label:", label)
                 unsat_lbls.append(label)
-                self.unsolved = self.unsolved.remove(label)
         
 
             
@@ -214,6 +227,7 @@ class RulesProve:
             print("Rule Proved for the following labels.")
             for indx1 in range(0, len(unsat_lbls)):
                 print("LABEL:", unsat_lbls[indx1])
+                self.unsolved = self.unsolved.remove(label)
             if (len(unsat_lbls) == len(outvars)-1):
                 print("RULE PROVED!!")
                 results = True

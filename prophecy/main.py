@@ -3,6 +3,7 @@ import os
 import argparse
 import numpy as np
 import pandas as pd
+import shutil
 
 from pathlib import Path
 
@@ -106,6 +107,16 @@ def run_prove_command(lab: int):
     print("FEATURES:", np.shape(train_features))
     print("LABELS:", np.shape(train_labels))
 
+    source_file1 = '/content/ProphecyPlus/dataset_modles/MarabouNetworkONNX.py'
+    source_file2 = '/content/ProphecyPlus/dataset_modles/ONNXParser.py'
+    #destination_file1 = '/usr/local/lib/python3.11/dist-packages/maraboupy/MarabouNetworkONNX.py'
+    destination_file1 = marabou_path + '/MarabouNetworkONNX.py'
+    destination_file2 = marabou_path + '/parsers/ONNXParser.py'
+
+    shutil.copy(source_file1, destination_file1)
+    shutil.copy(source_file2, destination_file2)
+
+    
     results = False
     it = 0
     while (results == False):
@@ -168,6 +179,7 @@ if __name__ == '__main__':
                                 default=False)
 
     analyze_parser = action_parser.add_parser('prove')
+    analyze_parser.add_argument('-mp', '--marabou_path', type=str, help='path to Marabou folder', required=True)
     analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
     analyze_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
     analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
@@ -186,6 +198,7 @@ if __name__ == '__main__':
     if (args.action == 'prove'):
         onnx_model = args.onnx_path
         onnx_map = args.onnx_map
+        marabou_path = args.marabou_path
         
     working_dir = Path(args.workdir) if args.workdir else results_path
 

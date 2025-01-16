@@ -25,7 +25,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
@@ -36,6 +36,7 @@ class RulesProve:
         self.labels = labels
         self.lab = lab
         self.iter = iter
+        self.unsolved = unsolved
         
     def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
@@ -110,11 +111,12 @@ class RulesProve:
 
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, inp_ex[0], finger_ex[0])
         
-    def __call__(self, **kwargs) -> bool:
+    def __call__(self, **kwargs) -> bool,list:
         
         (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
 
         results = False
+       
         
         onnx_model_nm=self.onnx_path
         h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
@@ -174,9 +176,11 @@ class RulesProve:
         #prove = True
         sat_lbls = []
         unsat_lbls = []
+        
         for label in range(0,  len(outvars)):
-            if (label == rule_label):
+            if ((label == rule_label) or (label not in self.unsolved)):
                 continue
+            
             label_var = Var(outvars[label])
             for indx in range(0,  len(outvars)):
                 v = Var(outvars[indx])
@@ -202,6 +206,7 @@ class RulesProve:
             if (sat_unsat == 'unsat'):
                 print("UNSAT for label:", label)
                 unsat_lbls.append(label)
+                self.unsolved = self.unsolved.remove(label)
         
 
             
@@ -219,4 +224,4 @@ class RulesProve:
             for indx1 in range(0, len(sat_lbls)):
                 print("LABEL:", sat_lbls[indx1])
         
-        return results
+        return results, self.unsolved

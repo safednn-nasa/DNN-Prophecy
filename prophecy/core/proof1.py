@@ -18,7 +18,7 @@ import time
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
 
-sys.path.append('/content/drive/MyDrive/Marabou')
+
 from maraboupy import Marabou
 from maraboupy.MarabouCore import *
 from maraboupy.MarabouPythonic import *

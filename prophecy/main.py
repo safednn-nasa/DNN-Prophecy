@@ -107,8 +107,8 @@ def run_prove_command(lab: int):
     print("FEATURES:", np.shape(train_features))
     print("LABELS:", np.shape(train_labels))
 
-    source_file1 = '/content/ProphecyPlus/dataset_modles/MarabouNetworkONNX.py'
-    source_file2 = '/content/ProphecyPlus/dataset_modles/ONNXParser.py'
+    source_file1 = '/content/ProphecyPlus/dataset_models/MarabouNetworkONNX.py'
+    source_file2 = '/content/ProphecyPlus/dataset_models/ONNXParser.py'
     #destination_file1 = '/usr/local/lib/python3.11/dist-packages/maraboupy/MarabouNetworkONNX.py'
     destination_file1 = marabou_path + '/MarabouNetworkONNX.py'
     destination_file2 = marabou_path + '/parsers/ONNXParser.py'

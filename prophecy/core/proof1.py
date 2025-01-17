@@ -146,7 +146,7 @@ class RulesProve:
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
-            if (self.iter ==  2):
+            if ((self.iter ==  2) or (self.iter == -1)):
                 network_a.setLowerBound(i,inp_ex[indx])
                 network_a.setUpperBound(i,inp_ex[indx])
             if ((self.iter == 0) or (self.iter == 1)):
@@ -160,7 +160,7 @@ class RulesProve:
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
-            if (self.iter > 0):
+            if ((self.iter > 0) or (self.iter == -1)):
                 network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
                 network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
             if (self.iter == 0):

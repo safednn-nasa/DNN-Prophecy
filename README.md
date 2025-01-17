@@ -114,7 +114,7 @@ $ python -m prophecy.main -m /path/to/model.pth' -wd /path/to/workdir prove [-h]
 
 
 #### Example
-- For the given label, select the rule with the highest recall on the train dataset. Invoke Marabou using the onnx version of the model and attempt to prove the query Vx \sigma(x) => F(x) = label
+- For the given label 0, select the rule with the highest recall on the train dataset. Invoke Marabou using the onnx version of the model and attempt to prove the query Vx \sigma(x) => F(x) = label
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir prove -tx /path/to/train_features.npy -mp /path/to/marabou\_build\_dir    -onx /path/to/onnx_model.onnx -onx_map h5_onnx_map.npy -label 0
 ```

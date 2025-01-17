@@ -129,7 +129,7 @@ def run_prove_command(lab: int):
     while (results == False):
         print("ITERATION #:", it)
         print("UNSOLVED LABELS:", unsolved_labs)
-        prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs)
+        prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const)
         results,unsolved = prove_marabou()
         unsolved_labs = []
         for indx in range(0,len(unsolved)):
@@ -194,6 +194,7 @@ if __name__ == '__main__':
 
     analyze_parser = action_parser.add_parser('prove')
     analyze_parser.add_argument('-mp', '--marabou_path', type=str, help='path to Marabou folder', required=True)
+    analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
     analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
     analyze_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
     analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
@@ -213,6 +214,7 @@ if __name__ == '__main__':
         onnx_model = args.onnx_path
         onnx_map = args.onnx_map
         marabou_path = args.marabou_path
+        min_const = args.min_const
         
     working_dir = Path(args.workdir) if args.workdir else results_path
 

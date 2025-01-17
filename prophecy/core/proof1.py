@@ -25,7 +25,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, min_const: bool, iter: int, unsolved: list):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
@@ -37,6 +37,7 @@ class RulesProve:
         self.lab = lab
         self.iter = iter
         self.unsolved = unsolved
+        self.min_const = min_const
         
     def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
@@ -194,18 +195,17 @@ class RulesProve:
         print("UNSOLVED LABS:", unsolved_labs)
 
         for indx in range(0,  len(unsolved_labs)):
-            #if ((label == rule_label) or (label not in self.unsolved)):
-            #    continue
-
-           # label = unsolved_labs[indx]
-            
-           # label_var = Var(outvars[label])
-           # for indx in range(0,  len(outvars)):
-           #     v = Var(outvars[indx])
-           #     if (indx == label):
-           #         continue
-           #     network_a.addConstraint(label_var >= v + 0.001)
-           #     print(v, ":",indx)
+            label = unsolved_labs[indx]
+            label_var = Var(outvars[label])
+            for indx in range(0,  len(outvars)):
+                v = Var(outvars[indx])
+                if (indx == label):
+                    continue
+                if (self.min_const == True):
+                    network_a.addConstraint(v >= label_var + 0.001)
+                else:
+                    network_a.addConstraint(label_var >= v + 0.001)
+                print(v, ":",indx)
 
 
             sat_unsat = None

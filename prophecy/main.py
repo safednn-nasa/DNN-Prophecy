@@ -116,6 +116,7 @@ def run_prove_command(lab: int):
     shutil.copy(source_file1, destination_file1)
     shutil.copy(source_file2, destination_file2)
 
+    print("PATH:", marabou_path)
     
     results = False
     it = -1

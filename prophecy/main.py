@@ -141,22 +141,22 @@ if __name__ == '__main__':
     print(path)
     #os.environ['PATH'] = path + ':../Marabou/:../Marabou/build:../Marabou/build/bin'
     #print(os.environ['PATH'])
-    parser = argparse.ArgumentParser(description='Infer Data Precondition')
-    parser.add_argument('-m', '--model_path', type=str, help='Model to infer the precondition',
+    parser = argparse.ArgumentParser(description='Prophecy')
+    parser.add_argument('-m', '--model_path', type=str, help='Model in keras (.h5) format.',
                         required=False)
     parser.add_argument('-wd', '--workdir', type=str, help='Working directory', required=False)
 
     action_parser = parser.add_subparsers(dest='action')
     
-    infer_parser = action_parser.add_parser('infer')
-    infer_parser.add_argument('-tx', '--test_features', type=str, help='Test features', required=True)
-    infer_parser.add_argument('-ty', '--test_labels', type=str, help='Test labels', required=True)
+    monitor_parser = action_parser.add_parser('monitor')
+    monitor_parser.add_argument('-tx', '--test_features', type=str, help='Test features', required=True)
+    monitor_parser.add_argument('-ty', '--test_labels', type=str, help='Test labels', required=True)
 
-    infer_subparser = infer_parser.add_subparsers(dest='infer_subparser')
-    rules_parser = infer_subparser.add_parser('rules')
+    monitor_subparser = monitor_parser.add_subparsers(dest='monitor_subparser')
+    rules_parser = monitor_subparser.add_parser('rules')
     rules_parser.add_argument('-t', '--threshold', type=float, help='rule F1-threshold', default=0.0)
 
-    classifiers_parser = infer_subparser.add_parser('classifiers')
+    classifiers_parser = monitor_subparser.add_parser('classifiers')
     classifiers_parser.add_argument('-op', '--only-pure', action='store_true', default=False,
                                     help='Consider only classifications with 100 probability')
 
@@ -222,13 +222,13 @@ if __name__ == '__main__':
         run_analyze_command()
     elif args.action == 'prove':
         run_prove_command(args.lab)
-    elif args.action == 'infer':
-        if args.infer_subparser == 'rules':
+    elif args.action == 'monitor':
+        if args.monitor_subparser == 'rules':
             run_detect_command()
-        elif args.infer_subparser == 'classifiers':
+        elif args.monitor_subparser == 'classifiers':
             run_classify_command()
         else:
             print("Please specify a command ['rules', 'classifiers'].", file=sys.stderr)
     else:
-        print("Please specify a command ['analyze', 'infer'].", file=sys.stderr)
+        print("Please specify a command ['analyze', 'monitor', 'prove'].", file=sys.stderr)
         exit()

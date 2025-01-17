@@ -184,7 +184,7 @@ class RulesProve:
                     continue
                 unsolved_labs.append(label)
         else:
-            for indx in range(0, self.unsolved):
+            for indx in range(0, len(self.unsolved)):
                 unsolved_labs.append(self.unsolved[indx])
                 
         print("UNSOLVED LABS:", unsolved_labs)

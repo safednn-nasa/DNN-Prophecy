@@ -98,7 +98,7 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor -tx 
 
 ### Prove Command
 
-Monitor model's behavior on unseen inputs and classify them as correctly classified, mis-classified or uncertain.
+Attempt to prove rules extracted by Prophecy (invokes Marabou solver https://github.com/NeuralNetworkVerification/Marabou).
 
 ```shell
 $ python -m prophecy.main -m /path/to/model.pth' -wd /path/to/workdir prove [-h] -tx TRAIN_FEATURES
@@ -113,8 +113,8 @@ $ python -m prophecy.main -m /path/to/model.pth' -wd /path/to/workdir prove [-h]
 - -label, --lab: Label for which the rule is chosen. Selects the top rule for given label.
 
 
-#### Examples
-- Evaluate a given model on unseen data with the extracted rules
+#### Example
+- For the given label, select the rule with the highest recall on the train dataset. Invoke Marabou using the onnx version of the model and attempt to prove the query Vx \sigma(x) => F(x) = label
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir prove -tx /path/to/train_features.npy -mp /path/to/marabou\_build\_dir    -onx /path/to/onnx_model.onnx -onx_map h5_onnx_map.npy -label 0
 ```

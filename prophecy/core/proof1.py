@@ -178,12 +178,16 @@ class RulesProve:
         unsat_lbls = []
         
         unsolved_labs = []
+        if (self.iter == -1):
+            unsolved_labs.append(rule_label)
+        
         if (self.iter == 0):
             for label in range(0,len(outvars)):
                 if (label == rule_label):
                     continue
                 unsolved_labs.append(label)
-        else:
+                
+        if (self.iter > 0):
             for indx in range(0, len(self.unsolved)):
                 unsolved_labs.append(self.unsolved[indx])
                 

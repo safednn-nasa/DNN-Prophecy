@@ -118,7 +118,7 @@ def run_prove_command(lab: int):
 
     
     results = False
-    it = 0
+    it = -1
     unsolved_labs = []
     #for indx in range(0,10):
     #    if (indx == lab):
@@ -133,7 +133,10 @@ def run_prove_command(lab: int):
         unsolved_labs = []
         for indx in range(0,len(unsolved)):
             unsolved_labs.append(unsolved[indx])
+        if (it == -1):
+            break
         it = it + 1
+        
 
 
 if __name__ == '__main__':

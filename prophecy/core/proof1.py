@@ -197,15 +197,15 @@ class RulesProve:
             #if ((label == rule_label) or (label not in self.unsolved)):
             #    continue
 
-            label = unsolved_labs[indx]
+           # label = unsolved_labs[indx]
             
-            label_var = Var(outvars[label])
-            for indx in range(0,  len(outvars)):
-                v = Var(outvars[indx])
-                if (indx == label):
-                    continue
-                network_a.addConstraint(label_var >= v + 0.001)
-                print(v, ":",indx)
+           # label_var = Var(outvars[label])
+           # for indx in range(0,  len(outvars)):
+           #     v = Var(outvars[indx])
+           #     if (indx == label):
+           #         continue
+           #     network_a.addConstraint(label_var >= v + 0.001)
+           #     print(v, ":",indx)
 
 
             sat_unsat = None

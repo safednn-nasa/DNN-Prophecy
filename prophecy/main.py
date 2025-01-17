@@ -119,7 +119,7 @@ def run_prove_command(lab: int):
     print("PATH:", marabou_path)
     
     results = False
-    it = -1
+    it = 0
     unsolved_labs = []
     #for indx in range(0,10):
     #    if (indx == lab):

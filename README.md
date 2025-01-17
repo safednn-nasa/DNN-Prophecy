@@ -66,7 +66,7 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze -tx 
 Monitor model's behavior on unseen inputs and classify them as correctly classified, mis-classified or uncertain.
 
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor [-h] -tx TEST_FEATURES -ty TEST_LABELS {rules,classifiers} ...
+$ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor [-h] -tx TEST_FEATURES -ty TEST_LABELS {rules,classifiers} ...
 ```
 
 #### Subcommands
@@ -88,11 +88,33 @@ $ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor [-h
 #### Examples
 - Evaluate a given model on unseen data with the extracted rules
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor -tx /path/to/test_features.csv -ty /path/to/test_labels.csv rules
+$ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor -tx /path/to/test_features.npy -ty /path/to/test_labels.npy rules
 ```
 
 - Evaluate a given model on unseen data with the trained classifiers
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth -wd /path/to/workdir monitor -tx /path/to/test_features.csv -ty /path/to/test_labels.csv classifiers 
+$ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor -tx /path/to/test_features.npy -ty /path/to/test_labels.npy classifiers 
 ```
 
+### Prove Command
+
+Monitor model's behavior on unseen inputs and classify them as correctly classified, mis-classified or uncertain.
+
+```shell
+$ python -m prophecy.main -m /path/to/model.pth' -wd /path/to/workdir prove [-h] -tx TRAIN_FEATURES
+```
+
+#### Arguments
+
+- -tx, --train_features (required): Path to the training features.
+- -mp, --marabou_path (required): MARABOU_PATH path to Marabou folder
+- -onx, --onnx_path (required): Path to model in ONNX form
+- -onx_map, --onnx_map: Map between the layers of .h5 and .onnx models
+- -label, --lab: Label for which the rule is chosen. Selects the top rule for given label.
+
+
+#### Examples
+- Evaluate a given model on unseen data with the extracted rules
+```shell
+$ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir prove -tx /path/to/train_features.npy -mp /path/to/marabou\_build\_dir    -onx /path/to/onnx_model.onnx -onx_map h5_onnx_map.npy -label 0
+```

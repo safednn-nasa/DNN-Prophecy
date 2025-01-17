@@ -25,7 +25,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool = False):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm

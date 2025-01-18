@@ -1,1 +1,14 @@
+! pip install onnx
+! pip install onnx-tf
 
+! pip install pybind11
+! pip install cmake
+
+import torch
+
+
+import onnx
+!pip install onnxruntime
+import onnxruntime
+
+!pip install maraboupy

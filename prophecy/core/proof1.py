@@ -25,7 +25,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool, pred_post: bool, robust_post: bool, op_consts: list):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
@@ -38,6 +38,10 @@ class RulesProve:
         self.iter = iter
         self.unsolved = unsolved
         self.min_const = min_const
+        self.pred_post = pred_post
+        self.robust_post = robust_post
+        self.op_consts = op_consts
+        
         
     def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")

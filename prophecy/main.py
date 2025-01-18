@@ -122,10 +122,12 @@ def run_prove_command(lab: int):
     it = 0
     if (robust_post == True):
         pred_post = False
+        print("CONSTRAINTS PATH:", consts_path)
+        conditions = np.genfromtxt(consts_path, delimiter=',', dtype=str)
+        print(np.shape(conditions))
         while (results == False):
             print("ITERATION #:", it)
-            
-            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, robust_post=robust_post,op_consts=consts)
+            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, robust_post=robust_post,op_consts=conditions)
             results,unsolved = prove_marabou()
             it = it + 1
         

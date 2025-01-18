@@ -117,26 +117,32 @@ def run_prove_command(lab: int):
     shutil.copy(source_file2, destination_file2)
 
     print("PATH:", marabou_path)
-    
+
     results = False
     it = 0
-    unsolved_labs = []
-    #for indx in range(0,10):
-    #    if (indx == lab):
-    #        continue
-    #    unsolved_labs.append(indx)
+    if (robust_post == True):
+        pred_post = False
+        while (results == False):
+            print("ITERATION #:", it)
+            
+            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, robust_post=robust_post,op_consts=consts)
+            results,unsolved = prove_marabou()
+            it = it + 1
         
-    while (results == False):
-        print("ITERATION #:", it)
-        print("UNSOLVED LABELS:", unsolved_labs)
-        prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const)
-        results,unsolved = prove_marabou()
+    if (pred_post == True):
         unsolved_labs = []
-        for indx in range(0,len(unsolved)):
-            unsolved_labs.append(unsolved[indx])
-        if (it == -1):
-            break
-        it = it + 1
+        while (results == False):
+            print("ITERATION #:", it)
+            print("UNSOLVED LABELS:", unsolved_labs)
+            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const)
+            results,unsolved = prove_marabou()
+            unsolved_labs = []
+            for indx in range(0,len(unsolved)):
+                unsolved_labs.append(unsolved[indx])
+            if (it == -1):
+                break
+            it = it + 1
+   
         
 
 
@@ -194,13 +200,16 @@ if __name__ == '__main__':
 
     analyze_parser = action_parser.add_parser('prove')
     analyze_parser.add_argument('-mp', '--marabou_path', type=str, help='path to Marabou folder', required=True)
-    analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
     analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
     analyze_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
     analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
     analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=True)
     analyze_parser.add_argument('-label', '--lab', type=int, default=0,
                                 help='select top rules for given label.')
+    analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
+    analyze_parser.add_argument('-pred_post', '--pred_post', type=bool, help='prediction post', default=True)
+    analyze_parser.add_argument('-robust_post', '--robust_post', type=bool, help='robustness post', default=False)
+    analyze_parser.add_argument('-cp', '--cp', type=str, help='path to output constraints file', default=None)
     
 
     args = parser.parse_args()
@@ -215,6 +224,9 @@ if __name__ == '__main__':
         onnx_map = args.onnx_map
         marabou_path = args.marabou_path
         min_const = args.min_const
+        pred_post = args.prd_post
+        robust_post = args.robust_post
+        consts_path = args.cp
         
     working_dir = Path(args.workdir) if args.workdir else results_path
 

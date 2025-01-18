@@ -111,70 +111,48 @@ class RulesProve:
         print("FINGERPRINT EXAM:", finger_ex[0])
 
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, inp_ex[0], finger_ex[0])
-        
-    def __call__(self, **kwargs) -> (bool,list):
-        
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
 
+    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: Any, conds: list)->bool:
+        for indx in range(0,  len(outvars)):
+            v = Var(outvars[indx])
+            for cond_indx in range(0, len(conds)):
+                cond = conds[cond_indx]
+                if (int(cond[0]) == indx):
+                    val = float(cond[2])
+                    if (cond[1] == '>='):
+                        network_a.addConstraint(val >= v + 0.001) # SHOULD BE UNSAT
+                    if (cond[1] == '<='):
+                        network_a.addConstraint(v >= val + 0.001) # SHOULD BE UNSAT
+                    if (cond[1] == '>'):
+                        network_a.addConstraint(val >= v) # SHOULD BE UNSAT
+                    if (cond[1] == '<'):
+                        network_a.addConstraint(v >= val) # SHOULD BE UNSAT
+            print(v, ":",indx)
+
+        sat_unsat = None
+        vals = None
+        stats = None
+            
+        sat_unsat,vals,stats = network_a.solve(options = options1)
+           
+        print("sat_unsat:", sat_unsat)
+            
+        if (sat_unsat == 'sat'):
+            print("SAT", label)
+            print("vals:", vals)
+
+                
+        if (sat_unsat == 'unsat'):
+            print("RULE PROVED!!")
+            results = True
+
+        return results
+
+        
+    
+    def pred_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: Any, lab:int)->(bool, list):
         results = False
-       
-        
-        onnx_model_nm=self.onnx_path
-        h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
-        print("h5_onnx_map:", np.shape(h5_onnx_map))
-        onnx_layer_nm = None
-        for indx1 in range(0,len(h5_onnx_map)):
-            if (h5_onnx_map[indx1][0] == self.layer_nm):
-                onnx_layer_nm = h5_onnx_map[indx1][1]
-                break
-        if (onnx_layer_nm != None):
-            print("onnx layer name:",onnx_layer_nm)
-        else:
-            print("could not find the onnx layer mapped to the h5 layer", self.layer_nm)
-            
-        #onnx_layer_nm="dense_14_1/Identity:0"
-        lab=self.lab
-     
-        #options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=90,snc=True)
-        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=120)
-        filename = onnx_model_nm
-        network_a = Marabou.read_onnx(filename)
-
-        print("INPUT VARS")
-        invars = network_a.inputVars[0][0].flatten()
-        print(invars)
-    
-        for indx in range(0,len(invars)):
-            i = invars[indx]
-            v = Var(i)
-            if ((self.iter ==  2) or (self.iter == -1)):
-                network_a.setLowerBound(i,inp_ex[indx])
-                network_a.setUpperBound(i,inp_ex[indx])
-            if ((self.iter == 0) or (self.iter == 1)):
-               network_a.setLowerBound(i,x_train_min_layer[i])
-               network_a.setUpperBound(i,x_train_max_layer[i])
-            
-
-        print("LAYER VARS")
-        neurons_layer = network_a.layerNameToVariables[onnx_layer_nm][0]
-        print(np.shape(neurons_layer))
-    
-        for indx in range(0, len(neurons_layer)):
-            neuron_indx = neurons_layer[indx] - neurons_layer[0]
-            if ((self.iter > 0) or (self.iter == -1)):
-                network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
-                network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
-            if (self.iter == 0):
-                network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
-                network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
-            
-
-        print("OUTPUT VARS")
-        outvars = network_a.outputVars[0].flatten()
-        print(outvars)
-
         rule_label = lab
-        #prove = True
         sat_lbls = []
         unsat_lbls = []
         
@@ -241,5 +219,81 @@ class RulesProve:
             print("CEs found for the following labels.")
             for indx1 in range(0, len(sat_lbls)):
                 print("LABEL:", sat_lbls[indx1])
+
+        return results, unsolved_labs
+        
+        
+    def __call__(self, **kwargs) -> (bool,list):
+        
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
+
+        results = False
+       
+        
+        onnx_model_nm=self.onnx_path
+        h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
+        print("h5_onnx_map:", np.shape(h5_onnx_map))
+        onnx_layer_nm = None
+        for indx1 in range(0,len(h5_onnx_map)):
+            if (h5_onnx_map[indx1][0] == self.layer_nm):
+                onnx_layer_nm = h5_onnx_map[indx1][1]
+                break
+        if (onnx_layer_nm != None):
+            print("onnx layer name:",onnx_layer_nm)
+        else:
+            print("could not find the onnx layer mapped to the h5 layer", self.layer_nm)
+            
+        #onnx_layer_nm="dense_14_1/Identity:0"
+        lab=self.lab
+     
+        #options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=90,snc=True)
+        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=120)
+        filename = onnx_model_nm
+        network_a = Marabou.read_onnx(filename)
+
+        print("INPUT VARS")
+        invars = network_a.inputVars[0][0].flatten()
+        print(invars)
+    
+        for indx in range(0,len(invars)):
+            i = invars[indx]
+            v = Var(i)
+            if ((self.iter ==  2) or (self.iter == -1)):
+                network_a.setLowerBound(i,inp_ex[indx])
+                network_a.setUpperBound(i,inp_ex[indx])
+            if ((self.iter == 0) or (self.iter == 1)):
+               network_a.setLowerBound(i,x_train_min_layer[i])
+               network_a.setUpperBound(i,x_train_max_layer[i])
+            
+
+        print("LAYER VARS")
+        neurons_layer = network_a.layerNameToVariables[onnx_layer_nm][0]
+        print(np.shape(neurons_layer))
+    
+        for indx in range(0, len(neurons_layer)):
+            neuron_indx = neurons_layer[indx] - neurons_layer[0]
+            if ((self.iter > 0) or (self.iter == -1)):
+                network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
+                network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
+            if (self.iter == 0):
+                network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+                network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
+            
+
+        print("OUTPUT VARS")
+        outvars = network_a.outputVars[0].flatten()
+        print(outvars)
+
+        %% PREDICTION POST-COND
+        unsolved_labs = []
+        if (self.pred_post == True):
+            results, unsolved_labs = pred_post_cond(network_a=network_a,outvars=outvars,options1=options1,lab=lab)
+            
+        %% ROBUST POST-COND 
+        if (self.robust_post == True):
+            conditions = np.genfromtxt(self.op_consts, delimiter=',', dtype=str)
+            print("OUTPUT CONDS:", np.shape(conditions))
+            results = robust_post_cond(network_a=network_a,outvars=outvars,options1=options1,conds=conditions)
+ 
         
         return results, unsolved_labs

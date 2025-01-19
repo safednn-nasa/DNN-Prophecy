@@ -127,7 +127,7 @@ class RulesProve:
 
         print("GET MIN,MAX BOUNDS OF OUTPUT NEURONS SATISFYING RULE")
         op_min3 = np.zeros(len(op3[0]))
-        opt_max3 = np.zeros(len(op3[0]))
+        op_max3 = np.zeros(len(op3[0]))
         for indx in range(0,len(op3[0])):
             op_min3[indx] = np.min(op3[:,indx])
             op_max3[indx] = np.max(op3[:,indx])

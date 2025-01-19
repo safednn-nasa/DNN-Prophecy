@@ -20,6 +20,7 @@ from prophecy.core.helpers import check_pattern, get_suffix_cluster
 
 
 from maraboupy import Marabou
+from maraboupy import MarabouNetworkONNX
 from maraboupy.MarabouCore import *
 from maraboupy.MarabouPythonic import *
 
@@ -154,7 +155,7 @@ class RulesProve:
 
         
     
-    def pred_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: Any, lab:int)->(bool, list):
+    def pred_post_cond(self, network_a: maraboupy.MarabouNetworkONNX ,outvars: list, options1: Any, lab:int)->(bool, list):
         results = False
         rule_label = lab
         sat_lbls = []

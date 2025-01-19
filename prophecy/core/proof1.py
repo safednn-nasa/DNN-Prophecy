@@ -300,7 +300,7 @@ class RulesProve:
         #PREDICTION POST-COND
         unsolved_labs = []
         if (self.pred_post == True):
-            results, unsolved_labs = pred_post_cond(network_a=network_a,outvars=outvars,options1=options1,lab=lab)
+            results, unsolved_labs = self.pred_post_cond(network_a=network_a,outvars=outvars,options1=options1,lab=lab)
             
         #ROBUST POST-COND 
         if (self.robust_post == True):
@@ -315,7 +315,7 @@ class RulesProve:
                     conditions.append(row)
             print("OUTPUT CONDS:", np.shape(conditions))
             
-            results = robust_post_cond(network_a=network_a,outvars=outvars,options1=options1,conds=conditions)
+            results = self.robust_post_cond(network_a=network_a,outvars=outvars,options1=options1,conds=conditions)
  
         
         return results, unsolved_labs

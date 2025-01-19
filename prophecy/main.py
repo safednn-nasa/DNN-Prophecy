@@ -206,7 +206,7 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
     analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
     analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=True)
-    analyze_parser.add_argument('-label', '--lab', type=int, default=0,
+    analyze_parser.add_argument('-label', '--lab', type=int, default=-1,
                                 help='select top rules for given label.')
     analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
     analyze_parser.add_argument('-pred_post', '--pred_post', type=bool, help='prediction post', default=True)

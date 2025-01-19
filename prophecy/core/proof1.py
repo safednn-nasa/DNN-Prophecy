@@ -64,15 +64,22 @@ class RulesProve:
 
         print("GET FINGERPRINTS FOR TRAIN DATA AFTER LAYER:", self.layer_nm)
         func_layer = None
+        func_op = None
         for layer in self.model.layers:
             if layer.name == self.layer_nm:
                 func_layer = keras.backend.function(self.model.input, [layer.output])
+            func_op = keras.backend.function(self.model.input, [self.model.output])
         fingerprint_layer = []
         if (func_layer != None):
             fingerprint_layer = func_layer(self.features)
+        fingerprint_op = []
+        if (func_op != None):
+            fingerprint_op = func_op(self.features)
+        fingerprints = fingerprint_layer[0]
+        ops = fingerprint_op[0]
+        
 
         print("GET INDICES OF INPUTS SATISFYING RULE")
-        fingerprints = fingerprint_layer[0]
         if (len(self.neurons) == len(self.sig)):
             fngprnt = (fingerprints > 0.0).astype('int')
             indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
@@ -82,16 +89,22 @@ class RulesProve:
 
         x_train3 = []
         fngprnt3 = []
+        op3 = []
         inp_ex = []
         finger_ex = []
+        op_ex = []
         for indx in range(0, len(indices)):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
                 finger_ex.append(fingerprints[indices[indx]])
+                op_ex.append(ops[indices[indx]])
+                
             x_train3.append(x_train_flat[indices[indx]])
             fngprnt3.append(fingerprints[indices[indx]])
+            op3.append(ops[indices[indx]])
         x_train3 = np.array(x_train3)
         fngprnt3 = np.array(fngprnt3)
+        op3 = np.array(op3)
 
         print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
         x_train_min3 = np.zeros(length)
@@ -111,32 +124,41 @@ class RulesProve:
             fngprnt_max3[indx] = np.max(fngprnt3[:,indx])
         print(fngprnt_min3)
         print(fngprnt_max3)
+
+        print("GET MIN,MAX BOUNDS OF OUTPUT NEURONS SATISFYING RULE")
+        op_min3 = np.zeros(len(op3[0]))
+        opt_max3 = np.zeros(len(op3[0]))
+        for indx in range(0,len(op3[0])):
+            op_min3[indx] = np.min(op3[:,indx])
+            op_max3[indx] = np.max(op3[:,indx])
+        print(op_min3)
+        print(op_max3)
         
         print("INPUT EXAM:", inp_ex[0])
         print("FINGERPRINT EXAM:", finger_ex[0])
+        print("OP EXAM:", op_ex[0])
 
-        return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, inp_ex[0], finger_ex[0])
+        
+        return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
 
-    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: any, conds: list)->bool:
+    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: list, out_max: list, options1: any, conds: list)->bool:
         results = False
         for indx in range(0,  len(outvars)):
-            v = Var(outvars[indx])
-            for cond_indx in range(0, len(conds)):
-                cond = conds[cond_indx]
+            network_a.setLowerBounds(indx, out_min[indx])
+            network_a.setUpperBounds(indx, out_max[indx])
+            
+        for cond_indx in range(0, len(conds)):
+            cond = conds[cond_indx]
+            for indx in range(0,  len(outvars)):
                 if (int(cond[0]) == indx):
+                    v = Var(outvars[indx])
                     val = float(cond[2])
                     if (cond[1] == '>='):
-                        print(val, ">= op[", indx,"] + 0.001 should be UNSAT")
-                        network_a.addConstraint(val >= v + 0.001) # SHOULD BE UNSAT
+                        ## ADD WIGGLE ROOM
+                        network_a.addConstraint((out_min[indx] - val) >= v) # SHOULD BE UNSAT
                     if (cond[1] == '<='):
-                        print(cond[1])
-                        network_a.addConstraint(v >= val + 0.001) # SHOULD BE UNSAT
-                    if (cond[1] == '>'):
-                        print(cond[1])
-                        network_a.addConstraint(val >= v) # SHOULD BE UNSAT
-                    if (cond[1] == '<'):
-                        print(cond[1])
-                        network_a.addConstraint(v >= val) # SHOULD BE UNSAT
+                        ## ADD WIGGLE ROOM
+                        network_a.addConstraint(v >= (out_max[indx] + val)) # SHOULD BE UNSAT
             print(v, ":",indx)
 
         sat_unsat = None
@@ -235,15 +257,12 @@ class RulesProve:
         
     def __call__(self, **kwargs) -> (bool,list):
         
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, inp_ex, finger_ex) = self.get_bounds()
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, op_min, op_max, inp_ex, finger_ex, op_ex) = self.get_bounds()
 
         results = False
        
         
         onnx_model_nm=self.onnx_path
-        #h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
-        #print("h5_onnx_map:", np.shape(h5_onnx_map))
-        
         h5_onnx_map = []
         with open(self.onnx_map, 'r') as file:
             csv_reader = csv.reader(file)
@@ -261,7 +280,7 @@ class RulesProve:
         else:
             print("could not find the onnx layer mapped to the h5 layer", self.layer_nm)
             
-        #onnx_layer_nm="dense_14_1/Identity:0"
+
         lab=self.lab
      
         #options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=90,snc=True)
@@ -308,9 +327,8 @@ class RulesProve:
             results, unsolved_labs = self.pred_post_cond(network_a=network_a,outvars=outvars,options1=options1,lab=lab)
             
         #ROBUST POST-COND 
-        if (self.robust_post == True):
-           # conditions = np.genfromtxt(self.op_consts, delimiter=',', dtype=str)
-           # print("OUTPUT CONDS:", np.shape(conditions))
+        if (self.robust_post == True):    
+            ### SET OUTVARS CONDS
             
             conditions = []
             with open(self.op_consts, 'r') as file:
@@ -318,6 +336,7 @@ class RulesProve:
                 for row in csv_reader:
                     print(row)
                     conditions.append(row)
+            
             print("OUTPUT CONDS:", np.shape(conditions))
             
             results = self.robust_post_cond(network_a=network_a,outvars=outvars,options1=options1,conds=conditions)

@@ -288,12 +288,12 @@ class RulesProve:
         outvars = network_a.outputVars[0].flatten()
         print(outvars)
 
-        %% PREDICTION POST-COND
+        #PREDICTION POST-COND
         unsolved_labs = []
         if (self.pred_post == True):
             results, unsolved_labs = pred_post_cond(network_a=network_a,outvars=outvars,options1=options1,lab=lab)
             
-        %% ROBUST POST-COND 
+        #ROBUST POST-COND 
         if (self.robust_post == True):
             conditions = np.genfromtxt(self.op_consts, delimiter=',', dtype=str)
             print("OUTPUT CONDS:", np.shape(conditions))

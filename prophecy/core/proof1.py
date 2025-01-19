@@ -145,29 +145,31 @@ class RulesProve:
         results = False
         for indx in range(0,  len(outvars)):
             op_indx = outvars[indx] - outvars[0]
-            network_a.setLowerBound(outvars[indx], out_min[op_indx])
-            network_a.setUpperBound(outvars[indx], out_max[op_indx])
+            thres_min = (out_min[op_indx] - 0.192)
+            thres_max = (out_max[op_indx] + 0.192)
+            network_a.setLowerBound(outvars[indx], thres_min)
+            network_a.setUpperBound(outvars[indx], thres_max)
             
-        for cond_indx in range(0, len(conds)):
-            cond = conds[cond_indx]
-            for indx in range(0,  len(outvars)):
-                op_indx = outvars[indx] - outvars[0]
-                if (int(cond[0]) == op_indx):
-                    v = Var(outvars[indx])
-                    val = float(cond[2])
-                    if (cond[1] == '>='):
-                        ## ADD WIGGLE ROOM
-                        print(out_min[op_indx]," -", val," >=", outvars[indx] , "SHOULD BE UNSAT")
-                        threshold = (out_min[op_indx] - val)
-                        print(threshold)
-                        network_a.addConstraint(-2.1237 >= v) # SHOULD BE UNSAT
-                    if (cond[1] == '<='):
-                        ## ADD WIGGLE ROOM
-                        print( outvars[indx] ,">=",out_max[op_indx], "+" ,val, "SHOULD BE UNSAT")
-                        threshold = (out_max[op_indx] + val)
-                        print(threshold)
-                        network_a.addConstraint(v >= threshold) # SHOULD BE UNSAT
-            print(v, ":",indx)
+       # for cond_indx in range(0, len(conds)):
+       #     cond = conds[cond_indx]
+       #     for indx in range(0,  len(outvars)):
+       #         op_indx = outvars[indx] - outvars[0]
+       #         if (int(cond[0]) == op_indx):
+       #             v = Var(outvars[indx])
+       #             val = float(cond[2])
+       #             if (cond[1] == '>='):
+       #                 ## ADD WIGGLE ROOM
+       #                 print(out_min[op_indx]," -", val," >=", outvars[indx] , "SHOULD BE UNSAT")
+       #                 threshold = (out_min[op_indx] - val)
+       #                 print(threshold)
+       #                 network_a.addConstraint(-2.1237 >= v) # SHOULD BE UNSAT
+       #             if (cond[1] == '<='):
+       #                 ## ADD WIGGLE ROOM
+       #                 print( outvars[indx] ,">=",out_max[op_indx], "+" ,val, "SHOULD BE UNSAT")
+       #                 threshold = (out_max[op_indx] + val)
+       #                 print(threshold)
+       #                 network_a.addConstraint(v >= threshold) # SHOULD BE UNSAT
+       #     print(v, ":",indx)
 
         sat_unsat = None
         vals = None

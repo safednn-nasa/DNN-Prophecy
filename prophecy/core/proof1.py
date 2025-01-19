@@ -145,8 +145,8 @@ class RulesProve:
         results = False
         for indx in range(0,  len(outvars)):
             op_indx = outvars[indx] - outvars[0]
-            network_a.setLowerBounds(outvars[indx], out_min[op_indx])
-            network_a.setUpperBounds(outvars[indx], out_max[op_indx])
+            network_a.setLowerBound(outvars[indx], out_min[op_indx])
+            network_a.setUpperBound(outvars[indx], out_max[op_indx])
             
         for cond_indx in range(0, len(conds)):
             cond = conds[cond_indx]

@@ -126,12 +126,16 @@ class RulesProve:
                     val = float(cond[2])
                     print(int(cond[0]), val)
                     if (cond[1] == '>='):
+                        print(cond[1])
                         network_a.addConstraint(val >= v + 0.001) # SHOULD BE UNSAT
                     if (cond[1] == '<='):
+                        print(cond[1])
                         network_a.addConstraint(v >= val + 0.001) # SHOULD BE UNSAT
                     if (cond[1] == '>'):
+                        print(cond[1])
                         network_a.addConstraint(val >= v) # SHOULD BE UNSAT
                     if (cond[1] == '<'):
+                        print(cond[1])
                         network_a.addConstraint(v >= val) # SHOULD BE UNSAT
             print(v, ":",indx)
 

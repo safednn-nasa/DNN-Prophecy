@@ -14,7 +14,7 @@ from tqdm import tqdm
 from pathlib import Path
 
 import time
-#import func_timeout
+import csv
 
 from prophecy.core.helpers import check_pattern, get_suffix_cluster
 
@@ -236,7 +236,15 @@ class RulesProve:
        
         
         onnx_model_nm=self.onnx_path
-        h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
+        #h5_onnx_map = np.genfromtxt(self.onnx_map, delimiter=',', dtype=str)
+        #print("h5_onnx_map:", np.shape(h5_onnx_map))
+        
+        h5_onnx_map = []
+        with open(self.onnx_map, 'r') as file:
+            csv_reader = csv.reader(file)
+            for row in csv_reader:
+                print(row)
+                h5_onnx_map.append(row)
         print("h5_onnx_map:", np.shape(h5_onnx_map))
         onnx_layer_nm = None
         for indx1 in range(0,len(h5_onnx_map)):
@@ -296,8 +304,17 @@ class RulesProve:
             
         #ROBUST POST-COND 
         if (self.robust_post == True):
-            conditions = np.genfromtxt(self.op_consts, delimiter=',', dtype=str)
+           # conditions = np.genfromtxt(self.op_consts, delimiter=',', dtype=str)
+           # print("OUTPUT CONDS:", np.shape(conditions))
+            
+            conditions = []
+            with open(self.op_consts, 'r') as file:
+                csv_reader = csv.reader(file)
+                for row in csv_reader:
+                    print(row)
+                    conditions.append(row)
             print("OUTPUT CONDS:", np.shape(conditions))
+            
             results = robust_post_cond(network_a=network_a,outvars=outvars,options1=options1,conds=conditions)
  
         

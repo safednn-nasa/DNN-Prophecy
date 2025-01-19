@@ -157,12 +157,14 @@ class RulesProve:
                     val = float(cond[2])
                     if (cond[1] == '>='):
                         ## ADD WIGGLE ROOM
-                        print(out_min[indx]," -", val,") >=", outvars[indx] , "SHOULD BE UNSAT")
-                        network_a.addConstraint((out_min[indx] - val) >= v) # SHOULD BE UNSAT
+                        print(out_min[op_indx]," -", val," >=", outvars[indx] , "SHOULD BE UNSAT")
+                        threshold = (out_min[op_indx] - val)
+                        network_a.addConstraint(threshold >= v) # SHOULD BE UNSAT
                     if (cond[1] == '<='):
                         ## ADD WIGGLE ROOM
-                        print(out_max[indx]," +", val,") <", outvars[indx] , "SHOULD BE UNSAT")
-                        network_a.addConstraint(v >= (out_max[indx] + val)) # SHOULD BE UNSAT
+                        print( outvars[indx] ,">=",out_max[op_indx], "+" ,val, "SHOULD BE UNSAT")
+                        threshold = (out_max[op_indx] + val)
+                        network_a.addConstraint(v >= threshold) # SHOULD BE UNSAT
             print(v, ":",indx)
 
         sat_unsat = None

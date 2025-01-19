@@ -44,7 +44,7 @@ class RulesProve:
         self.op_consts = op_consts
         
         
-    def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array):
+    def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array,np.array, np.array, np.array):
         print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
         x_train = self.features
         x_train_flat = []
@@ -141,23 +141,27 @@ class RulesProve:
         
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
 
-    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: list, out_max: list, options1: any, conds: list)->bool:
+    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, options1: any, conds: list)->bool:
         results = False
         for indx in range(0,  len(outvars)):
-            network_a.setLowerBounds(indx, out_min[indx])
-            network_a.setUpperBounds(indx, out_max[indx])
+            op_indx = outvars[indx] - outvars[0]
+            network_a.setLowerBounds(outvars[indx], out_min[op_indx])
+            network_a.setUpperBounds(outvars[indx], out_max[op_indx])
             
         for cond_indx in range(0, len(conds)):
             cond = conds[cond_indx]
             for indx in range(0,  len(outvars)):
-                if (int(cond[0]) == indx):
+                op_indx = outvars[indx] - outvars[0]
+                if (int(cond[0]) == op_indx):
                     v = Var(outvars[indx])
                     val = float(cond[2])
                     if (cond[1] == '>='):
                         ## ADD WIGGLE ROOM
+                        print(out_min[indx]," -", val,") >=", outvars[indx] , "SHOULD BE UNSAT")
                         network_a.addConstraint((out_min[indx] - val) >= v) # SHOULD BE UNSAT
                     if (cond[1] == '<='):
                         ## ADD WIGGLE ROOM
+                        print(out_max[indx]," +", val,") <", outvars[indx] , "SHOULD BE UNSAT")
                         network_a.addConstraint(v >= (out_max[indx] + val)) # SHOULD BE UNSAT
             print(v, ":",indx)
 
@@ -339,7 +343,7 @@ class RulesProve:
             
             print("OUTPUT CONDS:", np.shape(conditions))
             
-            results = self.robust_post_cond(network_a=network_a,outvars=outvars,options1=options1,conds=conditions)
+            results = self.robust_post_cond(network_a=network_a,outvars=outvars,out_min=op_min, out_max=op_max,options1=options1,conds=conditions)
  
         
         return results, unsolved_labs

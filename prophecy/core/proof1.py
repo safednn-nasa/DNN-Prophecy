@@ -118,6 +118,7 @@ class RulesProve:
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, inp_ex[0], finger_ex[0])
 
     def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: any, conds: list)->bool:
+        results = False
         for indx in range(0,  len(outvars)):
             v = Var(outvars[indx])
             for cond_indx in range(0, len(conds)):

@@ -124,6 +124,7 @@ class RulesProve:
                 cond = conds[cond_indx]
                 if (int(cond[0]) == indx):
                     val = float(cond[2])
+                    print(int(cond[0]), val)
                     if (cond[1] == '>='):
                         network_a.addConstraint(val >= v + 0.001) # SHOULD BE UNSAT
                     if (cond[1] == '<='):
@@ -143,7 +144,7 @@ class RulesProve:
         print("sat_unsat:", sat_unsat)
             
         if (sat_unsat == 'sat'):
-            print("SAT", label)
+            print("SAT:")
             print("vals:", vals)
 
                 

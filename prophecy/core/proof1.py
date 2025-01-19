@@ -160,13 +160,13 @@ class RulesProve:
                         print(out_min[op_indx]," -", val," >=", outvars[indx] , "SHOULD BE UNSAT")
                         threshold = (out_min[op_indx] - val)
                         print(threshold)
-                        network_a.addConstraint(-2.1237 >= outvars[indx]) # SHOULD BE UNSAT
+                        network_a.addConstraint(-2.1237 >= v) # SHOULD BE UNSAT
                     if (cond[1] == '<='):
                         ## ADD WIGGLE ROOM
                         print( outvars[indx] ,">=",out_max[op_indx], "+" ,val, "SHOULD BE UNSAT")
                         threshold = (out_max[op_indx] + val)
                         print(threshold)
-                        network_a.addConstraint(outvars[indx] >= threshold) # SHOULD BE UNSAT
+                        network_a.addConstraint(v >= threshold) # SHOULD BE UNSAT
             print(v, ":",indx)
 
         sat_unsat = None

@@ -147,8 +147,8 @@ class RulesProve:
             op_indx = outvars[indx] - outvars[0]
             thres_min = (out_min[op_indx] - 0.192)
             thres_max = (out_max[op_indx] + 0.192)
-            network_a.setLowerBound(outvars[indx], thres_min)
-            network_a.setUpperBound(outvars[indx], thres_max)
+            network_a.setLowerBound(outvars[indx], thres_max)
+        ##$$    network_a.setUpperBound(outvars[indx], thres_min)
             
        # for cond_indx in range(0, len(conds)):
        #     cond = conds[cond_indx]

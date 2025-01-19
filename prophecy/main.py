@@ -226,7 +226,7 @@ if __name__ == '__main__':
         onnx_map = args.onnx_map
         marabou_path = args.marabou_path
         min_const = args.min_const
-        pred_post = args.prd_post
+        pred_post = args.pred_post
         robust_post = args.robust_post
         consts_path = args.cp
         

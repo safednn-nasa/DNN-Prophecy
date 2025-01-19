@@ -155,7 +155,7 @@ class RulesProve:
 
         
     
-    def pred_post_cond(self, network_a: maraboupy.MarabouNetworkONNX ,outvars: list, options1: any, lab:int)->(bool, list):
+    def pred_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: any, lab:int)->(bool, list):
         results = False
         rule_label = lab
         sat_lbls = []

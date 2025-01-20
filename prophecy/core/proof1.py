@@ -141,7 +141,7 @@ class RulesProve:
         
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
 
-    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, options1: any, conds: list)->bool:
+    def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, conds: list)->bool:
         results = False
         for indx in range(0,  len(outvars)):
             op_indx = outvars[indx] - outvars[0]
@@ -174,7 +174,8 @@ class RulesProve:
         sat_unsat = None
         vals = None
         stats = None
-            
+
+        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=200)
         sat_unsat,vals,stats = network_a.solve(options = options1)
            
         print("sat_unsat:", sat_unsat)
@@ -192,7 +193,7 @@ class RulesProve:
 
         
     
-    def pred_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, options1: any, lab:int)->(bool, list):
+    def pred_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, lab:int)->(bool, list):
         results = False
         rule_label = lab
         sat_lbls = []
@@ -232,6 +233,7 @@ class RulesProve:
             vals = None
             stats = None
             
+            options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=120)
             sat_unsat,vals,stats = network_a.solve(options = options1)
            
             print("sat_unsat:", sat_unsat)
@@ -294,7 +296,6 @@ class RulesProve:
         lab=self.lab
      
         #options1 = Marabou.createOptions(verbosity = 1,numWorkers=1,timeoutInSeconds=90,snc=True)
-        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=120)
         filename = onnx_model_nm
         network_a = Marabou.read_onnx(filename)
 
@@ -334,7 +335,7 @@ class RulesProve:
         #PREDICTION POST-COND
         unsolved_labs = []
         if (self.pred_post == True):
-            results, unsolved_labs = self.pred_post_cond(network_a=network_a,outvars=outvars,options1=options1,lab=lab)
+            results, unsolved_labs = self.pred_post_cond(network_a=network_a,outvars=outvars,lab=lab)
             
         #ROBUST POST-COND 
         if (self.robust_post == True):    
@@ -349,7 +350,7 @@ class RulesProve:
             
             print("OUTPUT CONDS:", np.shape(conditions))
             
-            results = self.robust_post_cond(network_a=network_a,outvars=outvars,out_min=op_min, out_max=op_max,options1=options1,conds=conditions)
+            results = self.robust_post_cond(network_a=network_a,outvars=outvars,out_min=op_min, out_max=op_max,conds=conditions)
  
         
         return results, unsolved_labs

@@ -143,33 +143,29 @@ class RulesProve:
 
     def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, conds: list)->bool:
         results = False
-        for indx in range(0,  len(outvars)):
-            op_indx = outvars[indx] - outvars[0]
-            thres_min = (out_min[op_indx] - 0.192)
-            thres_max = (out_max[op_indx] + 0.192)
-            network_a.setLowerBound(outvars[indx], thres_max)
-        ##$$    network_a.setUpperBound(outvars[indx], thres_min)
+        #for indx in range(0,  len(outvars)):
+        #    op_indx = outvars[indx] - outvars[0]
+        #    thres_min = (out_min[op_indx] - 0.192)
+        #    thres_max = (out_max[op_indx] + 0.192)
+        #    network_a.setLowerBound(outvars[indx], thres_max)
+        #    network_a.setUpperBound(outvars[indx], thres_min)
             
-       # for cond_indx in range(0, len(conds)):
-       #     cond = conds[cond_indx]
-       #     for indx in range(0,  len(outvars)):
-       #         op_indx = outvars[indx] - outvars[0]
-       #         if (int(cond[0]) == op_indx):
-       #             v = Var(outvars[indx])
-       #             val = float(cond[2])
-       #             if (cond[1] == '>='):
-       #                 ## ADD WIGGLE ROOM
-       #                 print(out_min[op_indx]," -", val," >=", outvars[indx] , "SHOULD BE UNSAT")
-       #                 threshold = (out_min[op_indx] - val)
-       #                 print(threshold)
-       #                 network_a.addConstraint(-2.1237 >= v) # SHOULD BE UNSAT
-       #             if (cond[1] == '<='):
-       #                 ## ADD WIGGLE ROOM
-       #                 print( outvars[indx] ,">=",out_max[op_indx], "+" ,val, "SHOULD BE UNSAT")
-       #                 threshold = (out_max[op_indx] + val)
-       #                 print(threshold)
-       #                 network_a.addConstraint(v >= threshold) # SHOULD BE UNSAT
-       #     print(v, ":",indx)
+        for cond_indx in range(0, len(conds)):
+            cond = conds[cond_indx]   
+            for indx in range(0,  len(outvars)):
+                op_indx = outvars[indx] - outvars[0]
+                if (int(cond[0]) == op_indx):
+                    val = float(cond[2])
+                    print(val)
+                    if (cond[1] == "MIN"):
+                        thres_min = (out_min[op_indx] - val)
+                        print("SET UPPER BOUND:", outvars[indx],thres_min)
+                        network_a.setUpperBound(outvars[indx], thres_min)
+                    if (cond[1] == "MAX"):
+                        thres_max = (out_max[op_indx] + val)
+                        print("SET LOWER BOUND:", outvars[indx],thres_max)
+                        network_a.setLowerBound(outvars[indx], thres_max)
+
 
         sat_unsat = None
         vals = None

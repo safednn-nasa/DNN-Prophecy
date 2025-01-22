@@ -40,7 +40,6 @@ class RulesProve:
         self.unsolved = unsolved
         self.min_const = min_const
         self.pred_post = pred_post
-        #self.robust_post = robust_post
         self.op_consts = op_consts
         
         

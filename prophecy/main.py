@@ -227,7 +227,6 @@ if __name__ == '__main__':
         marabou_path = args.marabou_path
         min_const = args.min_const
         pred_post = args.pred
-     #   robust_post = args.robust_post
         consts_path = args.cp
         
     working_dir = Path(args.workdir) if args.workdir else results_path

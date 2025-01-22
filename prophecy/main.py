@@ -120,7 +120,7 @@ def run_prove_command(lab: int):
 
     results = False
     it = 0
-    if (robust_post == True):
+    if (pred_post == False):
         pred_post = False
         print("CONSTRAINTS PATH:", consts_path)
         #conditions = np.genfromtxt(consts_path, delimiter=',', dtype=str)
@@ -211,7 +211,7 @@ if __name__ == '__main__':
                                 help='select top rules for given label.')
     analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
     analyze_parser.add_argument('-pred_post', '--pred_post', type=bool, help='prediction post', default=True)
-    analyze_parser.add_argument('-robust_post', '--robust_post', type=bool, help='robustness post', default=False)
+   # analyze_parser.add_argument('-robust_post', '--robust_post', type=bool, help='robustness post', default=False)
     analyze_parser.add_argument('-cp', '--cp', type=str, help='path to output constraints file', default=None)
     
 

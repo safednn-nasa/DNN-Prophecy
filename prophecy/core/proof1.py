@@ -26,7 +26,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool, pred_post: bool, robust_post: bool, op_consts: list):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool, pred_post: bool, op_consts: list):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
@@ -40,7 +40,7 @@ class RulesProve:
         self.unsolved = unsolved
         self.min_const = min_const
         self.pred_post = pred_post
-        self.robust_post = robust_post
+        #self.robust_post = robust_post
         self.op_consts = op_consts
         
         
@@ -332,11 +332,10 @@ class RulesProve:
         unsolved_labs = []
         if (self.pred_post == True):
             results, unsolved_labs = self.pred_post_cond(network_a=network_a,outvars=outvars,lab=lab)
-            
+        else:
         #ROBUST POST-COND 
-        if (self.robust_post == True):    
+       # if (self.robust_post == True):    
             ### SET OUTVARS CONDS
-            
             conditions = []
             with open(self.op_consts, 'r') as file:
                 csv_reader = csv.reader(file)

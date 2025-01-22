@@ -121,7 +121,6 @@ def run_prove_command(lab: int):
     results = False
     it = 0
     if (pred_post == False):
-        pred_post = False
         print("CONSTRAINTS PATH:", consts_path)
         #conditions = np.genfromtxt(consts_path, delimiter=',', dtype=str)
         #print(np.shape(conditions))

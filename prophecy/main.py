@@ -210,7 +210,7 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-label', '--lab', type=int, default=-1,
                                 help='select top rules for given label.')
     analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
-    analyze_parser.add_argument('-pred_post', '--pred_post', type=bool, help='prediction post', default=True)
+    analyze_parser.add_argument('-pred', '--pred', type=bool, help='prediction post', default=True)
    # analyze_parser.add_argument('-robust_post', '--robust_post', type=bool, help='robustness post', default=False)
     analyze_parser.add_argument('-cp', '--cp', type=str, help='path to output constraints file', default=None)
     
@@ -227,8 +227,8 @@ if __name__ == '__main__':
         onnx_map = args.onnx_map
         marabou_path = args.marabou_path
         min_const = args.min_const
-        pred_post = args.pred_post
-        robust_post = args.robust_post
+        pred_post = args.pred
+     #   robust_post = args.robust_post
         consts_path = args.cp
         
     working_dir = Path(args.workdir) if args.workdir else results_path

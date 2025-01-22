@@ -209,7 +209,7 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-label', '--lab', type=int, default=-1,
                                 help='select top rules for given label.')
     analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
-    analyze_parser.add_argument('-pred', '--pred', type=bool, help='prediction post', default=True)
+    analyze_parser.add_argument('-pred', '--pred', type=bool, help='prediction post', default=False)
    # analyze_parser.add_argument('-robust_post', '--robust_post', type=bool, help='robustness post', default=False)
     analyze_parser.add_argument('-cp', '--cp', type=str, help='path to output constraints file', default=None)
     

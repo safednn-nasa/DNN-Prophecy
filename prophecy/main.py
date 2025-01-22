@@ -136,7 +136,8 @@ def run_prove_command(lab: int):
         while (results == False):
             print("ITERATION #:", it)
             print("UNSOLVED LABELS:", unsolved_labs)
-            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const)
+            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, op_consts=None)
+            results,unsolved = prove_marabou()
             results,unsolved = prove_marabou()
             unsolved_labs = []
             for indx in range(0,len(unsolved)):

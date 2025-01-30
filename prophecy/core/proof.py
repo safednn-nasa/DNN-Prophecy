@@ -248,7 +248,8 @@ class RulesProve:
             print("Rule Proved for the following labels.")
             for indx1 in range(0, len(unsat_lbls)):
                 print("LABEL:", unsat_lbls[indx1])
-                unsolved_labs.remove(unsat_lbls[indx1])        
+                unsolved_labs.remove(unsat_lbls[indx1])   
+                print("UNSOL:",unsolved_labs)
             if (len(unsolved_labs) == 0):
                 print("RULE PROVED!!")
                 results = True

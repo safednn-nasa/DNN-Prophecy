@@ -170,7 +170,7 @@ class RulesProve:
         vals = None
         stats = None
 
-        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=1000)
+        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=1800)
         sat_unsat,vals,stats = network_a.solve(options = options1)
            
         print("sat_unsat:", sat_unsat)

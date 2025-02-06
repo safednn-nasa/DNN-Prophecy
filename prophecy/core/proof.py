@@ -93,7 +93,7 @@ class RulesProve:
         finger_ex = []
         op_ex = []
        # for indx in range(0, len(indices)):
-        for indx in range(0, len(indices)/2):
+        for indx in range(0, int(len(indices)/2)):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
                 finger_ex.append(fingerprints[indices[indx]])

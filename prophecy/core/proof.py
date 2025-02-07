@@ -147,7 +147,46 @@ class RulesProve:
         
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
 
-    def get_bounds_GT(self):
+    def get_bounds_GT(self, gt_file_nm: str)->(np.array,np.array):
+        print("GET FINGERPRINTS FOR TRAIN DATA AFTER LAYER:", self.layer_nm)
+        func_layer = None
+        fingerprints = None
+        for layer in self.model.layers:
+            if layer.name == self.layer_nm:
+                func_layer = keras.backend.function(self.model.input, [layer.output])
+        fingerprint_layer = []
+        if (func_layer != None):
+            fingerprint_layer = func_layer(self.features)
+            fingerprints = fingerprint_layer[0]
+        
+        print("GET INDICES OF INPUTS SATISFYING RULE")
+        if (len(self.neurons) == len(self.sig)):
+            fngprnt = (fingerprints > 0.0).astype('int')
+            indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
+        else:
+            indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
+            print("indices:", len(indices))
+
+        ### READ FROM GT FILE
+        length = len(gt_flat[0])
+        gt = []
+        for indx in range(0, int(len(indices)/2)):
+            gt.append(gt_flat[indices[indx]])
+        gt = np.array(gt)
+
+        print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
+        gt_min = np.zeros(length)
+        gt_max = np.zeros(length)
+        for indx in range(0,length):
+          gt_min[indx] = np.min(gt[:,indx])
+          gt_max[indx] = np.max(gt[:,indx])
+
+        print(gt_min)
+        print(gt_max)
+
+        return(gt_min,gt_max)
+        
+            
     def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, conds: list)->bool:
         results = False
         gt_min =[]
@@ -170,24 +209,7 @@ class RulesProve:
                         
                     if (cond[1] == "MINGT"):
                         if (gt_min == []):
-                            print("GET FINGERPRINTS FOR TRAIN DATA AFTER LAYER:", self.layer_nm)
-                            func_layer = None
-                            fingerprints = None
-                            for layer in self.model.layers:
-                                if layer.name == self.layer_nm:
-                                    func_layer = keras.backend.function(self.model.input, [layer.output])
-                                    fingerprint_layer = []
-                            if (func_layer != None):
-                                fingerprint_layer = func_layer(self.features)
-                                fingerprints = fingerprint_layer[0]
-        
-                            print("GET INDICES OF INPUTS SATISFYING RULE")
-                            if (len(self.neurons) == len(self.sig)):
-                                fngprnt = (fingerprints > 0.0).astype('int')
-                                indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
-                            else:
-                                indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
-                                print("indices:", len(indices))
+                            (gt_min, gt_max) = get_bounds_gt(cond[3])
                         
                         
                         thres_min = (gt_min[op_indx] - val)

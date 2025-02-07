@@ -180,9 +180,13 @@ class RulesProve:
         print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
         gt_min = np.zeros(length)
         gt_max = np.zeros(length)
-        for indx in range(0,length):
-          gt_min[indx] = np.min(gt[:,indx])
-          gt_max[indx] = np.max(gt[:,indx])
+        if (length > 1):
+            for indx in range(0,length):
+                gt_min[indx] = np.min(gt[:,indx])
+                gt_max[indx] = np.max(gt[:,indx])
+        else:
+            gt_min[0] = np.min(gt)
+            gt_max[0] = np.max(gt) 
 
         print(gt_min)
         print(gt_max)

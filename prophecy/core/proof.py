@@ -168,6 +168,8 @@ class RulesProve:
             print("indices:", len(indices))
 
         ### READ FROM GT FILE
+        gt_flat = np.load(gt_file_nm)
+        print(np.shape(gt_flat))
         length = len(gt_flat[0])
         gt = []
         for indx in range(0, int(len(indices)/2)):

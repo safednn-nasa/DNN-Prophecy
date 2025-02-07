@@ -92,19 +92,24 @@ class RulesProve:
         inp_ex = []
         finger_ex = []
         op_ex = []
+        y_train3 = []
+        gt_ex = []
        # for indx in range(0, len(indices)):
         for indx in range(0, int(len(indices)/2)):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
+                gt_ex.append(y_train_flat[indices[indx]])
                 finger_ex.append(fingerprints[indices[indx]])
                 op_ex.append(ops[indices[indx]])
                 
             x_train3.append(x_train_flat[indices[indx]])
+            y_train3.append(y_train_flat[indices[indx]])
             fngprnt3.append(fingerprints[indices[indx]])
             op3.append(ops[indices[indx]])
         x_train3 = np.array(x_train3)
         fngprnt3 = np.array(fngprnt3)
         op3 = np.array(op3)
+        y_train3 = np.array(y_train3)
 
         print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
         x_train_min3 = np.zeros(length)
@@ -115,6 +120,16 @@ class RulesProve:
 
         print(x_train_min3)
         print(x_train_max3)
+
+        print("GET MIN,MAX BOUNDS OF OP GTs SATISFYING RULE")
+        y_train_min3 = np.zeros(length)
+        y_train_max3 = np.zeros(length)
+        for indx in range(0,length):
+          y_train_min3[indx] = np.min(y_train3[:,indx])
+          y_train_max3[indx] = np.max(y_train3[:,indx])
+
+        print(y_train_min3)
+        print(y_train_max3)
 
         print("GET MIN,MAX BOUNDS OF NEURONS SATISFYING RULE")
         fngprnt_min3 = np.zeros(len(fngprnt3[0]))
@@ -139,7 +154,7 @@ class RulesProve:
         print("OP EXAM:", op_ex[0])
 
         
-        return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
+        return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, y_train_min3, y_train_max3, inp_ex[0], finger_ex[0], op_ex[0],gt_ex[0])
 
     def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, conds: list)->bool:
         results = False

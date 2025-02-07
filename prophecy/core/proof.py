@@ -170,7 +170,8 @@ class RulesProve:
         ### READ FROM GT FILE
         gt_flat = np.load(gt_file_nm)
         print(np.shape(gt_flat))
-        length = len(gt_flat[0])
+        dimen = (np.array(gt_flat)).ndim
+        length = dimen
         gt = []
         for indx in range(0, int(len(indices)/2)):
             gt.append(gt_flat[indices[indx]])

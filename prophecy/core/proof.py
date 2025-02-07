@@ -212,22 +212,13 @@ class RulesProve:
                     if (cond[1] == "MINGT"):
                         if (gt_min == []):
                             (gt_min, gt_max) = get_bounds_gt(cond[3])
-                        
-                        
                         thres_min = (gt_min[op_indx] - val)
                         print("SET UPPER BOUND:", outvars[indx],thres_min)
                         network_a.setUpperBound(outvars[indx], thres_min)
                         
                     if (cond[1] == "MAXGT"):
                         if (gt_max == []):
-                            print("GET INDICES OF INPUTS SATISFYING RULE")
-                            if (len(self.neurons) == len(self.sig)):
-                                fngprnt = (fingerprints > 0.0).astype('int')
-                                indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
-                            else:
-                                indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
-                                print("indices:", len(indices))
-                                
+                            (gt_min, gt_max) = get_bounds_gt(cond[3])
                         thres_max = (gt_max[op_indx] + val)
                         print("SET LOWER BOUND:", outvars[indx],thres_max)
                         network_a.setLowerBound(outvars[indx], thres_max)

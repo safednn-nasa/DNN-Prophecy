@@ -211,14 +211,14 @@ class RulesProve:
                         
                     if (cond[1] == "MINGT"):
                         if (gt_min == []):
-                            (gt_min, gt_max) = get_bounds_GT(cond[3])
+                            (gt_min, gt_max) = self.get_bounds_GT(cond[3])
                         thres_min = (gt_min[op_indx] - val)
                         print("SET UPPER BOUND:", outvars[indx],thres_min)
                         network_a.setUpperBound(outvars[indx], thres_min)
                         
                     if (cond[1] == "MAXGT"):
                         if (gt_max == []):
-                            (gt_min, gt_max) = get_bounds_GT(cond[3])
+                            (gt_min, gt_max) = self.get_bounds_GT(cond[3])
                         thres_max = (gt_max[op_indx] + val)
                         print("SET LOWER BOUND:", outvars[indx],thres_max)
                         network_a.setLowerBound(outvars[indx], thres_max)

@@ -44,7 +44,7 @@ class RulesProve:
         
         
     def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array,np.array, np.array, np.array):
-        print("MIN AND MAX BOUNDS OF INPUT VARIABLES BASED ON TRAIN DATA")
+        print("MIN AND MAX BOUNDS OF VARIABLES BASED ON TRAIN DATA")
         x_train = self.features
         x_train_flat = []
         for indx in range(0,len(x_train)):
@@ -92,24 +92,24 @@ class RulesProve:
         inp_ex = []
         finger_ex = []
         op_ex = []
-        y_train3 = []
-        gt_ex = []
+       # y_train3 = []
+       # gt_ex = []
        # for indx in range(0, len(indices)):
         for indx in range(0, int(len(indices)/2)):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
-                gt_ex.append(y_train_flat[indices[indx]])
+        #        gt_ex.append(y_train_flat[indices[indx]])
                 finger_ex.append(fingerprints[indices[indx]])
                 op_ex.append(ops[indices[indx]])
                 
             x_train3.append(x_train_flat[indices[indx]])
-            y_train3.append(y_train_flat[indices[indx]])
+        #    y_train3.append(y_train_flat[indices[indx]])
             fngprnt3.append(fingerprints[indices[indx]])
             op3.append(ops[indices[indx]])
         x_train3 = np.array(x_train3)
         fngprnt3 = np.array(fngprnt3)
         op3 = np.array(op3)
-        y_train3 = np.array(y_train3)
+        #y_train3 = np.array(y_train3)
 
         print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
         x_train_min3 = np.zeros(length)
@@ -121,16 +121,7 @@ class RulesProve:
         print(x_train_min3)
         print(x_train_max3)
 
-        print("GET MIN,MAX BOUNDS OF OP GTs SATISFYING RULE")
-        y_train_min3 = np.zeros(length)
-        y_train_max3 = np.zeros(length)
-        for indx in range(0,length):
-          y_train_min3[indx] = np.min(y_train3[:,indx])
-          y_train_max3[indx] = np.max(y_train3[:,indx])
-
-        print(y_train_min3)
-        print(y_train_max3)
-
+    
         print("GET MIN,MAX BOUNDS OF NEURONS SATISFYING RULE")
         fngprnt_min3 = np.zeros(len(fngprnt3[0]))
         fngprnt_max3 = np.zeros(len(fngprnt3[0]))
@@ -154,17 +145,13 @@ class RulesProve:
         print("OP EXAM:", op_ex[0])
 
         
-        return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, y_train_min3, y_train_max3, inp_ex[0], finger_ex[0], op_ex[0],gt_ex[0])
+        return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
 
+    def get_bounds_GT(self):
     def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, conds: list)->bool:
         results = False
-        #for indx in range(0,  len(outvars)):
-        #    op_indx = outvars[indx] - outvars[0]
-        #    thres_min = (out_min[op_indx] - 0.192)
-        #    thres_max = (out_max[op_indx] + 0.192)
-        #    network_a.setLowerBound(outvars[indx], thres_max)
-        #    network_a.setUpperBound(outvars[indx], thres_min)
-            
+        gt_min =[]
+        gt_max = []
         for cond_indx in range(0, len(conds)):
             cond = conds[cond_indx]   
             for indx in range(0,  len(outvars)):
@@ -178,6 +165,46 @@ class RulesProve:
                         network_a.setUpperBound(outvars[indx], thres_min)
                     if (cond[1] == "MAX"):
                         thres_max = (out_max[op_indx] + val)
+                        print("SET LOWER BOUND:", outvars[indx],thres_max)
+                        network_a.setLowerBound(outvars[indx], thres_max)
+                        
+                    if (cond[1] == "MINGT"):
+                        if (gt_min == []):
+                            print("GET FINGERPRINTS FOR TRAIN DATA AFTER LAYER:", self.layer_nm)
+                            func_layer = None
+                            fingerprints = None
+                            for layer in self.model.layers:
+                                if layer.name == self.layer_nm:
+                                    func_layer = keras.backend.function(self.model.input, [layer.output])
+                                    fingerprint_layer = []
+                            if (func_layer != None):
+                                fingerprint_layer = func_layer(self.features)
+                                fingerprints = fingerprint_layer[0]
+        
+                            print("GET INDICES OF INPUTS SATISFYING RULE")
+                            if (len(self.neurons) == len(self.sig)):
+                                fngprnt = (fingerprints > 0.0).astype('int')
+                                indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
+                            else:
+                                indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
+                                print("indices:", len(indices))
+                        
+                        
+                        thres_min = (gt_min[op_indx] - val)
+                        print("SET UPPER BOUND:", outvars[indx],thres_min)
+                        network_a.setUpperBound(outvars[indx], thres_min)
+                        
+                    if (cond[1] == "MAXGT"):
+                        if (gt_max == []):
+                            print("GET INDICES OF INPUTS SATISFYING RULE")
+                            if (len(self.neurons) == len(self.sig)):
+                                fngprnt = (fingerprints > 0.0).astype('int')
+                                indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
+                            else:
+                                indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
+                                print("indices:", len(indices))
+                                
+                        thres_max = (gt_max[op_indx] + val)
                         print("SET LOWER BOUND:", outvars[indx],thres_max)
                         network_a.setLowerBound(outvars[indx], thres_max)
 

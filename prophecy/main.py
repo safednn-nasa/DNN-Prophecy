@@ -56,6 +56,10 @@ def run_detect_command():
 
 def run_prove_command(lab: int):
     train_features, train_labels = read_split(args.train_features, args.train_labels)
+    val_features = []
+    val_labels = []
+    if (args.val_features != None and args.val_labels != None):
+        val_features, val_labels = read_split(args.val_features, args.val_labels)
 
     output_path = predictions_path / 'results.txt'
 
@@ -127,7 +131,7 @@ def run_prove_command(lab: int):
         unsolved_labs = []
         while (results == False):
             print("ITERATION #:", it)
-            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, op_consts=consts_path)
+            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, op_consts=consts_path, Vfeatures=val_features, Vlabels=val_labels)
             results,unsolved = prove_marabou()
             it = it + 1
         
@@ -136,7 +140,7 @@ def run_prove_command(lab: int):
         while (results == False):
             print("ITERATION #:", it)
             print("UNSOLVED LABELS:", unsolved_labs)
-            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, op_consts=None)
+            prove_marabou = RulesProve(model=model, onnx_model_nm=onnx_model, onnx_map_nm=onnx_map, layer_nm = top_rule_layer_nm, neurons=rule_neurons_list, sig=rule_sig_list,features=train_features, labels=train_labels,lab=lab,iter=it,unsolved = unsolved_labs, min_const=min_const,pred_post=pred_post, op_consts=None, Vfeatures=val_features, Vlabels=val_labels)
             results,unsolved = prove_marabou()
             unsolved_labs = []
             for indx in range(0,len(unsolved)):

@@ -26,7 +26,7 @@ from maraboupy.MarabouPythonic import *
 
 
 class RulesProve:
-    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool, pred_post: bool, op_consts: list):
+    def __init__(self, model: keras.Model, onnx_model_nm: str, onnx_map_nm: str, layer_nm: str, neurons: list, sig: list, features: pd.DataFrame, labels: np.ndarray, lab: int, iter: int, unsolved: list, min_const: bool, pred_post: bool, op_consts: list,Vfeatures: pd.DataFrame, Vlabels: np.ndarray):
         self.model = model
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
@@ -36,6 +36,8 @@ class RulesProve:
         self.sig = sig
         self.features = features
         self.labels = labels
+        self.Vfeatures = Vfeatures
+        self.Vlabels = Vlabels
         self.lab = lab
         self.iter = iter
         self.unsolved = unsolved
@@ -93,24 +95,21 @@ class RulesProve:
         inp_ex = []
         finger_ex = []
         op_ex = []
-       # y_train3 = []
-       # gt_ex = []
-       # for indx in range(0, len(indices)):
-        for indx in range(0, int(len(indices)/2)):
+        max_indx = len(indices)
+        if (self.iter == 2):
+            max_indx = (int)(max_indx/2.0)
+        for indx in range(0, max_indx)):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
-        #        gt_ex.append(y_train_flat[indices[indx]])
                 finger_ex.append(fingerprints[indices[indx]])
                 op_ex.append(ops[indices[indx]])
                 
             x_train3.append(x_train_flat[indices[indx]])
-        #    y_train3.append(y_train_flat[indices[indx]])
             fngprnt3.append(fingerprints[indices[indx]])
             op3.append(ops[indices[indx]])
         x_train3 = np.array(x_train3)
         fngprnt3 = np.array(fngprnt3)
         op3 = np.array(op3)
-        #y_train3 = np.array(y_train3)
 
         print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
         x_train_min3 = np.zeros(length)
@@ -415,10 +414,10 @@ class RulesProve:
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
-            if ((self.iter ==  2) or (self.iter == -1)):
+            if ((self.iter ==  3) or (self.iter == -1)):
                 network_a.setLowerBound(i,inp_ex[indx])
                 network_a.setUpperBound(i,inp_ex[indx])
-            if ((self.iter == 0) or (self.iter == 1)):
+            if ((self.iter >= 0) and (self.iter < 3)):
                network_a.setLowerBound(i,x_train_min_layer[i])
                network_a.setUpperBound(i,x_train_max_layer[i])
             
@@ -429,10 +428,10 @@ class RulesProve:
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
-            if ((self.iter > 0) or (self.iter == -1)):
+            if ((self.iter >= 2) or (self.iter == -1)):
                 network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
                 network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
-            if (self.iter == 0):
+            else: ## IT = 0 OR 1
                 network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
                 network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
             

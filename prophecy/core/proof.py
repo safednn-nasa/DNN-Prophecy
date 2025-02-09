@@ -31,6 +31,7 @@ class RulesProve:
         self.onnx_path = onnx_model_nm
         self.onnx_map = onnx_map_nm
         self.layer_nm = layer_nm
+        self.onnx_layer_nm = None
         self.neurons = neurons
         self.sig = sig
         self.features = features
@@ -192,6 +193,52 @@ class RulesProve:
         print(gt_max)
 
         return(gt_min,gt_max)
+
+    def coverage(self, network_a: MarabouNetworkONNX):
+        func_layer = None
+        func_op = None
+        for layer in self.model.layers:
+            if layer.name == self.layer_nm:
+                func_layer = keras.backend.function(self.model.input, [layer.output])
+            func_op = keras.backend.function(self.model.input, [self.model.output])
+            
+        x_train = self.features
+        x_train_flat = []
+        for indx in range(0,len(x_train)):
+            x_train_flat.append(x_train[indx].flatten())
+        x_train_flat = np.array(x_train_flat)
+        length = len(x_train_flat[0])
+
+        
+        fingerprint_layer = []
+        if (func_layer != None):
+            fingerprint_layer = func_layer(self.features)
+        fingerprints = fingerprint_layer[0]
+        
+        print("LAYER VARS")
+        neurons_layer = network_a.layerNameToVariables[self.onnx_layer_nm][0]
+        print(np.shape(neurons_layer))
+
+        all_neurons = []
+        all_sig = []
+        for indx in range(0, len(neurons_layer)):
+            neuron_indx = neurons_layer[indx] - neurons_layer[0]
+            all_neurons.append(neuron_indx)
+            min_val = network_a.getLowerBound(neurons_layer[indx])
+            all_sig.append(">")
+            all_sig.append(min_val)
+            all_neurons.append(neuron_indx)
+            max_val = network_a.getUpperBound(neurons_layer[indx])
+            all_sig.append("<=")
+            all_sig.append(max_val)
+ 
+        print(all_neurons)
+        print(all_sig)
+
+        print("GET INDICES OF INPUTS SATISFYING FINGERPRINT")
+        indices = get_suffix_cluster(all_neurons, all_sig, fingerprints, VAL=True)
+        print("TRAIN SET COVERAGE:", len(indices))
+
         
             
     def robust_post_cond(self, network_a: MarabouNetworkONNX ,outvars: list, out_min: np.array, out_max: np.array, conds: list)->bool:
@@ -246,6 +293,8 @@ class RulesProve:
         if (sat_unsat == 'unsat'):
             print("RULE PROVED!!")
             results = True
+            #### % INPTS COVERED ##
+            self.coverage(network_a)
 
         return results
 
@@ -348,6 +397,7 @@ class RulesProve:
                 break
         if (onnx_layer_nm != None):
             print("onnx layer name:",onnx_layer_nm)
+            self.onnx_layer_nm = onnx_layer_nm
         else:
             print("could not find the onnx layer mapped to the h5 layer", self.layer_nm)
             

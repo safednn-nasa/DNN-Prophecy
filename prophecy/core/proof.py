@@ -96,8 +96,9 @@ class RulesProve:
         finger_ex = []
         op_ex = []
         max_indx = len(indices)
-        if (self.iter == 2):
+        if (self.iter == 1):
             max_indx = (int)(max_indx/2.0)
+        print("MAX INDX:", max_indx)
         for indx in range(0, max_indx):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
@@ -173,7 +174,11 @@ class RulesProve:
         dimen = (np.array(gt_flat)).ndim
         length = dimen
         gt = []
-        for indx in range(0, int(len(indices)/2)):
+        max_indx = len(indices)
+        if (self.iter == 1):
+            max_indx = (int)(max_indx/2.0)
+        print("MAX INDX:", max_indx)
+        for indx in range(0, max_indx):
             gt.append(gt_flat[indices[indx]])
         gt = np.array(gt)
 

@@ -223,11 +223,13 @@ class RulesProve:
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
             all_neurons.append(neuron_indx)
-            min_val = network_a.getLowerBound(neurons_layer[indx])
+          #  min_val = network_a.getLowerBound(neurons_layer[indx])
+            min_val = network_a.lowerBounds[neurons_layer[indx]]
             all_sig.append(">")
             all_sig.append(min_val)
             all_neurons.append(neuron_indx)
-            max_val = network_a.getUpperBound(neurons_layer[indx])
+          #  max_val = network_a.getUpperBound(neurons_layer[indx])
+            max_val = network_a.upperBounds[neurons_layer[indx]]
             all_sig.append("<=")
             all_sig.append(max_val)
  

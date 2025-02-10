@@ -242,7 +242,7 @@ class RulesProve:
         print(all_sig)
 
         print("GET INDICES OF INPUTS SATISFYING FINGERPRINT")
-        indices = get_suffix_cluster(all_neurons, all_sig, fingerprints, VAL=True)
+        indices = get_suffix_cluster(all_neurons, all_sig, fingerprints, VAL=True, DEBUG=True)
         print("TRAIN SET COVERAGE:", len(indices))
 
         

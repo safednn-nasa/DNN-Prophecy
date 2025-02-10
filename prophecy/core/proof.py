@@ -291,7 +291,7 @@ class RulesProve:
         vals = None
         stats = None
 
-        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=120)
+        options1 = Marabou.createOptions(verbosity = 1,timeoutInSeconds=1200)
         sat_unsat,vals,stats = network_a.solve(options = options1)
            
         print("sat_unsat:", sat_unsat)

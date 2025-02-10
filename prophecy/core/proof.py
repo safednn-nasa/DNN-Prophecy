@@ -215,9 +215,12 @@ class RulesProve:
 
         
         fingerprint_layer = []
+        fingerprint_layer_v = []
         if (func_layer != None):
             fingerprint_layer = func_layer(self.features)
+            fingerprint_layer_v = func_layer(self.Vfeatures)
         fingerprints = fingerprint_layer[0]
+        fingerprintsV = fingerprint_layer_v[0]
         
         print("LAYER VARS")
         neurons_layer = network_a.layerNameToVariables[self.onnx_layer_nm][0]
@@ -242,8 +245,10 @@ class RulesProve:
         print(all_sig)
 
         print("GET INDICES OF INPUTS SATISFYING FINGERPRINT")
-        indices = get_suffix_cluster(all_neurons, all_sig, fingerprints, VAL=True, DEBUG=True)
+        indices = get_suffix_cluster(all_neurons, all_sig, fingerprints, VAL=True, DEBUG=False)
         print("TRAIN SET COVERAGE:", len(indices))
+        indicesV = get_suffix_cluster(all_neurons, all_sig, fingerprintsV, VAL=True, DEBUG=False)
+        print("VAL SET COVERAGE:", len(indicesV))
 
         
             

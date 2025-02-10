@@ -126,7 +126,7 @@ def get_all_invariants_val(estimator):
 
 # print("MIS-CLASSIFIED:", total_fail)
 
-def check_pattern(layer_vals: list, neuron_ids: list, neuron_sig: list) -> bool:
+def check_pattern(layer_vals: list, neuron_ids: list, neuron_sig: list, DEBUG=False) -> bool:
     """
         Check if the provided layer values satisfy the provided neuron signature.
     :param layer_vals:
@@ -149,7 +149,8 @@ def check_pattern(layer_vals: list, neuron_ids: list, neuron_sig: list) -> bool:
             v = int(neuron_ids[(int)(ind / 2)])
             vsig = float(neuron_sig[ind])
             val = float(layer_vals[v])
-            # print(v,vsig,val,oper)
+            if (DEBUG == True):
+                print(v,vsig,val,oper)
             if oper == 0:
                 if val > vsig:
                     # print(v,val,vsig,oper)
@@ -165,7 +166,7 @@ def check_pattern(layer_vals: list, neuron_ids: list, neuron_sig: list) -> bool:
     return found
 
 
-def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False):
+def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False, DEBUG=False):
     # Get the cluster of inputs that such that all inputs in the cluster
     # have provided on/off signature for the provided neurons.
     #
@@ -177,7 +178,7 @@ def get_suffix_cluster(neuron_ids, neuron_sig, suffixes, VAL=False):
     matched_ids = []
     # print(len(suffixes))
     for indx in range(0, len(suffixes)):
-        if (check_pattern(suffixes[indx], neuron_ids, neuron_sig) == True):
+        if (check_pattern(suffixes[indx], neuron_ids, neuron_sig,DEBUG) == True):
             matched_ids.append(indx)
     # print(matched_ids)
     return matched_ids

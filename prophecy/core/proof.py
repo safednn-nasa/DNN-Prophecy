@@ -98,7 +98,7 @@ class RulesProve:
         max_indx = len(indices)
         if (self.iter == 2):
             max_indx = (int)(max_indx/2.0)
-        for indx in range(0, max_indx)):
+        for indx in range(0, max_indx):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
                 finger_ex.append(fingerprints[indices[indx]])

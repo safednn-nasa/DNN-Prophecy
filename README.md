@@ -101,16 +101,21 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor -tx 
 Attempt to prove rules extracted by Prophecy (invokes Marabou solver https://github.com/NeuralNetworkVerification/Marabou).
 
 ```shell
-$ python -m prophecy.main -m /path/to/model.pth' -wd /path/to/workdir prove [-h] -tx TRAIN_FEATURES
+$ python -m prophecy.main -m /path/to/model.h5' -wd /path/to/workdir prove [-h]
 ```
 
 #### Arguments
 
 - -tx, --train_features (required): Path to the training features.
+- -ty, --train_labels (required): Path to the training labels.
+- -vx, --val_features (required): Path to the validation features.- -vy, --val_labels (required): Path to the validation labels.
 - -mp, --marabou_path (required): MARABOU_PATH path to Marabou folder
 - -onx, --onnx_path (required): Path to model in ONNX form
 - -onx_map, --onnx_map: Map between the layers of .h5 and .onnx models
 - -label, --lab: Label for which the rule is chosen. Selects the top rule for given label.
+- -pred, --pred: True: Classification output constraints.
+- -min_const, --min_const: True: Classification output constraints specifying that label has the minimum value.
+- -cp CONSTS_file, --cp: Path to a file specifiying the output constraints (ex. regression outputs)
 
 
 #### Example

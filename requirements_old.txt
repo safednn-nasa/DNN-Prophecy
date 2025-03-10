@@ -6,3 +6,8 @@ tensorflow~=2.14.0
 keras~=2.14.0
 pybind11~=2.11.1
 tqdm~=4.66.1
+onnx
+onnx-tf
+cmake
+onnxruntime
+maraboupy

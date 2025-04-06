@@ -107,8 +107,7 @@ $ python -m prophecy.main -m /path/to/model.h5' -wd /path/to/workdir prove [-h]
 #### Arguments
 
 - -tx, --train_features (required): Path to the training features.
-- -ty, --train_labels (required): Path to the training labels.
-- -vx, --val_features (required): Path to the validation features.- -vy, --val_labels (required): Path to the validation labels.
+- -vx, --val_features (required): Path to the validation features.
 - -mp, --marabou_path (required): MARABOU_PATH path to Marabou folder
 - -onx, --onnx_path (required): Path to model in ONNX form
 - -onx_map, --onnx_map: Map between the layers of .h5 and .onnx models

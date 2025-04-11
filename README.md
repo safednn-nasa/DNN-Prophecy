@@ -48,15 +48,15 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze [-h]
 - -type: 0:rules w.r.t model output,eg.rules for every predicted label, 1:rules for correct vs incorrect classification, 2:rules for correct classification per label and incorrect classification, 3:rules w.r.t labels in -ty
 - Mathematical form of rules
 - -acts: True:on/off neuron activations, False:neuron Values
-- -top, --number of rules to be extracted: True: rules with the highest train recall, False: all rules
-- -sr, --skip-rules: Skip rules extraction
-- -b, --balance: Balance classes in the dataset for training the classifiers
-- -c, --confidence: Adjust labels in the dataset for training the classifiers with confidence
-- -rs, --random-state: Random state for reproducibility (default: 42)
+- -top: --number of rules to be extracted: True: rules with the highest train recall, False: all rules
+- -sr: --skip-rules: Skip rules extraction
+- -b: --balance: Balance classes in the dataset for training the classifiers
+- -c: --confidence: Adjust labels in the dataset for training the classifiers with confidence
+- -rs: --random-state: Random state for reproducibility (default: 42)
 
 #### Examples
 
-- Extract rules from a classification model, model.h5, using the train dataset. Each rule corresponds to a distinct label predicted by the model. Rules extracted from the activation and dense layers and in terms of on/off neuron activation values. Only those that have the highest recall on the train data are obtained. 
+- Extract rules from a classification model, model.h5, using the train dataset. Each rule corresponds to a distinct label predicted by the model. Rules extracted from the activation and dense layers and in terms of on/off neuron activation values. Only those that have the highest recall on the train data for each label are stored in the output file in wd.
 
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze -tx /path/to/train_features.npy -ty /path/to/train_labels.npy \

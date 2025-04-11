@@ -56,12 +56,40 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze [-h]
 
 #### Examples
 
-- Extract rules for the given keras model based on the train and validation data provided as .npy files based on the model's predictions (ex. distinct labels) for activation and dense layers, in terms of on/off neuron activation values, only those that have the highest recall on the train data. 
+- Extract rules from a classification model, model.h5, using the train dataset. Each rule corresponds to a distinct label predicted by the model. Rules extracted from the activation and dense layers and in terms of on/off neuron activation values. Only those that have the highest recall on the train data are obtained. 
 
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze -tx /path/to/train_features.npy -ty /path/to/train_labels.npy \
 -vx /path/to/val_features.npy -vy /path/to/val_labels.npy -odl -oal -type 0 -acts True -top True
 ```
+
+### Prove Command
+
+Attempt to prove rules extracted by Prophecy (invokes Marabou solver https://github.com/NeuralNetworkVerification/Marabou).
+
+```shell
+$ python -m prophecy.main -m /path/to/model.h5' -wd /path/to/workdir prove [-h]
+```
+
+#### Arguments
+
+- -tx, --train_features (required): Path to the training features.
+- -vx, --val_features (required): Path to the validation features.
+- -mp, --marabou_path (required): MARABOU_PATH path to Marabou folder
+- -onx, --onnx_path (required): Path to model in ONNX form
+- -onx_map, --onnx_map: Map between the layers of .h5 and .onnx models
+- -label, --lab: Label for which the rule is chosen. Selects the top rule for given label.
+- -pred, --pred: True: Classification output constraints.
+- -min_const, --min_const: True: Classification output constraints specifying that label has the minimum value.
+- -cp CONSTS_file, --cp: Path to a file specifiying the output constraints (ex. regression outputs)
+
+
+#### Example
+- For the given label 0, select the rule with the highest recall on the train dataset. Invoke Marabou using the onnx version of the model and attempt to prove the query Vx \sigma(x) => F(x) = label
+```shell
+$ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir prove -tx /path/to/train_features.npy -mp /path/to/marabou\_build\_dir    -onx /path/to/onnx_model.onnx -onx_map h5_onnx_map.npy -label 0
+```
+
 ### Monitor Command
 
 Monitor model's behavior on unseen inputs and classify them as correctly classified, mis-classified or uncertain.
@@ -95,31 +123,4 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor -tx 
 - Evaluate a given model on unseen data with the trained classifiers
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir monitor -tx /path/to/test_features.npy -ty /path/to/test_labels.npy classifiers 
-```
-
-### Prove Command
-
-Attempt to prove rules extracted by Prophecy (invokes Marabou solver https://github.com/NeuralNetworkVerification/Marabou).
-
-```shell
-$ python -m prophecy.main -m /path/to/model.h5' -wd /path/to/workdir prove [-h]
-```
-
-#### Arguments
-
-- -tx, --train_features (required): Path to the training features.
-- -vx, --val_features (required): Path to the validation features.
-- -mp, --marabou_path (required): MARABOU_PATH path to Marabou folder
-- -onx, --onnx_path (required): Path to model in ONNX form
-- -onx_map, --onnx_map: Map between the layers of .h5 and .onnx models
-- -label, --lab: Label for which the rule is chosen. Selects the top rule for given label.
-- -pred, --pred: True: Classification output constraints.
-- -min_const, --min_const: True: Classification output constraints specifying that label has the minimum value.
-- -cp CONSTS_file, --cp: Path to a file specifiying the output constraints (ex. regression outputs)
-
-
-#### Example
-- For the given label 0, select the rule with the highest recall on the train dataset. Invoke Marabou using the onnx version of the model and attempt to prove the query Vx \sigma(x) => F(x) = label
-```shell
-$ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir prove -tx /path/to/train_features.npy -mp /path/to/marabou\_build\_dir    -onx /path/to/onnx_model.onnx -onx_map h5_onnx_map.npy -label 0
 ```

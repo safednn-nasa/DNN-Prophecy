@@ -38,15 +38,16 @@ $ python -m prophecy.main -m /path/to/model.h5 -wd /path/to/workdir analyze [-h]
 - -wd: Working directory path
 - -tx, -ty: Datasets with model input data and labels (.npy) 
 - -vx, -vy: Datasets with model input data and labels (.npy) for statistical validation
-- Layer/s to be used for activations collection
+- ## Layer/s to be used for activations collection
 - -odl: only dense layers (name starting with text 'dense')
 - -oal: includes the activation layers associated with the dense layers.
 - -layer_name: name of a specific layer
-- Type of input data (provided in -tx and -vx)
+- ## Type of input data (provided in -tx and -vx)
 - -inptype: 0: model inputs (eg. images), 1: array of neuron activations
-- Short-cut for post-cond properties
+- ## Short-cut for post-cond properties
 - -type: 0:rules w.r.t model output,eg.rules for every predicted label, 1:rules for correct vs incorrect classification, 2:rules for correct classification per label and incorrect classification, 3:rules w.r.t labels in -ty
-- -acts: mathematical form of rules: True:on/off neuron activations, False:neuron Values
+- ## Mathematical form of rules
+- -acts: True:on/off neuron activations, False:neuron Values
 - -top, --number of rules to be extracted: True: rules with the highest train recall, False: all rules
 - -sr, --skip-rules: Skip rules extraction
 - -b, --balance: Balance classes in the dataset for training the classifiers

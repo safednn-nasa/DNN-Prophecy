@@ -69,20 +69,22 @@ Attempt to prove rules extracted by Prophecy (invokes Marabou solver https://git
 
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5' -wd /path/to/workdir prove [-h]
+                     -mp MARABOU_PATH -onx ONNX_PATH -onx_map ONNX_MAP
+                     -tx TRAIN_FEATURES [-ty TRAIN_LABELS] [-vx VAL_FEATURES]
+                     [-vy VAL_LABELS] [-label LAB] [-min_const MIN_CONST]
+                     [-pred PRED] [-cp CP]
 ```
 
 #### Arguments
-
-- -tx, --train_features (required): Path to the training features.
-- -vx, --val_features (required): Path to the validation features.
-- -mp, --marabou_path (required): MARABOU_PATH path to Marabou folder
-- -onx, --onnx_path (required): Path to model in ONNX form
-- -onx_map, --onnx_map: Map between the layers of .h5 and .onnx models
-- -label, --lab: Label for which the rule is chosen. Selects the top rule for given label.
-- -pred, --pred: True: Classification output constraints.
-- -min_const, --min_const: True: Classification output constraints specifying that label has the minimum value.
-- -cp CONSTS_file, --cp: Path to a file specifiying the output constraints (ex. regression outputs)
-
+- -mp: Path to Marabou folder
+- -onx: Path to model in ONNX form
+- -onx_map: Map between the layers of .h5 and .onnx models
+- -label: Label for which the rule is chosen. Selects the top rule for given label
+- -pred: True:classification output constraints
+- -min_const: True:classification output constraints specifying that label has the minimum value
+- -cp CONSTS_file: Path to a file specifiying the output constraints (ex. regression outputs)
+- -tx: data used to constrain network input variables
+- -tx, -vx: in-distribution data to calculate coverage of regions with proofs
 
 #### Example
 - For the given label 0, select the rule with the highest recall on the train dataset. Invoke Marabou using the onnx version of the model and attempt to prove the query Vx \sigma(x) => F(x) = label

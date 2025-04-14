@@ -1,5 +1,5 @@
 # ProphecyPlus
-This repository provides the tool for the approach published in:
+This repository provides the tool for the approach first published in:
 
 Property Inference for Deep Neural Networks.
 Authors: Divya Gopinath, Hayes Converse, Corina S. Pasareanu, Ankur Taly.

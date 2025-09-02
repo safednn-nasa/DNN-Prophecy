@@ -1,4 +1,4 @@
-**Appication on a large Vision-Language Models**
+**Appication on a large Vision-Language model**
 
 CLIP_collect_acts.ipynb: Contains code to extract activations from CLIP's VIT encoder. Inputs are images of truck and cars respectively. The labelling is done based on the zero-shot classification of CLIP.
 

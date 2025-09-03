@@ -10,5 +10,3 @@ onnx>=1.16,<1.18
 onnxruntime>=1.19,<1.22
 onnx-tf
 maraboupy
-
-

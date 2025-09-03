@@ -17,5 +17,6 @@ onnx>=1.16,<1.18
 onnxruntime>=1.19,<1.22
 
 # Optional / cautious:
-# onnx-tf  -> often lags TensorFlow; likely incompatible with TF 2.17, so omit unless you must use it.
-# maraboupy -> frequently fails on Colab/Py3.12; usually needs a source build. Omit in Colab.
+onnx-tf  #-> often lags TensorFlow; likely incompatible with TF 2.17, so omit unless you must use it.
+maraboupy #-> frequently fails on Colab/Py3.12; usually needs a source build. Omit in Colab.
+

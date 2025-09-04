@@ -1,20 +1,5 @@
-#numpy~=1.24
-#pandas~=1.3.5
-#scikit-learn~=1.3.0
-#scipy~=1.9.3
-#tensorflow~=2.14.0
-#keras~=2.14.0
-#pybind11~=2.11.1
-#tqdm~=4.66.1
-#onnx
-#onnx-tf
-#pybind11
-#cmake
-#onnxruntime
-#maraboupy
 numpy~=1.24
-pandas==1.5.3; python_version >= "3.10"
-pandas~=1.3.5; python_version < "3.10"
+pandas~=1.3.5
 scikit-learn~=1.3.0
 scipy~=1.9.3
 tensorflow~=2.14.0
@@ -23,6 +8,21 @@ pybind11~=2.11.1
 tqdm~=4.66.1
 onnx
 onnx-tf
+pybind11
 cmake
 onnxruntime
-maraboupy; python_version < "3.12"
+maraboupy
+#numpy~=1.24
+#pandas==1.5.3; python_version >= "3.10"
+#pandas~=1.3.5; python_version < "3.10"
+#scikit-learn~=1.3.0
+#scipy~=1.9.3
+#tensorflow~=2.14.0
+#keras~=2.14.0
+#pybind11~=2.11.1
+#tqdm~=4.66.1
+#onnx
+#onnx-tf
+#cmake
+#onnxruntime
+#maraboupy; python_version < "3.12"

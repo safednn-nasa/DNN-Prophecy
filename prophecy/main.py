@@ -204,19 +204,19 @@ if __name__ == '__main__':
     analyze_parser.add_argument('-top', '--top', type=bool, help='Top rules or All rules',
                                 default=False)
 
-    analyze_parser = action_parser.add_parser('prove')
-    analyze_parser.add_argument('-mp', '--marabou_path', type=str, help='path to Marabou folder', required=True)
-    analyze_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
-    analyze_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
-    analyze_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
-    analyze_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=False)
-    analyze_parser.add_argument('-vx', '--val_features', type=str, help='Val features', required=False)
-    analyze_parser.add_argument('-vy', '--val_labels', type=str, help='Val labels', required=False)
-    analyze_parser.add_argument('-label', '--lab', type=int, default=-1,
+    prove_parser = action_parser.add_parser('prove')
+    prove_parser.add_argument('-mp', '--marabou_path', type=str, help='path to Marabou folder', required=True)
+    prove_parser.add_argument('-onx', '--onnx_path', type=str, help='model in ONNX form', required=True)
+    prove_parser.add_argument('-onx_map', '--onnx_map', type=str, help='map between the layers of .h5 and .onnx models', required=True)
+    prove_parser.add_argument('-tx', '--train_features', type=str, help='Train features', required=True)
+    prove_parser.add_argument('-ty', '--train_labels', type=str, help='Train labels', required=False)
+    prove_parser.add_argument('-vx', '--val_features', type=str, help='Val features', required=False)
+    prove_parser.add_argument('-vy', '--val_labels', type=str, help='Val labels', required=False)
+    prove_parser.add_argument('-label', '--lab', type=int, default=-1,
                                 help='select top rules for given label.')
-    analyze_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
-    analyze_parser.add_argument('-pred', '--pred', type=bool, help='prediction post', default=False)
-    analyze_parser.add_argument('-cp', '--cp', type=str, help='path to output constraints file', default=None)
+    prove_parser.add_argument('-min_const', '--min_const', type=bool, help='output constraints', default=False)
+    prove_parser.add_argument('-pred', '--pred', type=bool, help='prediction post', default=False)
+    prove_parser.add_argument('-cp', '--cp', type=str, help='path to output constraints file', default=None)
     
 
     args = parser.parse_args()
@@ -227,6 +227,7 @@ if __name__ == '__main__':
         model = get_model(args.model_path)
 
     if (args.action == 'prove'):
+        print ("ACTION PROVE:")
         onnx_model = args.onnx_path
         onnx_map = args.onnx_map
         marabou_path = args.marabou_path
@@ -245,6 +246,7 @@ if __name__ == '__main__':
     if args.action == 'analyze':
         run_analyze_command()
     elif args.action == 'prove':
+        print ("RUN PROVE CMD")
         run_prove_command(args.lab)
     elif args.action == 'monitor':
         if args.monitor_subparser == 'rules':

@@ -227,7 +227,6 @@ if __name__ == '__main__':
         model = get_model(args.model_path)
 
     if (args.action == 'prove'):
-        print ("ACTION PROVE:")
         onnx_model = args.onnx_path
         onnx_map = args.onnx_map
         marabou_path = args.marabou_path
@@ -246,7 +245,6 @@ if __name__ == '__main__':
     if args.action == 'analyze':
         run_analyze_command()
     elif args.action == 'prove':
-        print ("RUN PROVE CMD")
         run_prove_command(args.lab)
     elif args.action == 'monitor':
         if args.monitor_subparser == 'rules':

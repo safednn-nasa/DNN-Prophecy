@@ -72,8 +72,7 @@ Attempt to prove rules extracted by Prophecy (invokes Marabou solver https://git
 ```shell
 $ python -m prophecy.main -m /path/to/model.h5' -wd /path/to/workdir prove [-h]
                      -mp MARABOU_PATH -onx ONNX_PATH -onx_map ONNX_MAP
-                     -tx TRAIN_FEATURES [-ty TRAIN_LABELS] [-vx VAL_FEATURES]
-                     [-vy VAL_LABELS] [-label LAB] [-min_const MIN_CONST]
+                     -tx TRAIN_FEATURES [-vx VAL_FEATURES] [-label LAB] [-min_const MIN_CONST]
                      [-pred PRED] [-cp CP]
 ```
 

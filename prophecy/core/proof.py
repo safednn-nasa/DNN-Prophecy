@@ -397,8 +397,9 @@ class RulesProve:
         
         
     def __call__(self, **kwargs) -> (bool,list):
-        
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, op_min, op_max, inp_ex, finger_ex, op_ex) = self.get_bounds(prnt=True)
+
+        if (self.iter <= 0):
+            (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, op_min, op_max, inp_ex, finger_ex, op_ex) = self.get_bounds(prnt=True)
 
         results = False
        

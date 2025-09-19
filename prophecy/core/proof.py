@@ -46,8 +46,9 @@ class RulesProve:
         self.op_consts = op_consts
         
         
-    def get_bounds(self) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array,np.array, np.array, np.array):
-        print("MIN AND MAX BOUNDS OF VARIABLES BASED ON TRAIN DATA")
+    def get_bounds(self,prnt=False) -> (np.array, np.array, np.array, np.array, np.array, np.array, np.array, np.array,np.array, np.array, np.array):
+        if (prnt == True):
+            print("MIN AND MAX BOUNDS OF VARIABLES BASED ON TRAIN DATA")
         x_train = self.features
         x_train_flat = []
         for indx in range(0,len(x_train)):
@@ -60,11 +61,13 @@ class RulesProve:
         for indx in range(0,length):
             x_train_min[indx] = np.min(x_train_flat[:,indx])
             x_train_max[indx] = np.max(x_train_flat[:,indx])
+            
+        if (prnt == True):
+            print("TRAIN MIN:", x_train_min)
+            print("TRAIN MAX:", x_train_max)
 
-        print("TRAIN MIN:", x_train_min)
-        print("TRAIN MAX:", x_train_max)
-
-        print("GET FINGERPRINTS FOR TRAIN DATA AFTER LAYER:", self.layer_nm)
+        if (prnt == True):
+            print("GET FINGERPRINTS FOR TRAIN DATA AFTER LAYER:", self.layer_nm)
         func_layer = None
         func_op = None
         for layer in self.model.layers:
@@ -80,14 +83,15 @@ class RulesProve:
         fingerprints = fingerprint_layer[0]
         ops = fingerprint_op[0]
         
-
-        print("GET INDICES OF INPUTS SATISFYING RULE")
+        if (prnt == True):
+            print("GET INDICES OF INPUTS SATISFYING RULE")
         if (len(self.neurons) == len(self.sig)):
             fngprnt = (fingerprints > 0.0).astype('int')
             indices = get_suffix_cluster(self.neurons, self.sig, fngprnt)
         else:
             indices = get_suffix_cluster(self.neurons, self.sig, fingerprints, VAL=True)
-        print("indices:", len(indices))
+        if (prnt == True):
+            print("indices:", len(indices))
 
         x_train3 = []
         fngprnt3 = []
@@ -98,7 +102,8 @@ class RulesProve:
         max_indx = len(indices)
         if (self.iter == 1):
             max_indx = (int)(max_indx/2.0)
-        print("MAX INDX:", max_indx)
+        if (prnt == True):
+            print("MAX INDX:", max_indx)
         for indx in range(0, max_indx):
             if (indx == 0):
                 inp_ex.append(x_train_flat[indices[indx]])
@@ -112,38 +117,43 @@ class RulesProve:
         fngprnt3 = np.array(fngprnt3)
         op3 = np.array(op3)
 
-        print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
+        if (prnt == True):
+            print("GET MIN,MAX BOUNDS OF INPUTS SATISFYING RULE")
         x_train_min3 = np.zeros(length)
         x_train_max3 = np.zeros(length)
         for indx in range(0,length):
           x_train_min3[indx] = np.min(x_train3[:,indx])
           x_train_max3[indx] = np.max(x_train3[:,indx])
+        if (prnt == True):
+            print(x_train_min3)
+            print(x_train_max3)
 
-        print(x_train_min3)
-        print(x_train_max3)
-
-    
-        print("GET MIN,MAX BOUNDS OF NEURONS SATISFYING RULE")
+        if (prnt == True):
+            print("GET MIN,MAX BOUNDS OF NEURONS SATISFYING RULE")
         fngprnt_min3 = np.zeros(len(fngprnt3[0]))
         fngprnt_max3 = np.zeros(len(fngprnt3[0]))
         for indx in range(0,len(fngprnt3[0])):
             fngprnt_min3[indx] = np.min(fngprnt3[:,indx])
             fngprnt_max3[indx] = np.max(fngprnt3[:,indx])
-        print(fngprnt_min3)
-        print(fngprnt_max3)
+        if (prnt == True):
+            print(fngprnt_min3)
+            print(fngprnt_max3)
 
-        print("GET MIN,MAX BOUNDS OF OUTPUT NEURONS SATISFYING RULE")
+        if (prnt == True):
+            print("GET MIN,MAX BOUNDS OF OUTPUT NEURONS SATISFYING RULE")
         op_min3 = np.zeros(len(op3[0]))
         op_max3 = np.zeros(len(op3[0]))
         for indx in range(0,len(op3[0])):
             op_min3[indx] = np.min(op3[:,indx])
             op_max3[indx] = np.max(op3[:,indx])
-        print(op_min3)
-        print(op_max3)
-        
-        print("INPUT EXAM:", inp_ex[0])
-        print("FINGERPRINT EXAM:", finger_ex[0])
-        print("OP EXAM:", op_ex[0])
+        if (prnt == True):
+            print(op_min3)
+            print(op_max3)
+
+        if (prnt == True):
+            print("INPUT EXAM:", inp_ex[0])
+            print("FINGERPRINT EXAM:", finger_ex[0])
+            print("OP EXAM:", op_ex[0])
 
         
         return (x_train_min, x_train_max, x_train_min3, x_train_max3, fngprnt_min3, fngprnt_max3, op_min3, op_max3, inp_ex[0], finger_ex[0], op_ex[0])
@@ -316,7 +326,7 @@ class RulesProve:
         rule_label = lab
         sat_lbls = []
         unsat_lbls = []
-        
+
         unsolved_labs = []
         if (self.iter == -1):
             unsolved_labs.append(rule_label)
@@ -388,7 +398,7 @@ class RulesProve:
         
     def __call__(self, **kwargs) -> (bool,list):
         
-        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, op_min, op_max, inp_ex, finger_ex, op_ex) = self.get_bounds()
+        (x_train_min, x_train_max, x_train_min_layer, x_train_max_layer, fngprnt_min_layer, fngprnt_max_layer, op_min, op_max, inp_ex, finger_ex, op_ex) = self.get_bounds(prnt=True)
 
         results = False
        
@@ -419,38 +429,46 @@ class RulesProve:
         filename = onnx_model_nm
         network_a = Marabou.read_onnx(filename)
 
-        print("INPUT VARS")
+        print("INPUT VARS BOUNDS:")
         invars = network_a.inputVars[0][0].flatten()
-        print(invars)
+        #print(invars)
     
         for indx in range(0,len(invars)):
             i = invars[indx]
             v = Var(i)
             if ((self.iter ==  3) or (self.iter == -1)):
                 network_a.setLowerBound(i,inp_ex[indx])
+                print(i, ":lower bound:", inp_ex[indx])
                 network_a.setUpperBound(i,inp_ex[indx])
+                print(i, ":upper bound:", inp_ex[indx])
             if ((self.iter >= 0) and (self.iter < 3)):
                network_a.setLowerBound(i,x_train_min_layer[i])
+               print(i, ":lower bound:", x_train_min_layer[i])
                network_a.setUpperBound(i,x_train_max_layer[i])
+               print(i, ":upper bound:", x_train_max_layer[i])
             
 
-        print("LAYER VARS")
+        print("LAYER VARS BOUNDS:")
         neurons_layer = network_a.layerNameToVariables[onnx_layer_nm][0]
-        print(np.shape(neurons_layer))
+        #print(np.shape(neurons_layer))
     
         for indx in range(0, len(neurons_layer)):
             neuron_indx = neurons_layer[indx] - neurons_layer[0]
             if ((self.iter >= 2) or (self.iter == -1)):
                 network_a.setLowerBound(neurons_layer[indx], finger_ex[neuron_indx] - 0.1)
+                print(neurons_layer[indx],":lower bounds:",finger_ex[neuron_indx] - 0.1)
                 network_a.setUpperBound(neurons_layer[indx], finger_ex[neuron_indx] + 0.1)
+                print(neurons_layer[indx],":upper bounds:",finger_ex[neuron_indx] + 0.1)
             else: ## IT = 0 OR 1
                 network_a.setLowerBound(neurons_layer[indx], fngprnt_min_layer[neuron_indx])
+                print(neurons_layer[indx],":lower bounds:",fngprnt_min_layer[neuron_indx])
                 network_a.setUpperBound(neurons_layer[indx], fngprnt_max_layer[neuron_indx])
+                print(neurons_layer[indx],":upper bounds:",fngprnt_max_layer[neuron_indx])
             
 
-        print("OUTPUT VARS")
+        #print("OUTPUT VARS")
         outvars = network_a.outputVars[0].flatten()
-        print(outvars)
+        #print(outvars)
 
         #PREDICTION POST-COND
         unsolved_labs = []

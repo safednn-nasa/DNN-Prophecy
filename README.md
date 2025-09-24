@@ -1,3 +1,17 @@
+# DNN-Prophecy
+DNN-Prophecy is a tool for automatically inferring formal properties of deep neural networks.
+It extracts rules based on neuron activations (values or on/off
+statuses) as preconditions that imply a desirable output property specified by the user,
+e.g., the prediction being a certain class.
+
+The approach was first published in:
+Property Inference for Deep Neural Networks.
+Authors: Divya Gopinath, Hayes Converse, Corina S. Pasareanu, Ankur Taly.
+Published in ASE'19 proceedings. Preprint available at: https://arxiv.org/abs/1904.13215
+
+Note: Since the DNN-Prophecy software results are precondition rules that are generated based upon user selected, entered postcondition outputs, the accuracy of the resulting rules directly relates to the quality/quantity of user-provided postcondition outputs. Further, the DNN-Prophecy software has no capability to analyze user specific application domains so the software lacks the ability to assess the accuracy of the resulting precondition rules. DNN-Prophecy is a research software tool intended only to aid user understanding of DNN models.
+
+## OLD VERSION START
 # ProphecyPlus
 This repository provides the tool for the approach first published in:
 
@@ -7,6 +21,7 @@ Published in ASE'19 proceedings. Preprint available at: https://arxiv.org/abs/19
 
 Note this is a research tool that can be used to understand DNN models.
 
+## OLD VERSION END
 
 ## Installation
 Prophecy is implemented in Python 3.10. To install the required packages, run:

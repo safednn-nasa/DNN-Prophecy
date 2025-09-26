@@ -12,8 +12,8 @@ Published in ASE'19 proceedings. Preprint available at: https://arxiv.org/abs/19
 Note: Since the DNN-Prophecy software results are precondition rules that are generated based upon user selected, entered postcondition outputs, the accuracy of the resulting rules directly relates to the quality/quantity of user-provided postcondition outputs. Further, the DNN-Prophecy software has no capability to analyze user specific application domains so the software lacks the ability to assess the accuracy of the resulting precondition rules. DNN-Prophecy is a research software tool intended only to aid user understanding of DNN models.
 
 ## INSTALLATION
-### Prophecy is implemented in Python 3.10. 
-### The Marabou solver (https://github.com/NeuralNetworkVerification/Marabou) currently supports Python 3.8, 3.9, 3.10 and 3.11.
+#### Prophecy is implemented in Python 3.10. 
+#### It invokes the Marabou solver (https://github.com/NeuralNetworkVerification/Marabou), which currently supports Python 3.8, 3.9, 3.10 and 3.11.
 
 To install the required packages, run:
 

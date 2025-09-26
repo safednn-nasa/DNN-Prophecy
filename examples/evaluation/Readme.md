@@ -7,9 +7,7 @@ Tabular model and dataset: PD (PIMA diabetes)
 The rules are then used to classify runtime inputs as "CORRECTLY CLASSIFIED", "INCORRECTLY CLASSIFIED", "UNCERTAIN".
 The following Prophecy command line arguments are used at runtime.
 
-Note: https://github.com/safednn-nasa/ProphecyPlus.git is ALIAS of https://github.com/safednn-nasa/DNN-Prophecy.git
-
-Please clone the repository into a local folder with name ProphecyPlus, before executing the notebooks.
+Note: https://github.com/safednn-nasa/ProphecyPlus.git is ALIAS of https://github.com/safednn-nasa/DNN-Prophecy.git. Please clone the repository into a local folder with name ProphecyPlus, before executing the notebook.
 
 ### Infer Command
 

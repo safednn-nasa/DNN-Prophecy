@@ -26,7 +26,7 @@ $ pip install -r requirements.txt
 
 ## USAGE
 
-#### Example Notebooks
+### Example Notebooks
 The examples folder contains a number of notebooks using Prophecy on different models and datasets.
 
 ### Analyze Command

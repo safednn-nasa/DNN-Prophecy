@@ -16,6 +16,6 @@ Chord length [m]
 Free-stream velocity [m/s]
 Suction side displacement thickness [m]
 1D output:
-Scaled sound pressure level at given frequency [dB]
+Scaled sound pressure level at given frequency [dB].
 Extracts rules and uses Marabou to generate proofs.
 
